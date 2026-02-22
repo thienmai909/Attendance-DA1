@@ -2,13 +2,22 @@
 	"version": 4,
 	"configurePresets": [
 		{
-			"name": "attendance",
-			"displayName": "Attendence Preset",
-			"description": "Preset to use with the attendence",
+			"name": "attendance-win32",
+			"displayName": "Attendance Preset",
+			"description": "Preset to use with the attendance",
 			"binaryDir": "${sourceDir}/build",
 			"cacheVariables": {
 				"CMAKE_TOOLCHAIN_FILE": "D:/Customs/Clone/vcpkg/scripts/buildsystems/vcpkg.cmake"
 			}
-		}
+		},
+		{
+			"name": "attendance-unix",
+			"displayName": "Attendance Preset",
+			"description": "Preset to use with the attendance",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build",
+			"cacheVariables": {
+			}
+		}	
 	]
 }
