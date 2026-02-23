@@ -3,8 +3,9 @@
 	"configurePresets": [
 		{
 			"name": "attendance-win32",
-			"displayName": "Attendance Preset",
-			"description": "Preset to use with the attendance",
+			"displayName": "Attendance with VS 19 2022",
+			"description": "Win32 build using VS 19 2022",
+			"generator": "Visual Studio 17 2022",
 			"binaryDir": "${sourceDir}/build",
 			"cacheVariables": {
 				"CMAKE_TOOLCHAIN_FILE": "D:/Customs/Clone/vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -19,5 +20,27 @@
 			"cacheVariables": {
 			}
 		}	
+	],
+	"testPresets": [
+		{
+			"name": "test-win32",
+			"configurePreset": "attendance-win32",
+			"configuration": "Debug",
+			"execution": { 
+				"jobs": 0,
+				"noTestsAction": "error"
+			},
+			"output": { "outputOnFailure": true }
+		},
+		{
+			"name": "test-unix",
+			"configurePreset": "attendance-unix",
+			"configuration": "Debug",
+			"execution": {
+				"jobs": 0,
+				"noTestsAction": "error"
+			},
+			"output": { "outputOnFailure": true }
+		}
 	]
 }
