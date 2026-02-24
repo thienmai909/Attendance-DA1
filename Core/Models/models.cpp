@@ -254,4 +254,5 @@ std::string ClassRoom::getLoaiPhong() const
         case RoomType::PhongThucHanh:
             return "Phòng thực hành";
     }
+    return "Không xác định";
 }
