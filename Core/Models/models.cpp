@@ -167,8 +167,10 @@ bool DateTime::operator>(const DateTime &other) const
     return _tp > other._tp;
 }
 
+// ================ Contact ================
 Contact::Contact(std::string email, std::string phoneNumber) :
-    _email(std::move(email)), _phoneNumber(std::move(phoneNumber))
+    _email(std::move(email)),
+    _phoneNumber(std::move(phoneNumber))
 {
 }
 
@@ -182,6 +184,7 @@ const std::string &Contact::getPhoneNumber() const
     return _phoneNumber;
 }
 
+// ================ StudyPeriod ================
 StudyPeriod::StudyPeriod(
     int tietBatDau,
     int tietKetThuc,

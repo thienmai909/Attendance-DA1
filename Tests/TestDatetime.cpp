@@ -10,7 +10,8 @@ int main(int argc, char* argv[]) {
     try {
         if (test == "valid") {
             DateTime dt(1, 5, 2025, 12, 30, 45);
-            return !(dt.day() == 1 &&
+            return !(dt.weekday() == 4 &&
+                     dt.day() == 1 &&
                      dt.month() == 5 &&
                      dt.year() == 2025 &&
                      dt.hour() == 12 &&
