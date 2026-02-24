@@ -229,3 +229,29 @@ std::string StudyPeriod::getTGKetThuc() const
 {
     return _endTime.toTimeString();
 }
+
+// ================ ClassRoom ================
+ClassRoom::ClassRoom(std::string tenPhong, int succhua, RoomType loaiPhong) 
+    : _maPhong(std::move(tenPhong)), _sucChua(succhua), _loaiPhong(loaiPhong)
+{
+}
+
+std::string ClassRoom::getTenPhong() const
+{
+    return _maPhong;
+}
+
+int ClassRoom::getSucChua() const
+{
+    return _sucChua;
+}
+
+std::string ClassRoom::getLoaiPhong() const
+{
+    switch(_loaiPhong) {
+        case RoomType::PhongLyThuyet:
+            return "Phòng lý thuyết";
+        case RoomType::PhongThucHanh:
+            return "Phòng thực hành";
+    }
+}

@@ -3,6 +3,11 @@
 #include <string>
 #include <chrono>
 
+enum class RoomType {
+    PhongLyThuyet,
+    PhongThucHanh
+};
+
 class Account {
     std::string _username;
     std::string _password_hash;
@@ -71,4 +76,17 @@ public:
 
     std::string getTGBatDau() const;
     std::string getTGKetThuc() const;
+};
+
+class ClassRoom {
+    std::string _maPhong;
+    int _sucChua;
+    RoomType _loaiPhong;
+
+public:
+    ClassRoom(std::string tenPhong, int succhua, RoomType loaiPhong);
+
+    std::string getTenPhong() const;
+    int getSucChua() const;
+    std::string getLoaiPhong() const;
 };

@@ -2,16 +2,19 @@ add_executable(TestAccount)
 add_executable(TestDatetime)
 add_executable(TestContact)
 add_executable(TestStudyPeriod)
+add_executable(TestClassRoom)
 
 target_sources(TestAccount PRIVATE TestAccount.cpp)
 target_sources(TestDatetime PRIVATE TestDatetime.cpp)
 target_sources(TestContact PRIVATE TestContact.cpp)
 target_sources(TestStudyPeriod PRIVATE TestStudyPeriod.cpp)
+target_sources(TestClassRoom PRIVATE TestClassRoom.cpp)
 
 target_link_libraries(TestAccount PRIVATE Core)
 target_link_libraries(TestDatetime PRIVATE Core)
 target_link_libraries(TestContact PRIVATE Core)
 target_link_libraries(TestStudyPeriod PRIVATE Core)
+target_link_libraries(TestClassRoom PRIVATE Core)
 
 function(TestAccount test)
 	add_test(
@@ -41,6 +44,13 @@ function(TestStudyPeriod test)
 	)
 endfunction()
 
+function(TestClassRoom test)
+	add_test(
+		NAME ${test}
+		COMMAND TestClassRoom ${test}
+	)
+endfunction()
+
 TestAccount(username)
 TestAccount(correct_password)
 TestAccount(wrong_password)
@@ -62,3 +72,6 @@ TestStudyPeriod(period)
 TestStudyPeriod(time_string)
 TestStudyPeriod(thu_ngay)
 TestStudyPeriod(consistency)
+
+TestClassRoom(lecture)
+TestClassRoom(lab)
