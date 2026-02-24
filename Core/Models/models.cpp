@@ -1,4 +1,4 @@
-#include "models.hpp"
+#include <models.hpp>
 
 #include <sodium.h>
 
@@ -38,7 +38,6 @@ const std::string& Account::getUsername() const {
 }
 
 // ================ Date ================
-
 DateTime::DateTime() : _tp{std::chrono::system_clock::now()} {}
 
 DateTime::DateTime(int day, int month, int year, int hour, int minute, int second) {
