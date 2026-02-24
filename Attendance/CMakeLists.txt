@@ -1,12 +1,7 @@
 add_executable(Attendance)
 target_sources(Attendance
 	PRIVATE
-		Attendance.cxx
-)
-
-target_compile_features(Attendance
-	PRIVATE
-		cxx_std_20
+		Attendance.cpp
 )
 
 if (
