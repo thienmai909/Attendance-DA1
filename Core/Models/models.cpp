@@ -65,6 +65,12 @@ DateTime DateTime::now()
     return DateTime();
 }
 
+int DateTime::weekday() const
+{
+    auto dp = floor<std::chrono::days>(_tp);
+    return unsigned(std::chrono::weekday{dp}.c_encoding());
+}
+
 int DateTime::day() const
 {
     auto dp = floor<std::chrono::days>(_tp);
@@ -102,6 +108,15 @@ int DateTime::second() const
     auto dp = floor<std::chrono::days>(_tp);
     std::chrono::hh_mm_ss hms{std::chrono::duration_cast<std::chrono::seconds>(_tp - dp)};
     return hms.seconds().count();
+}
+
+std::string DateTime::toTimeString() const
+{
+    std::ostringstream oss;
+    oss << std::setw(2) << std::setfill('0') << hour()
+        << ":"
+        << std::setw(2) << std::setfill('0') << minute();
+    return oss.str();
 }
 
 std::string DateTime::toString() const
@@ -150,4 +165,64 @@ bool DateTime::operator<(const DateTime &other) const
 bool DateTime::operator>(const DateTime &other) const
 {
     return _tp > other._tp;
+}
+
+Contact::Contact(std::string email, std::string phoneNumber) :
+    _email(std::move(email)), _phoneNumber(std::move(phoneNumber))
+{
+}
+
+const std::string &Contact::getEmail() const
+{
+    return _email;
+}
+
+const std::string &Contact::getPhoneNumber() const
+{
+    return _phoneNumber;
+}
+
+StudyPeriod::StudyPeriod(
+    int tietBatDau,
+    int tietKetThuc,
+    DateTime tgBatDau,
+    DateTime tgKetThuc) : 
+        _starPeriod(tietBatDau), 
+        _endPeriod(tietKetThuc), 
+        _starTime(std::move(tgBatDau)), 
+        _endTime(std::move(tgKetThuc))
+{
+}
+
+int StudyPeriod::getTietBatDau() const
+{
+    return _starPeriod;
+}
+
+int StudyPeriod::getTietKetThuc() const
+{
+    return _endPeriod;
+}
+
+std::string StudyPeriod::getThuNgay() const
+{
+    std::string week[] = {"Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
+
+    std::ostringstream oss;
+    oss << week[_starTime.weekday()] << ", "
+        << std::setw(2) << std::setfill('0') << _starTime.day() << "/"
+        << std::setw(2) << std::setfill('0') << _starTime.month() << "/"
+        << _starTime.year();
+    
+    return oss.str();
+}
+
+std::string StudyPeriod::getTGBatDau() const
+{
+    return _starTime.toTimeString();
+}
+
+std::string StudyPeriod::getTGKetThuc() const
+{
+    return _endTime.toTimeString();
 }

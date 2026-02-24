@@ -23,6 +23,7 @@ public:
 
     static DateTime now();
 
+    int weekday() const;
     int day() const;
     int month() const;
     int year() const;
@@ -30,6 +31,7 @@ public:
     int minute() const;
     int second() const;
 
+    std::string toTimeString() const;
     std::string toString() const;
 
     DateTime addDays(int days) const;
@@ -41,4 +43,32 @@ public:
     bool operator<(const DateTime& other) const;
     bool operator>(const DateTime& other) const;
 
+};
+
+class Contact {
+    std::string _email;
+    std::string _phoneNumber;
+public:
+    Contact(std::string email, std::string phoneNumber);
+
+    const std::string& getEmail() const;
+    const std::string& getPhoneNumber() const;
+};
+
+class StudyPeriod {
+    int _starPeriod;
+    int _endPeriod;
+    DateTime _starTime;
+    DateTime _endTime;
+
+public:
+    StudyPeriod(int tietBatDau, int tietKetThuc, DateTime tgBatDau, DateTime tgKetThuc);
+
+    int getTietBatDau() const;
+    int getTietKetThuc() const;
+
+    std::string getThuNgay() const;
+
+    std::string getTGBatDau() const;
+    std::string getTGKetThuc() const;
 };
