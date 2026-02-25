@@ -4,11 +4,13 @@ target_sources(Models
 	PRIVATE
 		DataType.cpp
 		GiangVien.cpp
+		SinhVien.cpp
 	PUBLIC
 		FILE_SET HEADERS
 		FILES
 			DataType.hpp
 			GiangVien.hpp
+			SinhVien.hpp
 )
 
 target_link_libraries(Models

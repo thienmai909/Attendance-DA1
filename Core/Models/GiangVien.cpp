@@ -1,17 +1,17 @@
 #include <GiangVien.hpp>
+#include <format>
 
-GiangVien::GiangVien(const std::string &maGV, const std::string & hoTen, bool isAdmin) 
- : _maGv(maGV), _hoTen(hoTen), _isAdmin(isAdmin)
+GiangVien::GiangVien(std::string maGV, std::string hoTen, bool isAdmin) 
+ : _maGv(std::move(maGV)), _hoTen(std::move(hoTen)), _isAdmin(isAdmin)
 {
-
 }
 
-void GiangVien::setHoTen(const std::string &hoTen)
+void GiangVien::setHoTen(std::string hoTen)
 {
     _hoTen = std::move(hoTen);
 }
 
-void GiangVien::setTaiKhoan(const std::string &tenTaiKhoan, const std::string &matKhau)
+void GiangVien::setTaiKhoan(std::string tenTaiKhoan, std::string matKhau)
 {
     _taiKhoan.emplace(std::move(tenTaiKhoan), std::move(matKhau));
 }
@@ -21,7 +21,7 @@ void GiangVien::setHocVi(Degree hocVi)
     _hocVi = hocVi;
 }
 
-void GiangVien::setLienHe(const std::string &email, const std::string &sdt)
+void GiangVien::setLienHe(std::string email, std::string sdt)
 {
     _lienHe.emplace(std::move(email), std::move(sdt));
 }
@@ -38,15 +38,20 @@ std::string GiangVien::getHoTenGV() const
 
 std::string GiangVien::getTenTaiKhoan() const
 {
-    return _taiKhoan->getUsername();
+    return _taiKhoan.has_value() ? _taiKhoan->getUsername() : "(none)";
 }
 
 std::string GiangVien::getMatKhauHash() const
 {
-    return _taiKhoan->getPasswordHash();
+    return _taiKhoan.has_value() ? _taiKhoan->getPasswordHash() : "(none)";
 }
 
-std::string GiangVien::getHocVi() const
+Degree GiangVien::getHocVi() const
+{
+    return _hocVi;
+}
+
+std::string GiangVien::getHocViStr() const
 {
     switch(_hocVi) {
         case Degree::CUNHAN:
@@ -63,6 +68,11 @@ std::string GiangVien::getHocVi() const
             return "(None)";
     }
     return "(None)";
+}
+
+std::optional<Contact> GiangVien::getLienHe() const
+{
+    return _lienHe;
 }
 
 std::string GiangVien::getLienHeStr() const
@@ -86,9 +96,9 @@ bool GiangVien::xacThucTaiKhoan(const std::string &username, const std::string &
     return false;
 }
 
-void GiangVien::khoiPhucTaiKhoan(const std::string &username, const std::string &hash)
+void GiangVien::khoiPhucTaiKhoan(std::string username, std::string hash)
 {
-    _taiKhoan = Account::loadFromHash(username, hash);
+    _taiKhoan = Account::loadFromHash(std::move(username), std::move(hash));
 }
 
 utility_csv::Row GiangVien::toCSVRow() const
@@ -114,10 +124,10 @@ utility_csv::Row GiangVien::toCSVRow() const
     row.push_back(_maGv);
     row.push_back(_hoTen);
     row.push_back(hocVi);
-    row.push_back(getTenTaiKhoan()),
+    row.push_back(getTenTaiKhoan());
     row.push_back(getMatKhauHash()); //MatKhau Hash
-    row.push_back(_lienHe->getEmail());
-    row.push_back(_lienHe->getPhoneNumber());
+    row.push_back(_lienHe.has_value() ? _lienHe->getEmail() : "(none)");
+    row.push_back(_lienHe.has_value() ? _lienHe->getPhoneNumber() : "(none)");
     row.push_back(_isAdmin ? "1" : "0");
 
     return row;

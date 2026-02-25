@@ -1,8 +1,11 @@
 #include <iostream>
 #include <format>
+
 #include <DataType.hpp>
-#include <utility.hpp>
+#include <Utility.hpp>
+
 #include <GiangVien.hpp>
+#include <SinhVien.hpp>
 
 int main() {
     Contact conact = Contact("thienmai0637@gmail.com", "0339991772");
@@ -36,9 +39,6 @@ int main() {
         (gv.xacThucTaiKhoan("ngochi", "1234") ? "Thành công" : "Thất bại"))
         << std::endl;
     
-    // for (const auto& i : gv.toCSVRow()) {
-    //     std::cout << i << "\n";
-    // }
 
     GiangVien gv2 = GiangVien::fromCSVRow(gv.toCSVRow());
     std::cout << "Giảng viên 2: " << std::endl;
@@ -48,4 +48,16 @@ int main() {
         (gv2.xacThucTaiKhoan("ngocchi", "1234") ? "Thành công" : "Thất bại"))
         << std::endl;
     std::cout << std::format("Liên hệ: {}", gv2.getLienHeStr()) << std::endl;
+
+    DateTime *ngaySinh = new DateTime(1, 2, 2025);
+        
+    SinhVien sinhvien("", "");
+    sinhvien.setNgaySinh(*ngaySinh);
+    std::cout << std::format("Ngày sinh: {}", sinhvien.getNgaySinhStr()) << std::endl;
+    delete ngaySinh;
+    
+    std::cout << std::format("Ngày sinh: {}", sinhvien.getNgaySinhStr()) << std::endl;
+
+
+
 }

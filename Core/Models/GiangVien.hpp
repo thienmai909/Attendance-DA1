@@ -1,7 +1,7 @@
 #pragma once
 
 #include <DataType.hpp>
-#include <utility.hpp>
+#include <Utility.hpp>
 
 #include <string>
 #include <optional>
@@ -14,22 +14,24 @@ class GiangVien {
     Degree _hocVi = Degree::NONE;
     bool _isAdmin;
 public:
-    GiangVien(const std::string& maGV, const std::string& hoTen, bool isAdmin = false);
+    GiangVien(std::string maGV, std::string hoTen, bool isAdmin = false);
     
-    void setHoTen(const std::string& hoTen);
-    void setTaiKhoan(const std::string& tenTaiKhoan, const std::string& matKhau);
+    void setHoTen(std::string hoTen);
+    void setTaiKhoan(std::string tenTaiKhoan, std::string matKhau);
     void setHocVi(Degree hocVi);
-    void setLienHe(const std::string& email, const std::string& sdt);
+    void setLienHe(std::string email, std::string sdt);
 
     std::string getMaGV() const;
     std::string getHoTenGV() const;
     std::string getTenTaiKhoan() const;
     std::string getMatKhauHash() const;
-    std::string getHocVi() const;
+    Degree getHocVi() const;
+    std::string getHocViStr() const;
+    std::optional<Contact> getLienHe() const;
     std::string getLienHeStr() const;
 
     bool xacThucTaiKhoan(const std::string& username, const std::string& password) const;
-    void khoiPhucTaiKhoan(const std::string& username, const std::string& hash);
+    void khoiPhucTaiKhoan(std::string username, std::string hash);
     utility_csv::Row toCSVRow() const;
 
     static GiangVien fromCSVRow(const utility_csv::Row& row);

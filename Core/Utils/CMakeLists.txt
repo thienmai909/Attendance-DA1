@@ -4,5 +4,5 @@ target_sources(Utils
 	INTERFACE
 		FILE_SET HEADERS
 		FILES
-			utility.hpp
+			Utility.hpp
 )

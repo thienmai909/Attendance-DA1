@@ -12,6 +12,10 @@ enum class HocKi {
     I, II, He
 };
 
+enum class LopSinhHoat {
+    DEFAULT = 0, DHSTIN23B, DHSTIN23A, DHSTIN23C
+};
+
 enum class Degree {
     NONE = 0, CUNHAN, THACSI, TIENSI, PGSTS, GS
 };
