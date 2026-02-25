@@ -1,6 +1,8 @@
 add_library(Utils INTERFACE)
 
-target_include_directories(Utils
+target_sources(Utils
 	INTERFACE
 		FILE_SET HEADERS
+		FILES
+			utility.hpp
 )

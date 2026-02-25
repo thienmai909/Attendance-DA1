@@ -1,6 +1,7 @@
 #include <iostream>
 #include <format>
-#include <models.hpp>
+#include <DataType.hpp>
+#include <utility.hpp>
 
 int main() {
     Contact conact = Contact("thienmai0637@gmail.com", "0339991772");
@@ -20,4 +21,7 @@ int main() {
     ClassRoom phonghoc = ClassRoom("B4-102", 45, RoomType::PhongThucHanh);
     std::cout << std::format("Phòng: {}\nSức chứa: {}\nLoại: {}",
         phonghoc.getTenPhong(), phonghoc.getSucChua(), phonghoc.getLoaiPhong());
+
+    auto a = utility_input::readInt<int>("Nhập 1 số: ");
+    std::cout << a.value() << std::endl;
 }

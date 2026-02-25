@@ -2,14 +2,14 @@ add_library(Models)
 
 target_sources(Models
 	PRIVATE
-		models.cpp
+		DataType.cpp
 	PUBLIC
 		FILE_SET HEADERS
 		FILES
-			models.hpp
+			DataType.hpp
 )
 
 target_link_libraries(Models
-	PUBLIC
+	PRIVATE
 		deps::sodium
 )

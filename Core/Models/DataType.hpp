@@ -8,6 +8,14 @@ enum class RoomType {
     PhongThucHanh
 };
 
+enum class HocKi {
+    I, II, He
+};
+
+enum class Degree {
+    CUNHAN, THACSI, TIENSI, PGSTS, GS
+};
+
 class Account {
     std::string _username;
     std::string _password_hash;
