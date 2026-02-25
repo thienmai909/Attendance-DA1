@@ -1,3 +1,5 @@
+#pragma once
+
 #include <csv.hpp>
 
 #include <string>
@@ -42,7 +44,7 @@ namespace utility_csv {
         }
     };
     
-    CSVData read_csv(
+    inline CSVData read_csv(
         const std::filesystem::path& file,
         char delimiter = ',',
         bool trim = true
@@ -97,7 +99,7 @@ namespace utility_csv {
         return data;
     }
 
-    void write_csv(
+    inline void write_csv(
         const std::filesystem::path& filename,
         const CSVData& data
     ) {
@@ -193,7 +195,7 @@ namespace utility_input {
     }
 
     template <>
-    bool parse<std::string>(const std::string& input, std::string& out) {
+    inline bool parse<std::string>(const std::string& input, std::string& out) {
         if (input.empty()) return false;
         out = input;
         return true;

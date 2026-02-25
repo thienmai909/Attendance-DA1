@@ -25,6 +25,11 @@ Account::Account(const std::string& username, const std::string& raw_password) :
     _password_hash = hash;
 }
 
+Account::Account(const std::string &username, const std::string &raw_password, bool isHash)
+    : _username(username), _password_hash(raw_password)
+{
+}
+
 bool Account::verifyPassword(const std::string& raw_password) const {
     return crypto_pwhash_str_verify(
         _password_hash.c_str(),
@@ -35,6 +40,16 @@ bool Account::verifyPassword(const std::string& raw_password) const {
 
 const std::string& Account::getUsername() const {
     return _username;
+}
+
+const std::string &Account::getPasswordHash() const
+{
+    return _password_hash;
+}
+
+Account Account::loadFromHash(const std::string &username, const std::string &hash)
+{
+    return Account(username, hash, true);
 }
 
 // ================ Date ================

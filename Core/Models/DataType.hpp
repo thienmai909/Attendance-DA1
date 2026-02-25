@@ -13,18 +13,23 @@ enum class HocKi {
 };
 
 enum class Degree {
-    CUNHAN, THACSI, TIENSI, PGSTS, GS
+    NONE = 0, CUNHAN, THACSI, TIENSI, PGSTS, GS
 };
 
 class Account {
     std::string _username;
     std::string _password_hash;
 
+    Account(const std::string& username, const std::string& raw_password, bool isHash);
+    
 public:
     Account(const std::string& username, const std::string& raw_password);
 
     bool verifyPassword(const std::string& raw_password) const;
     const std::string& getUsername() const;
+    const std::string& getPasswordHash() const;
+
+    static Account loadFromHash(const std::string& username, const std::string& hash);
 };
 
 class DateTime {
