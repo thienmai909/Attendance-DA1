@@ -51,13 +51,11 @@ int main() {
 
     DateTime *ngaySinh = new DateTime(1, 2, 2025);
         
-    SinhVien sinhvien("", "");
+    SinhVien sinhvien("0023412316", "Mai Hữu Thiện");
     sinhvien.setNgaySinh(*ngaySinh);
+    sinhvien.setLienHe("thienmai0637@gmail.com", "0394023174");
+    std::cout << std::format("Mã SV: {}\nTên SV: {}\n", sinhvien.getMaSV(), sinhvien.getTenSV());
     std::cout << std::format("Ngày sinh: {}", sinhvien.getNgaySinhStr()) << std::endl;
-    delete ngaySinh;
+    std::cout << std::format("{}", sinhvien.getLienHeStr());
     
-    std::cout << std::format("Ngày sinh: {}", sinhvien.getNgaySinhStr()) << std::endl;
-
-
-
 }

@@ -9,7 +9,7 @@ enum class RoomType {
 };
 
 enum class HocKi {
-    I, II, He
+    DEFAULT = 0, I, II, He
 };
 
 enum class LopSinhHoat {

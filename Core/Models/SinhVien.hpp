@@ -20,7 +20,7 @@ public:
     void setNgaySinh(int ngay, int thang, int nam);
     void setNgaySinh(const DateTime& ngaysinh);
     void setLienHe(std::string email, std::string sdt);
-    void setLienHe(const DateTime& lienHe);
+    void setLienHe(const Contact& lienHe);
 
     LopSinhHoat getLopSH() const;
     std::string getMaSV() const;

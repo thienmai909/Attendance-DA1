@@ -82,7 +82,7 @@ std::string GiangVien::getLienHeStr() const
             _lienHe->getEmail(), 
             _lienHe->getPhoneNumber()
         );
-    return "";
+    return "(none)";
 }
 
 bool GiangVien::xacThucTaiKhoan(const std::string &username, const std::string &password) const
