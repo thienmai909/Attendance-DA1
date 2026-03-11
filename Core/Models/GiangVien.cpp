@@ -138,10 +138,10 @@ GiangVien GiangVien::fromCSVRow(const utility_csv::Row &row)
     // 0 - ma; 1 - hoten; 2 - hocvi; 3 - username; 4 - hashpass; 5 email; 6 sdt; 7 - isAdmin
     GiangVien gv(row[0], row[1], row[7] == "1");
 
-    if (!row[3].empty() && !row[4].empty())
+    if (!row[3].empty() && row[3] != "(none)" && !row[4].empty() && row[4] != "(none)")
         gv.khoiPhucTaiKhoan(row[3], row[4]);
 
-    if (!row[5].empty() && !row[6].empty())
+    if (!row[5].empty() && row[5] != "(none)" && !row[6].empty() && row[6] != "(none)")
         gv.setLienHe(row[5], row[6]);
     
     Degree hocVi = Degree::NONE;

@@ -78,3 +78,70 @@ std::string SinhVien::getLienHeStr() const
         );
     return "(none)";
 }
+
+utility_csv::Row SinhVien::toCSVRow() const
+{
+    std::string lopSH {};
+    switch(_lopSinhHoat) {
+        case LopSinhHoat::DHSTIN23A:
+            lopSH = "DHSTIN23A"; break;
+        case LopSinhHoat::DHSTIN23B:
+            lopSH = "DHSTIN23B"; break;
+        case LopSinhHoat::DHSTIN23C:
+            lopSH = "DHSTIN23C"; break;
+        case LopSinhHoat::DEFAULT:
+            lopSH = "DEFAULT";
+    }
+
+    utility_csv::Row row;
+    row.push_back(_maSV);
+    row.push_back(_tenSV);
+    row.push_back(_ngaySinh.has_value() ? std::to_string(_ngaySinh->day()) : "(none)");
+    row.push_back(_ngaySinh.has_value() ? std::to_string(_ngaySinh->month()) : "(none)");
+    row.push_back(_ngaySinh.has_value() ? std::to_string(_ngaySinh->year()) : "(none)");
+    row.push_back(_ngaySinh.has_value() ? std::to_string(_ngaySinh->hour()) : "(none)");
+    row.push_back(_ngaySinh.has_value() ? std::to_string(_ngaySinh->minute()) : "(none)");
+    row.push_back(_ngaySinh.has_value() ? std::to_string(_ngaySinh->second()) : "(none)");
+    row.push_back(_lienHe.has_value() ? _lienHe->getEmail() : "(none)");
+    row.push_back(_lienHe.has_value() ? _lienHe->getPhoneNumber() : "(none)");
+    row.push_back(lopSH);
+
+    return row;
+}
+
+SinhVien SinhVien::fromCSVRow(const utility_csv::Row &row)
+{
+    SinhVien sv(row[0], row[1]);
+
+    if (row[2] != "(none)" && !row[2].empty() && 
+        row[3] != "(none)" && !row[3].empty() && 
+        row[4] != "(none)" && !row[4].empty() && 
+        row[5] != "(none)" && !row[5].empty() && 
+        row[6] != "(none)" && !row[6].empty() && 
+        row[7] != "(none)" && !row[7].empty()
+    )
+        sv.setNgaySinh(
+            DateTime(std::stoi(row[2]), 
+                    std::stoi(row[3]), 
+                    std::stoi(row[4]),
+                    std::stoi(row[5]), 
+                    std::stoi(row[6]),
+                    std::stoi(row[7])
+            )
+        );
+
+    if (!row[8].empty() && row[8] != "(none)" && 
+        !row[9].empty() && row[9] != "(none)"
+    )
+        sv.setLienHe(row[8], row[9]);
+
+    LopSinhHoat lopSH = LopSinhHoat::DEFAULT;
+    if (row[10] == "DHSTIN23A") lopSH = LopSinhHoat::DHSTIN23A;
+    else if (row[10] == "DHSTIN23B") lopSH = LopSinhHoat::DHSTIN23B;
+    else if (row[10] == "DHSTIN23C") lopSH = LopSinhHoat::DHSTIN23C;
+    else lopSH = LopSinhHoat::DEFAULT;
+
+    sv.setLopSH(lopSH);
+
+    return sv;
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DataType.hpp>
+#include <Utility.hpp>
 
 #include <optional>
 #include <string>
@@ -29,4 +30,8 @@ public:
     std::string getNgaySinhStr() const;
     std::optional<Contact> getLienHe() const;
     std::string getLienHeStr() const;
+
+    utility_csv::Row toCSVRow() const;
+
+    static SinhVien fromCSVRow(const utility_csv::Row& row);
 };

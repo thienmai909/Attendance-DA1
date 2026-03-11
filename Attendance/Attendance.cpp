@@ -58,4 +58,14 @@ int main() {
     std::cout << std::format("Ngày sinh: {}", sinhvien.getNgaySinhStr()) << std::endl;
     std::cout << std::format("{}", sinhvien.getLienHeStr());
     
+    SinhVien sinhvien2("0023412315", "Thiện Hữu Mai");
+    sinhvien2.setNgaySinh(DateTime());
+    sinhvien2.setLienHe("thienyphung909@gmail.com", "0339991772");
+    sinhvien2.setLopSH(LopSinhHoat::DHSTIN23B);
+
+    SinhVien sv_output = SinhVien::fromCSVRow(sinhvien2.toCSVRow());
+    std::cout << std::format("\nMã SV: {}\nTên SV: {}\n", sv_output.getMaSV(), sv_output.getTenSV());
+    std::cout << std::format("Ngày sinh: {}", sv_output.getNgaySinhStr()) << std::endl;
+    std::cout << std::format("{}", sv_output.getLienHeStr());
+    std::cout << std::format("\nLớp sinh hoạt: {}", sv_output.getLopSH() == LopSinhHoat::DHSTIN23B ? "ĐHSTIN23B" : "NONE") ;
 }
