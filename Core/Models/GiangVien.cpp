@@ -6,14 +6,14 @@ GiangVien::GiangVien(std::string maGV, std::string hoTen, bool isAdmin)
 {
 }
 
-void GiangVien::setHoTen(std::string hoTen)
+void GiangVien::setHoTen(const std::string &hoTen)
 {
-    _hoTen = std::move(hoTen);
+    _hoTen = hoTen;
 }
 
-void GiangVien::setTaiKhoan(std::string tenTaiKhoan, std::string matKhau)
+void GiangVien::setTaiKhoan(const std::string& tenTaiKhoan, const std::string& matKhau)
 {
-    _taiKhoan.emplace(std::move(tenTaiKhoan), std::move(matKhau));
+    _taiKhoan.emplace(tenTaiKhoan, matKhau);
 }
 
 void GiangVien::setHocVi(Degree hocVi)
@@ -21,17 +21,17 @@ void GiangVien::setHocVi(Degree hocVi)
     _hocVi = hocVi;
 }
 
-void GiangVien::setLienHe(std::string email, std::string sdt)
+void GiangVien::setLienHe(const std::string &email, const std::string &sdt)
 {
-    _lienHe.emplace(std::move(email), std::move(sdt));
+    _lienHe.emplace(email, sdt);
 }
 
-std::string GiangVien::getMaGV() const
+const std::string& GiangVien::getMaGV() const
 {
     return _maGv;
 }
 
-std::string GiangVien::getHoTenGV() const
+const std::string& GiangVien::getHoTenGV() const
 {
     return _hoTen;
 }
@@ -96,9 +96,9 @@ bool GiangVien::xacThucTaiKhoan(const std::string &username, const std::string &
     return false;
 }
 
-void GiangVien::khoiPhucTaiKhoan(std::string username, std::string hash)
+void GiangVien::khoiPhucTaiKhoan(const std::string &username, const std::string &hash)
 {
-    _taiKhoan = Account::loadFromHash(std::move(username), std::move(hash));
+    _taiKhoan = Account::loadFromHash(username, hash);
 }
 
 utility_csv::Row GiangVien::toCSVRow() const

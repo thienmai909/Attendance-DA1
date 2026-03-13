@@ -6,6 +6,7 @@
 
 #include <GiangVien.hpp>
 #include <SinhVien.hpp>
+#include <LopHocPhan.hpp>
 
 int main() {
     Contact conact = Contact("thienmai0637@gmail.com", "0339991772");
@@ -68,4 +69,12 @@ int main() {
     std::cout << std::format("Ngày sinh: {}", sv_output.getNgaySinhStr()) << std::endl;
     std::cout << std::format("{}", sv_output.getLienHeStr());
     std::cout << std::format("\nLớp sinh hoạt: {}", sv_output.getLopSH() == LopSinhHoat::DHSTIN23B ? "ĐHSTIN23B" : "NONE") ;
+
+    LopHocPhan lophocphan = LopHocPhan("01", "Toán cao cấp 1", 3, 45, 0.2, HocKi::I);
+    lophocphan.ghiNhanBuoiHoc(3);
+    lophocphan.ghiNhanBuoiHoc(2);
+    lophocphan.ghiNhanBuoiHoc(3);
+    lophocphan.ghiNhanBuoiHoc(2);
+    lophocphan.ghiNhanBuoiHoc(3);
+    std::cout << "\n" << lophocphan.tienDoHocTapStr();
 }

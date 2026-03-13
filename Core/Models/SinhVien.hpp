@@ -20,12 +20,12 @@ public:
     void setLopSH(LopSinhHoat lopSH);
     void setNgaySinh(int ngay, int thang, int nam);
     void setNgaySinh(const DateTime& ngaysinh);
-    void setLienHe(std::string email, std::string sdt);
+    void setLienHe(const std::string& email, const std::string& sdt);
     void setLienHe(const Contact& lienHe);
 
     LopSinhHoat getLopSH() const;
-    std::string getMaSV() const;
-    std::string getTenSV() const;
+    const std::string& getMaSV() const;
+    const std::string& getTenSV() const;
     std::optional<DateTime> getNgaySinh() const;
     std::string getNgaySinhStr() const;
     std::optional<Contact> getLienHe() const;

@@ -22,7 +22,7 @@ void SinhVien::setNgaySinh(const DateTime& ngaysinh)
     _ngaySinh = ngaysinh;
 }
 
-void SinhVien::setLienHe(std::string email, std::string sdt)
+void SinhVien::setLienHe(const std::string &email, const std::string &sdt)
 {
     _lienHe.emplace(email, sdt);
 }
@@ -37,12 +37,12 @@ LopSinhHoat SinhVien::getLopSH() const
     return _lopSinhHoat;
 }
 
-std::string SinhVien::getMaSV() const
+const std::string& SinhVien::getMaSV() const
 {
     return _maSV;
 }
 
-std::string SinhVien::getTenSV() const
+const std::string& SinhVien::getTenSV() const
 {
     return _tenSV;
 }

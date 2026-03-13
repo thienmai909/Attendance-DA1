@@ -16,13 +16,13 @@ class GiangVien {
 public:
     GiangVien(std::string maGV, std::string hoTen, bool isAdmin = false);
     
-    void setHoTen(std::string hoTen);
-    void setTaiKhoan(std::string tenTaiKhoan, std::string matKhau);
+    void setHoTen(const std::string& hoTen);
+    void setTaiKhoan(const std::string& tenTaiKhoan, const std::string& matKhau);
     void setHocVi(Degree hocVi);
-    void setLienHe(std::string email, std::string sdt);
+    void setLienHe(const std::string& email, const std::string& sdt);
 
-    std::string getMaGV() const;
-    std::string getHoTenGV() const;
+    const std::string& getMaGV() const;
+    const std::string& getHoTenGV() const;
     std::string getTenTaiKhoan() const;
     std::string getMatKhauHash() const;
     Degree getHocVi() const;
@@ -31,7 +31,7 @@ public:
     std::string getLienHeStr() const;
 
     bool xacThucTaiKhoan(const std::string& username, const std::string& password) const;
-    void khoiPhucTaiKhoan(std::string username, std::string hash);
+    void khoiPhucTaiKhoan(const std::string& username, const std::string& hash);
     utility_csv::Row toCSVRow() const;
 
     static GiangVien fromCSVRow(const utility_csv::Row& row);
