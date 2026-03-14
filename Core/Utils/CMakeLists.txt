@@ -6,3 +6,9 @@ target_sources(Utils
 		FILES
 			Utility.hpp
 )
+
+target_include_directories(Utils
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+

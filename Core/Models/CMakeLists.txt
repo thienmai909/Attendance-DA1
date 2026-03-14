@@ -18,5 +18,6 @@ target_sources(Models
 target_link_libraries(Models
 	PRIVATE
 		deps::sodium
+	PUBLIC
 		Utils
 )
