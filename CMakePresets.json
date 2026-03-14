@@ -3,12 +3,11 @@
 	"configurePresets": [
 		{
 			"name": "attendance-win32",
-			"displayName": "Attendance with VS 19 2022",
-			"description": "Win32 build using VS 19 2022",
-			"generator": "Visual Studio 17 2022",
-			"binaryDir": "${sourceDir}/build",
+			"displayName": "Attendance with Visual Studio",
+			"description": "Win32 build using Visual Studio",
+			"binaryDir": "${sourceDir}/build-win32",
 			"cacheVariables": {
-				"CMAKE_TOOLCHAIN_FILE": "D:/Customs/Clone/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				"CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
 			}
 		},
 		{
@@ -16,8 +15,9 @@
 			"displayName": "Attendance Preset",
 			"description": "Preset to use with the attendance",
 			"generator": "Ninja",
-			"binaryDir": "${sourceDir}/build",
+			"binaryDir": "${sourceDir}/build-unix",
 			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
 			}
 		}	
 	],
