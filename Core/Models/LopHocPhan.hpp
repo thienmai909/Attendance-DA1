@@ -16,6 +16,10 @@ class LopHocPhan {
     double _nguongCamThi;
     HocKi _hocKi = HocKi::DEFAULT;
     std::optional<ClassRoom> _phongHoc;
+
+    void setSoTietDaHoc(int soTietDaHoc);
+    void setSoBuoiDaHoc(int soBuoiDaHoc);
+
 public:
     LopHocPhan() = default;
     LopHocPhan(
@@ -34,12 +38,16 @@ public:
     int getSoBuoiDaHoc() const;
     double getNguongCamThi() const;
     HocKi getHocKi() const;
+    std::string getHocKiStr() const;
     std::optional<ClassRoom> getPhongHoc() const;
+    std::string getTenPhongHoc() const;
 
     void setTenLHP(const std::string& tenLHP);
     void setSoTC(int soTC);
+    void setTongSoTiet(int tongSoTiet);
     void setNguongCamThi(double nguongCamThi);
     void setPhongHoc(const ClassRoom& phongHoc);
+    void setPhongHoc(const std::string& tenPhong, int sucChua, RoomType loaiPhong);
 
     int soTietVangToiDa() const; // _tongSoTiet * _nguongCamThi;
     bool kiemTraViPham(int soTietVang) const; // kiểm tả một con số tiết vắng cụ thể có vượt ngưỡng của lớp này không

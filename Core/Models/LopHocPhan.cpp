@@ -1,19 +1,27 @@
 #include <LopHocPhan.hpp>
 
+void LopHocPhan::setSoTietDaHoc(int soTietDaHoc)
+{
+    _soTietDaHoc = soTietDaHoc;
+}
+
+void LopHocPhan::setSoBuoiDaHoc(int soBuoiDaHoc)
+{
+    _soBuoiDaHoc = soBuoiDaHoc;
+}
+
 LopHocPhan::LopHocPhan(
-    std::string maLHP, 
-    std::string tenLHP, 
-    int soTC, 
-    int tongSoTiet, 
-    double nguongCamThi, 
-    HocKi hocKi
-) :
-    _maLHP(std::move(maLHP)), 
-    _tenLHP(std::move(tenLHP)), 
-    _soTC(soTC), 
-    _tongSoTiet(tongSoTiet), 
-    _nguongCamThi(nguongCamThi),
-    _hocKi(hocKi)
+    std::string maLHP,
+    std::string tenLHP,
+    int soTC,
+    int tongSoTiet,
+    double nguongCamThi,
+    HocKi hocKi) : _maLHP(std::move(maLHP)),
+                   _tenLHP(std::move(tenLHP)),
+                   _soTC(soTC),
+                   _tongSoTiet(tongSoTiet),
+                   _nguongCamThi(nguongCamThi),
+                   _hocKi(hocKi)
 {
 }
 
@@ -57,9 +65,30 @@ HocKi LopHocPhan::getHocKi() const
     return _hocKi;
 }
 
+std::string LopHocPhan::getHocKiStr() const
+{
+    switch(_hocKi) {
+        case HocKi::I:
+            return std::format("I");
+        case HocKi::II:
+            return std::format("II");
+        case HocKi::He:
+            return std::format("Hè");
+    };
+    return std::format("(none)");
+}
+
 std::optional<ClassRoom> LopHocPhan::getPhongHoc() const
 {
     return _phongHoc;
+}
+
+std::string LopHocPhan::getTenPhongHoc() const
+{
+    if (_phongHoc.has_value()) {
+        return std::format("{}", _phongHoc->getTenPhong());
+    }
+    return "(none)";
 }
 
 void LopHocPhan::setTenLHP(const std::string &tenLHP)
@@ -72,6 +101,11 @@ void LopHocPhan::setSoTC(int soTC)
     _soTC = soTC;
 }
 
+void LopHocPhan::setTongSoTiet(int tongSoTiet)
+{
+    _tongSoTiet = tongSoTiet;
+}
+
 void LopHocPhan::setNguongCamThi(double nguongCamThi)
 {
     _nguongCamThi = nguongCamThi;
@@ -80,6 +114,11 @@ void LopHocPhan::setNguongCamThi(double nguongCamThi)
 void LopHocPhan::setPhongHoc(const ClassRoom &phongHoc)
 {
     _phongHoc = phongHoc;
+}
+
+void LopHocPhan::setPhongHoc(const std::string &tenPhong, int sucChua, RoomType loaiPhong)
+{
+    _phongHoc.emplace(tenPhong, sucChua, loaiPhong);
 }
 
 int LopHocPhan::soTietVangToiDa() const
@@ -146,4 +185,43 @@ utility_csv::Row LopHocPhan::toCSVRow() const
     row.push_back(_phongHoc.has_value() ? std::to_string(_phongHoc->getSucChua()) : "(none)");
     
     return row;
+}
+
+LopHocPhan LopHocPhan::fromCSVRow(const utility_csv::Row &row)
+{   
+    HocKi hocKi = HocKi::DEFAULT;
+    if (row[7] == "I") hocKi = HocKi::I;
+    else if (row[7] == "II") hocKi = HocKi::II;
+    else if (row[7] == "He") hocKi = HocKi::He;
+    else hocKi = HocKi::DEFAULT;
+
+    LopHocPhan lopHocPhan(
+        row[0],             //maLHP
+        row[1],             //tenLHP
+        std::stoi(row[2]),  //soTC
+        std::stoi(row[3]),  //tongSoTiet
+        std::stof(row[6]),  //nguongCamThi
+        hocKi
+    );
+
+    lopHocPhan.setSoTietDaHoc(std::stoi(row[4]));
+    lopHocPhan.setSoBuoiDaHoc(std::stoi(row[5]));
+
+    RoomType loaiPhong;
+
+    if (!row[8].empty() && row[8] != "(none)" && 
+        !row[9].empty() && row[9] != "(none)" &&
+        !row[10].empty() && row[10] != "(none)"
+    ) {
+
+        if (row[8] == "Phòng lý thuyết")
+            loaiPhong = RoomType::PhongLyThuyet;
+        else if (row[8] == "Phòng thực hành")
+            loaiPhong = RoomType::PhongThucHanh;     
+        
+        ClassRoom phongHoc(row[9], std::stoi(row[10]), loaiPhong);
+        lopHocPhan.setPhongHoc(phongHoc);
+    }
+
+    return lopHocPhan;
 }

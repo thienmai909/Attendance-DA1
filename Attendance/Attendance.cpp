@@ -71,10 +71,23 @@ int main() {
     std::cout << std::format("\nLớp sinh hoạt: {}", sv_output.getLopSH() == LopSinhHoat::DHSTIN23B ? "ĐHSTIN23B" : "NONE") ;
 
     LopHocPhan lophocphan = LopHocPhan("01", "Toán cao cấp 1", 3, 45, 0.2, HocKi::I);
+    lophocphan.setPhongHoc("203-B4", 45, RoomType::PhongLyThuyet);
     lophocphan.ghiNhanBuoiHoc(3);
     lophocphan.ghiNhanBuoiHoc(2);
     lophocphan.ghiNhanBuoiHoc(3);
     lophocphan.ghiNhanBuoiHoc(2);
     lophocphan.ghiNhanBuoiHoc(3);
     std::cout << "\n" << lophocphan.tienDoHocTapStr();
+
+    LopHocPhan lophocphan2 = LopHocPhan::fromCSVRow(lophocphan.toCSVRow());
+    std::cout << std::format("\nTên LHP: {}\nHọc kì: {}\nSố tín chỉ: {}\nTổng số tiết: {}\nSố tiết đã học: {}\nSố buổi đã học: {}\nNgưỡng cấm thi: {:.0f}%\nPhòng học: {}",
+        lophocphan2.getTenLHP(),
+        lophocphan2.getHocKiStr(),
+        lophocphan2.getSoTC(),
+        lophocphan2.getTongSoTiet(),
+        lophocphan2.getSoTietDaHoc(),
+        lophocphan2.getSoBuoiDaHoc(),
+        lophocphan2.getNguongCamThi() * 100,
+        lophocphan2.getTenPhongHoc()
+    );
 }
