@@ -1,6 +1,5 @@
 #include <iostream>
 #include <format>
-#include <nlohmann/json.hpp>
 
 #include <DataType.hpp>
 #include <Utility.hpp>

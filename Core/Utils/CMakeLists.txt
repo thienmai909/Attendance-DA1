@@ -15,5 +15,6 @@ target_include_directories(Utils
 target_link_libraries(Utils 
 	INTERFACE
 		deps::csv-parser
+		deps::nlohmann_json
 )
 

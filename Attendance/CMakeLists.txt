@@ -25,5 +25,4 @@ endif()
 target_link_libraries(Attendance
 	PUBLIC
 		Core
-		deps::nlohmann_json
 )

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csv.hpp>
+#include <nlohmann/json.hpp>
 
 #include <string>
 #include <vector>
@@ -323,3 +324,83 @@ namespace utility_input {
     }
 }
 
+namespace utility_json {
+    using json = nlohmann::json;
+
+    inline json read_json(const std::filesystem::path& file) {
+        if (!std::filesystem::exists(file))
+            throw std::runtime_error("JSON file not found: " + file.string());
+        
+        if (!std::filesystem::is_regular_file(file))
+            throw std::runtime_error("Not a regular file: " + file.string());
+
+        if (std::filesystem::file_size(file) == 0)
+            throw std::runtime_error("JSON file as empty: " + file.string());
+        
+        std::ifstream ifs(file);
+        if (!ifs)
+            throw std::runtime_error("Failed to open file: " + file.string());
+        
+        try {
+            return json::parse(ifs);
+        } catch (const json::parse_error& e) {
+            throw std::runtime_error(
+                "JSON parse error in " + file.string() + ": " + e.what()
+            );
+        }
+    }
+
+    inline void write_json(
+        const std::filesystem::path& file,
+        const json& data,
+        int indent = 2
+    ) {
+        std::filesystem::path tmp = file;
+        tmp += ".tmp";
+
+        {
+            std::ofstream ofs(tmp, std::ios::binary);
+            if (!ofs) 
+                throw std::runtime_error("Failed to open temp file: " + tmp.string());
+            ofs << data.dump(indent);
+            if (!ofs)
+                throw std::runtime_error("Failed to write JSON: " + tmp.string());
+        }
+
+        std::error_code ec;
+        std::filesystem::rename(tmp,  file, ec);
+
+        if (ec) {
+            std::filesystem::remove(tmp);
+            throw std::runtime_error(
+                "Failed finalize JSON file: " + file.string() + " - " + ec.message()
+            );
+        }
+    }
+
+    // ── Đọc field bắt buộc (ném exception nếu thiếu hoặc sai kiểu) ──
+    template <typename T>
+    T require(const json& j, std::string_view key) {
+        if (!j.contains(key))
+            throw std::runtime_error("JSON missing requied field: '" + std::string(key) + "'");
+        
+            try {
+                return j.at(key).get<T>();
+            } catch (const json::type_error& e) {
+                throw std::runtime_error(
+                    "JSON field '" + std::string(key) + "' has wrong type: " + e.what()
+                );
+            }
+    }
+
+    // ── Đọc field tuỳ chọn (trả về default nếu thiếu) ───────────
+    template <typename T>
+    T optional(const json& j, std::string_view key, T default_val = T{}) {
+        if (!j.contains(key)) return default_val;
+        try {
+            return j.at(key).get<T>();
+        } catch (const json::type_error& e) {
+            return default_val;
+        }
+    }
+}

@@ -38,8 +38,8 @@ class BuoiDiemDanh {
     CaHoc _caDiemDanh;
     int _soTiet;
     bool _khoaDiemDanh;
-    // std::vector<ChiTietDiemDanh> 
+    std::vector<ChiTietDiemDanh> danhSachChiTiet;
 
 public:
-    
+    // Chưa hoàn thành
 };
