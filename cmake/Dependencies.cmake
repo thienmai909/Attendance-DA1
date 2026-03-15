@@ -29,3 +29,15 @@ endif()
 
 # Tạo namespace alias chuẩn cho project
 add_library(deps::sodium ALIAS ${SODIUM_TARGET})
+
+# Find nlohmann-json
+find_package(nlohmann_json REQUIRED)
+
+# Create a standard alias for the project
+add_library(deps::nlohmann_json ALIAS nlohmann_json::nlohmann_json)
+
+# Find csv-parser
+find_package(unofficial-vincentlaucsb-csv-parser CONFIG REQUIRED)
+
+# Create a standard alias for the project
+add_library(deps::csv-parser ALIAS unofficial::vincentlaucsb-csv-parser::csv)

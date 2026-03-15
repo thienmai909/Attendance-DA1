@@ -1,7 +1,16 @@
 {
   "name": "attendance",
   "version": "0.1.0",
+  "builtin-baseline": "4b77da7fed37817f124936239197833469f1b9a8",
   "dependencies": [
-    "libsodium"
+    "libsodium",
+    "nlohmann-json",
+    "vincentlaucsb-csv-parser"
+  ],
+  "overrides": [
+    {
+      "name": "vincentlaucsb-csv-parser",
+      "version": "2.3.0"
+    }
   ]
 }

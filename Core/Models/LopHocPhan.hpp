@@ -6,6 +6,10 @@
 #include <optional>
 #include <string>
 
+enum class HocKi {
+    DEFAULT = 0, I, II, He
+};
+
 class LopHocPhan {
     std::string _maLHP;
     std::string _tenLHP;

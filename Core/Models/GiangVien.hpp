@@ -6,6 +6,10 @@
 #include <string>
 #include <optional>
 
+enum class Degree {
+    NONE = 0, CUNHAN, THACSI, TIENSI, PGSTS, GS
+};
+
 class GiangVien {
     std::string _maGv;
     std::string _hoTen;

@@ -8,17 +8,7 @@ enum class RoomType {
     PhongThucHanh
 };
 
-enum class HocKi {
-    DEFAULT = 0, I, II, He
-};
 
-enum class LopSinhHoat {
-    DEFAULT = 0, DHSTIN23B, DHSTIN23A, DHSTIN23C
-};
-
-enum class Degree {
-    NONE = 0, CUNHAN, THACSI, TIENSI, PGSTS, GS
-};
 
 class Account {
     std::string _username;
@@ -53,6 +43,7 @@ public:
     int minute() const;
     int second() const;
 
+    std::string toDayString() const;
     std::string toTimeString() const;
     std::string toString() const;
 

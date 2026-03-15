@@ -6,6 +6,10 @@
 #include <optional>
 #include <string>
 
+enum class LopSinhHoat {
+    DEFAULT = 0, DHSTIN23B, DHSTIN23A, DHSTIN23C
+};
+
 class SinhVien {
     std::string _maSV;
     std::string _tenSV;

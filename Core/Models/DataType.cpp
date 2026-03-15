@@ -125,12 +125,23 @@ int DateTime::second() const
     return hms.seconds().count();
 }
 
+std::string DateTime::toDayString() const
+{
+    std::ostringstream oss;
+    oss << std::setw(2) << std::setfill('0') << day() << "/"
+        << std::setw(2) << std::setfill('0') << month() << "/"
+        << year();
+    return oss.str();
+}
+
 std::string DateTime::toTimeString() const
 {
     std::ostringstream oss;
     oss << std::setw(2) << std::setfill('0') << hour()
         << ":"
-        << std::setw(2) << std::setfill('0') << minute();
+        << std::setw(2) << std::setfill('0') << minute()
+        << ":"
+        << std::setw(2) << std::setfill('0') << second();
     return oss.str();
 }
 

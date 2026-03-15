@@ -6,6 +6,7 @@ target_sources(Models
 		GiangVien.cpp
 		SinhVien.cpp
 		LopHocPhan.cpp
+		BuoiDiemDanh.cpp
 	PUBLIC
 		FILE_SET HEADERS
 		FILES
@@ -13,11 +14,13 @@ target_sources(Models
 			GiangVien.hpp
 			SinhVien.hpp
 			LopHocPhan.hpp
+			BuoiDiemDanh.hpp
 )
 
 target_link_libraries(Models
 	PRIVATE
 		deps::sodium
+		deps::nlohmann_json   
 	PUBLIC
 		Utils
 )

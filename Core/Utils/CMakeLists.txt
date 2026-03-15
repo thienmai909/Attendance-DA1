@@ -12,3 +12,8 @@ target_include_directories(Utils
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+target_link_libraries(Utils 
+	INTERFACE
+		deps::csv-parser
+)
+
