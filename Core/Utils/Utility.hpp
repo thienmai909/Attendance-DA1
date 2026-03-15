@@ -384,13 +384,13 @@ namespace utility_json {
         if (!j.contains(key))
             throw std::runtime_error("JSON missing requied field: '" + std::string(key) + "'");
         
-            try {
-                return j.at(key).get<T>();
-            } catch (const json::type_error& e) {
-                throw std::runtime_error(
-                    "JSON field '" + std::string(key) + "' has wrong type: " + e.what()
-                );
-            }
+        try {
+            return j.at(key).get<T>();
+        } catch (const json::type_error& e) {
+            throw std::runtime_error(
+                "JSON field '" + std::string(key) + "' has wrong type: " + e.what()
+            );
+        }
     }
 
     // ── Đọc field tuỳ chọn (trả về default nếu thiếu) ───────────
