@@ -403,4 +403,70 @@ namespace utility_json {
             return default_val;
         }
     }
+
+    // ── Load danh sách object từ array key ───────────────────────
+    // Dùng: auto lops = load_array<LopHocPhan>(root, "lopHocPhan", LopHocPhan::fromJson);
+    template <typename T>
+    std::vector<T> load_array(
+        const json& j,
+        std::string_view key,
+        std::function<T(const json&)> from_json
+    ) {
+        if (!j.contains(key)) return {};
+        
+        const auto& arr = j.at(key);
+        if (!arr.is_array())
+            throw std::runtime_error(
+                "JSON field '" + std::string(key) + "' is not array"
+            );
+
+        std::vector<T> result;
+        result.reserve(arr.size());
+
+        std::size_t idx = 0;
+        for (const auto& item : arr) {
+            try {
+                result.push_back(from_json(item));
+            } catch (const std::exception& e) {
+                throw std::runtime_error(
+                    "JSON array '" + std::string(key) + 
+                    "' error at index " + std::to_string(idx) + ": " + e.what()
+                );
+            }
+            ++idx;
+        }
+        return result;
+    }
+
+    // ── Dump danh sách object ra json array ──────────────────────
+    // Dùng: j["lopHocPhan"] = dump_array(danhSach, &LopHocPhan::toJson);
+    template <typename T>
+    json dump_array(
+        const std::vector<T>& vec,
+        std::function<json(const T&)> to_json
+    ) {
+        json arr = json::array();
+        for (const auto& item : vec) 
+            arr.push_back(to_json(item));
+        return arr;
+    }
+
+    // ── Kiểm tra file JSON hợp lệ mà không ném exception ────────
+    inline bool is_valid(const std::filesystem::path& file) noexcept {
+        try {
+            read_json(file);
+            return true;
+        } catch (...) {
+            return false;
+        }
+    }
+
+    // ── Merge hai json object (b ghi đè lên a) ───────────────────
+    inline json merge(json base, const json& override) {
+        if (!base.is_object() || !override.is_object())
+            throw std::runtime_error("JSON merge: both operands must be objects");
+        for (const auto& [key, val] : override.items())
+            base[key] = val;
+        return base;
+    }
 }
