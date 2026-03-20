@@ -7,6 +7,7 @@
 #include <GiangVien.hpp>
 #include <SinhVien.hpp>
 #include <LopHocPhan.hpp>
+#include <BuoiDiemDanh.hpp>
 
 int main() {
     Contact conact = Contact("thienmai0637@gmail.com", "0339991772");
@@ -90,4 +91,25 @@ int main() {
         lophocphan2.getNguongCamThi() * 100,
         lophocphan2.getTenPhongHoc()
     );
+
+    DateTime ngayDiemDanh = DateTime();
+    BuoiDiemDanh buoi1 = BuoiDiemDanh(ngayDiemDanh, CaHoc::SANG, 3);
+    DateTime gioDiemDanh = DateTime();
+    buoi1.themChiTiet("0023412316", gioDiemDanh, Status::CO_MAT, "");
+
+    DateTime gioDiemDanh2 = DateTime();
+    gioDiemDanh2 = gioDiemDanh2.addMinutes(2);
+    buoi1.themChiTiet("0023412244", gioDiemDanh2, Status::CO_MAT, "");
+
+    DateTime gioDiemDanh3 = DateTime();
+    gioDiemDanh3 = gioDiemDanh3.addMinutes(20);
+    buoi1.themChiTiet("0023412241", gioDiemDanh3, Status::MUON, "");
+
+    std::cout << std::format("\nĐiểm danh buổi 1 ngày {}", buoi1.getNgayDiemDanhStr());
+    for (const auto& sv : buoi1.getDanhSachChiTiet()) {
+        std::cout << std::format("\nSV: {} -> {}: {}",
+            sv.getMaSV(), sv.getGioDiemDanhStr(), sv.getTrangThaiStr()
+        );
+    }
+
 }

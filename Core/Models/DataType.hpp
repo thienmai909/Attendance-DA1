@@ -31,6 +31,7 @@ class DateTime {
 
 public:
     DateTime();
+    DateTime(std::chrono::system_clock::time_point tp);
     DateTime(int day, int month, int year, int hour = 0, int minute = 0, int second = 0);
 
     static DateTime now();
@@ -49,6 +50,7 @@ public:
 
     DateTime addDays(int days) const;
     DateTime addHours(int hours) const;
+    DateTime addMinutes(int minutes) const;
 
     long long daysBetween(const DateTime& other) const;
 

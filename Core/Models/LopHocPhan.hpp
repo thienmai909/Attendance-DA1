@@ -2,9 +2,11 @@
 
 #include <DataType.hpp>
 #include <Utility.hpp>
+#include <BuoiDiemDanh.hpp>
 
 #include <optional>
 #include <string>
+#include <vector>
 
 enum class HocKi {
     DEFAULT = 0, I, II, He
@@ -20,6 +22,8 @@ class LopHocPhan {
     double _nguongCamThi;
     HocKi _hocKi = HocKi::DEFAULT;
     std::optional<ClassRoom> _phongHoc;
+
+    std::vector<BuoiDiemDanh> _dsBuoiDiemDanh;
 
     void setSoTietDaHoc(int soTietDaHoc);
     void setSoBuoiDaHoc(int soBuoiDaHoc);
@@ -45,6 +49,7 @@ public:
     std::string getHocKiStr() const;
     std::optional<ClassRoom> getPhongHoc() const;
     std::string getTenPhongHoc() const;
+    const std::vector<BuoiDiemDanh>& getDsBuoiDiemDanh() const;
 
     void setTenLHP(const std::string& tenLHP);
     void setSoTC(int soTC);

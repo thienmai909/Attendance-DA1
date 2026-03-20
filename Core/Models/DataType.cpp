@@ -55,6 +55,11 @@ Account Account::loadFromHash(const std::string &username, const std::string &ha
 // ================ Date ================
 DateTime::DateTime() : _tp{std::chrono::system_clock::now()} {}
 
+DateTime::DateTime(std::chrono::system_clock::time_point tp)
+    : _tp(tp)
+{
+}
+
 DateTime::DateTime(int day, int month, int year, int hour, int minute, int second) {
     std::chrono::year_month_day ymd {
         std::chrono::year {year},
@@ -159,16 +164,18 @@ std::string DateTime::toString() const
 
 DateTime DateTime::addDays(int days) const
 {
-    DateTime result;
-    result._tp = _tp + std::chrono::days { days };
-    return result;
+    return DateTime (_tp + std::chrono::days {days});
 }
 
 DateTime DateTime::addHours(int hours) const
 {
-    DateTime result;
-    result._tp = _tp + std::chrono::hours { hours };
-    return result;
+    return DateTime (_tp + std::chrono::hours {hours});
+
+}
+
+DateTime DateTime::addMinutes(int minutes) const
+{
+    return DateTime (_tp + std::chrono::minutes {minutes});
 }
 
 long long DateTime::daysBetween(const DateTime &other) const

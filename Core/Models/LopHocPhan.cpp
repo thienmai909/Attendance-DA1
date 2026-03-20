@@ -91,6 +91,11 @@ std::string LopHocPhan::getTenPhongHoc() const
     return "(none)";
 }
 
+const std::vector<BuoiDiemDanh> &LopHocPhan::getDsBuoiDiemDanh() const
+{
+    return _dsBuoiDiemDanh;
+}
+
 void LopHocPhan::setTenLHP(const std::string &tenLHP)
 {
     _tenLHP = tenLHP;

@@ -26,6 +26,7 @@ public:
 
     const std::string& getMaSV() const;
     Status getTrangThai() const;
+    std::string getTrangThaiStr() const;
     const std::string& getGhiChu() const;
     std::string getGioDiemDanhStr() const;
 
@@ -33,13 +34,32 @@ public:
     void setGhiChu(const std::string& ghiChu);
 };
 
+// =============== Buoi Diem Danh ===============
 class BuoiDiemDanh {
-    DateTime _ngayDiemDanh;
+    std::optional<DateTime> _ngayDiemDanh;
     CaHoc _caDiemDanh;
     int _soTiet;
-    bool _khoaDiemDanh;
-    std::vector<ChiTietDiemDanh> danhSachChiTiet;
+    bool _khoaDiemDanh = false;
+    std::vector<ChiTietDiemDanh> _danhSachChiTiet;
 
 public:
-    // Chưa hoàn thành
+    BuoiDiemDanh(DateTime ngayDiemDanh, CaHoc caDiemDanh, int soTiet);
+
+    std::string getNgayDiemDanhStr() const;
+    CaHoc getCaDiemDanh() const;
+    std::string getCaDiemDanhStr() const;
+    int getSoTiet() const;
+    bool getKhoaDiemDanh() const;
+    const std::vector<ChiTietDiemDanh>& getDanhSachChiTiet() const;
+
+    void khoaBuoi();
+    void themChiTiet(
+        const std::string& maSV,
+        const DateTime& gioDiemDanh,
+        Status trangThai,
+        const std::string& ghiChu
+    );
+    void capNhatTrangThai(const std::string& maSV, Status trangThai);
+    void capNhatGhiChu(const std::string& maSV, const std::string& ghiChu);
+    int demVangMat() const;
 };
