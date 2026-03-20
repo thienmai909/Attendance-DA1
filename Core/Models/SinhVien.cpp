@@ -1,13 +1,14 @@
 #include <SinhVien.hpp>
 
 #include <format>
+#include <algorithm>
 
 std::string SinhVien::lopSinhHoatStr(LopSinhHoat lopSinhHoat)
 {
-    switch(lop) {
+    switch(lopSinhHoat) {
         case LopSinhHoat::DHSTIN23A: return "DHSTIN23A";
-        case LopSinhHoat::DHSTIN23B: return "DHSTIN23AB;
-        case LopSinhHoat::DHSTIN23C: return "DHSTIN23AC;
+        case LopSinhHoat::DHSTIN23B: return "DHSTIN23A";
+        case LopSinhHoat::DHSTIN23C: return "DHSTIN23C";
         default:                     return "DEFAULT";
     };
     return "(none)";
@@ -98,7 +99,9 @@ bool SinhVien::isValid() const
 bool SinhVien::hasValidMaSV() const
 {
     if (_maSV.size() != 10) return false;
-    return std::all_of(_maSV.begin(), _maSV.end(), std::isdigit);
+    return std::all_of(_maSV.begin(), _maSV.end(),
+        [](unsigned char c) { return std::isdigit(c); }
+    );
 }
 
 bool SinhVien::hasLienHe() const
@@ -144,11 +147,14 @@ bool SinhVien::operator<(const SinhVien &other) const
 
 bool SinhVien::matchTen(const std::string &keyword) const
 {
-    std::string tenLower = _tenSV;
-    std::string kwLower = keyword;
-    std::transform(tenLower.begin(), tenLower.end(), tenLower.begin(), std::tolower);
-    std::transform(kwLower.begin(), kwLower.end(), kwLower.begin(), std::tolower);
-    return tenLower.find(kwLower) != std::string::npos;
+    auto toLower = [] (const std::string& s) {
+        std::string result = s;
+        std::transform(result.begin(), result.end(), result.begin(),
+            [](unsigned char c) { return std::tolower(c); }
+        );
+        return result;
+    };
+    return toLower(_tenSV).find(toLower(keyword)) != std::string::npos;
 }
 
 std::string SinhVien::toSummaryString() const
@@ -164,7 +170,7 @@ std::string SinhVien::toDetailString() const
         << "Lớp SH    : " << lopSinhHoatStr(_lopSinhHoat) << "\n"
         << "Ngày sinh : " << getNgaySinhStr() << "\n"
         << "Liên hệ   : " << getLienHeStr();
-    if (auto tuoi = tinhTuoi)
+    if (auto tuoi = tinhTuoi())
         oss << "\nTuổi      : " << *tuoi;
     return oss.str();
 }
