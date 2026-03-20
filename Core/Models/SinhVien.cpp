@@ -2,6 +2,17 @@
 
 #include <format>
 
+std::string SinhVien::lopSinhHoatStr(LopSinhHoat lopSinhHoat)
+{
+    switch(lop) {
+        case LopSinhHoat::DHSTIN23A: return "DHSTIN23A";
+        case LopSinhHoat::DHSTIN23B: return "DHSTIN23AB;
+        case LopSinhHoat::DHSTIN23C: return "DHSTIN23AC;
+        default:                     return "DEFAULT";
+    };
+    return "(none)";
+}
+
 SinhVien::SinhVien(std::string maSV, std::string tenSV)
     : _maSV(maSV), _tenSV(tenSV)
 {
@@ -77,6 +88,85 @@ std::string SinhVien::getLienHeStr() const
             _lienHe->getPhoneNumber()
         );
     return "(none)";
+}
+
+bool SinhVien::isValid() const
+{
+    return !_maSV.empty() && !_tenSV.empty();
+}
+
+bool SinhVien::hasValidMaSV() const
+{
+    if (_maSV.size() != 10) return false;
+    return std::all_of(_maSV.begin(), _maSV.end(), std::isdigit);
+}
+
+bool SinhVien::hasLienHe() const
+{
+    return _lienHe.has_value();
+}
+
+bool SinhVien::hasNgaySinh() const
+{
+    return _ngaySinh.has_value();
+}
+
+std::optional<int> SinhVien::tinhTuoi() const
+{
+    if (!_ngaySinh.has_value()) return std::nullopt;
+    DateTime now = DateTime();
+    int tuoi = now.year() - _ngaySinh->year();
+    if (now.month() < _ngaySinh->month() ||
+        (now.month() == _ngaySinh->month() && 
+         now.day() < _ngaySinh->day())
+    )
+        --tuoi;
+    return tuoi;
+}
+
+bool SinhVien::isSinhNhat() const
+{
+    if (!_ngaySinh.has_value()) return false;
+    DateTime now = DateTime();
+    return now.day() == _ngaySinh->day() &&
+           now.month() == _ngaySinh->month();
+}
+
+bool SinhVien::operator==(const SinhVien &other) const
+{
+    return _maSV == other._maSV;
+}
+
+bool SinhVien::operator<(const SinhVien &other) const
+{
+    return _maSV < other._maSV;
+}
+
+bool SinhVien::matchTen(const std::string &keyword) const
+{
+    std::string tenLower = _tenSV;
+    std::string kwLower = keyword;
+    std::transform(tenLower.begin(), tenLower.end(), tenLower.begin(), std::tolower);
+    std::transform(kwLower.begin(), kwLower.end(), kwLower.begin(), std::tolower);
+    return tenLower.find(kwLower) != std::string::npos;
+}
+
+std::string SinhVien::toSummaryString() const
+{
+    return _maSV + " -  " + _tenSV + " (" + lopSinhHoatStr(_lopSinhHoat) + ")";
+}
+
+std::string SinhVien::toDetailString() const
+{
+    std::ostringstream oss;
+    oss << "Mã SV     : " << _maSV << "\n"
+        << "Họ tên    : " << _tenSV << "\n"
+        << "Lớp SH    : " << lopSinhHoatStr(_lopSinhHoat) << "\n"
+        << "Ngày sinh : " << getNgaySinhStr() << "\n"
+        << "Liên hệ   : " << getLienHeStr();
+    if (auto tuoi = tinhTuoi)
+        oss << "\nTuổi      : " << *tuoi;
+    return oss.str();
 }
 
 utility_csv::Row SinhVien::toCSVRow() const

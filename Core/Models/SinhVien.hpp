@@ -17,6 +17,8 @@ class SinhVien {
     std::optional<Contact> _lienHe;
     LopSinhHoat _lopSinhHoat = LopSinhHoat::DEFAULT;
 
+    static std::string lopSinhHoatStr(LopSinhHoat lopSinhHoat);
+
 public:
     SinhVien() = default;
     SinhVien(std::string maSV, std::string tenSV);
@@ -35,7 +37,21 @@ public:
     std::optional<Contact> getLienHe() const;
     std::string getLienHeStr() const;
 
-    utility_csv::Row toCSVRow() const;
+    bool isValid() const;
+    bool hasValidMaSV() const;
+    bool hasLienHe() const;
+    bool hasNgaySinh() const;
+    std::optional<int> tinhTuoi() const;
+    bool isSinhNhat() const;
+    
+    bool operator==(const SinhVien& other) const;
+    bool operator<(const SinhVien& other) const;
+    bool matchTen(const std::string& keyword) const;
 
+    std::string toSummaryString() const;
+    std::string toDetailString() const;
+
+
+    utility_csv::Row toCSVRow() const;
     static SinhVien fromCSVRow(const utility_csv::Row& row);
 };
