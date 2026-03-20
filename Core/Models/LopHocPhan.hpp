@@ -64,6 +64,12 @@ public:
     double tiLeVangHienTai(int tongSoTietVang) const;
     int soTietVangDoiDaChoPhep() const;
     std::string tienDoHocTapStr() const;
+    void themBuoiDiemDanh(const DateTime& ngayDiemDanh, CaHoc caDiemDanh, int soTiet);
+    BuoiDiemDanh& getBuoi(std::size_t index);
+    std::size_t soBuoi() const;
+    int tongTietDaDiemDanh() const;
+    double tyLeVang(const std::string& maSV) const;
+    bool biCamThi(const std::string& maSV) const;
 
     utility_csv::Row toCSVRow() const;
     static LopHocPhan fromCSVRow(const utility_csv::Row& row);

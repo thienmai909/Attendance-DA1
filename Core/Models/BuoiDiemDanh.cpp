@@ -75,6 +75,11 @@ std::string BuoiDiemDanh::getNgayDiemDanhStr() const
     return "(none)";
 }
 
+std::optional<DateTime> BuoiDiemDanh::getNgayDiemDanh() const
+{
+    return _ngayDiemDanh;
+}
+
 CaHoc BuoiDiemDanh::getCaDiemDanh() const
 {
     return _caDiemDanh;
@@ -97,7 +102,7 @@ int BuoiDiemDanh::getSoTiet() const
     return _soTiet;
 }
 
-bool BuoiDiemDanh::getKhoaDiemDanh() const
+bool BuoiDiemDanh::isKhoaDiemDanh() const
 {
     return _khoaDiemDanh;
 }

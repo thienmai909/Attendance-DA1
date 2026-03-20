@@ -46,10 +46,11 @@ public:
     BuoiDiemDanh(DateTime ngayDiemDanh, CaHoc caDiemDanh, int soTiet);
 
     std::string getNgayDiemDanhStr() const;
+    std::optional<DateTime> getNgayDiemDanh() const;
     CaHoc getCaDiemDanh() const;
     std::string getCaDiemDanhStr() const;
     int getSoTiet() const;
-    bool getKhoaDiemDanh() const;
+    bool isKhoaDiemDanh() const;
     const std::vector<ChiTietDiemDanh>& getDanhSachChiTiet() const;
 
     void khoaBuoi();

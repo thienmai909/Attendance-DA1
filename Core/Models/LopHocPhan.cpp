@@ -162,6 +162,61 @@ std::string LopHocPhan::tienDoHocTapStr() const
     );
 }
 
+void LopHocPhan::themBuoiDiemDanh(const DateTime &ngayDiemDanh, CaHoc caDiemDanh, int soTiet)
+{
+    for (const auto& buoi : _dsBuoiDiemDanh) {
+        const auto& buoi_1 = buoi.getNgayDiemDanh();
+        if (buoi_1.has_value())
+            if (
+                buoi_1->year() == ngayDiemDanh.year() &&
+                buoi_1->month() == ngayDiemDanh.month() &&
+                buoi_1->day() == ngayDiemDanh.day()
+            )
+                throw std::runtime_error("Buổi điểm danh bị trùng");
+        }
+    _dsBuoiDiemDanh.emplace_back(ngayDiemDanh, caDiemDanh, soTiet);
+}
+
+BuoiDiemDanh &LopHocPhan::getBuoi(std::size_t index)
+{
+    if (index >= _dsBuoiDiemDanh.size())
+        throw std::out_of_range("Index số buổi không hợp lệ!");
+    return _dsBuoiDiemDanh.at(index);
+}
+
+std::size_t LopHocPhan::soBuoi() const
+{
+    return _dsBuoiDiemDanh.size();
+}
+
+int LopHocPhan::tongTietDaDiemDanh() const
+{
+    int tong = 0;
+    for (const auto& buoi : _dsBuoiDiemDanh)
+        if (buoi.isKhoaDiemDanh())
+            tong += buoi.getSoTiet();
+    return tong;
+}
+
+double LopHocPhan::tyLeVang(const std::string &maSV) const
+{
+    if (_dsBuoiDiemDanh.empty()) return 0.0;
+    int vang = 0, tong = 0;
+    for (const auto& buoi : _dsBuoiDiemDanh)
+        for (const auto& chiTiet : buoi.getDanhSachChiTiet())
+            if (chiTiet.getMaSV() == maSV) {
+                ++tong;
+                if (chiTiet.getTrangThai() == Status::VANG)
+                    ++vang;
+            }
+    return tong > 0 ? (double)vang / tong : 0.0;
+}
+
+bool LopHocPhan::biCamThi(const std::string &maSV) const
+{
+    return tyLeVang(maSV) > _nguongCamThi;
+}
+
 utility_csv::Row LopHocPhan::toCSVRow() const
 {
     std::string hocKi{};
