@@ -16,7 +16,9 @@ class GiangVien {
     std::optional<Account> _taiKhoan;
     std::optional<Contact> _lienHe;
     Degree _hocVi = Degree::NONE;
-    bool _isAdmin;
+    bool _isAdmin = false;
+
+    static std::string degreeToStr(Degree hocVi);
 public:
     GiangVien(std::string maGV, std::string hoTen, bool isAdmin = false);
     
@@ -36,7 +38,21 @@ public:
 
     bool xacThucTaiKhoan(const std::string& username, const std::string& password) const;
     void khoiPhucTaiKhoan(const std::string& username, const std::string& hash);
-    utility_csv::Row toCSVRow() const;
+    bool hasTaiKhoan() const;
+    bool isAdmin() const;
+    bool doiMatKhau(
+        const std::string& username,
+        const std::string& matKhauCu,
+        const std::string& matKhauMoi
+    );
+    bool isValid() const;
+    bool hasLienHe() const;
+    bool operator==(const GiangVien& other) const;
+    bool operator<(const GiangVien& other) const;
+    bool matchHoTen(const std::string& keyword) const;
+    std::string toSummaryString() const;
+    std::string toDetailString() const;
 
+    utility_csv::Row toCSVRow() const;
     static GiangVien fromCSVRow(const utility_csv::Row& row);
 };

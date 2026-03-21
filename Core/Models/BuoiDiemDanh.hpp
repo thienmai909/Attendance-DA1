@@ -15,6 +15,24 @@ enum class Status {
     DEFAULT = 0, VANG, CO_MAT, MUON
 };
 
+inline std::string caHocToStr(CaHoc caHoc) {
+    switch(caHoc) {
+        case CaHoc::SANG: return "Sáng";
+        case CaHoc::CHIEU: return "Chiều";
+        case CaHoc::TOI: return "Tối";
+        default: return "Chưa xác định";
+    }
+}
+
+inline std::string statusToStr(Status status) {
+    switch(status) {
+        case Status::CO_MAT: return "Có mặt";
+        case Status::VANG: return "Vắng";
+        case Status::MUON: return "Muộn";
+        default: return "Chưa điểm danh";
+    }
+}
+
 class ChiTietDiemDanh {
     std::string _maSV;
     std::optional<DateTime> _gioDiemDanh;
