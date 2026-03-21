@@ -39,6 +39,11 @@ const std::string &ChiTietDiemDanh::getGhiChu() const
     return _ghiChu;
 }
 
+std::optional<DateTime> ChiTietDiemDanh::getGioDiemDanh() const
+{
+    return _gioDiemDanh;
+}
+
 std::string ChiTietDiemDanh::getGioDiemDanhStr() const
 {
     return _gioDiemDanh.has_value() ? _gioDiemDanh->toTimeString() : "(none)";
@@ -54,6 +59,40 @@ void ChiTietDiemDanh::setGhiChu(const std::string &ghiChu)
     _ghiChu = ghiChu;
 }
 
+nlohmann::json ChiTietDiemDanh::toJson() const
+ {
+    using namespace utility_json;
+    nlohmann::json j = {
+        {"maSV", _maSV},
+        {"trangThai", static_cast<int>(_trangThai)},
+        {"ghiChu", _ghiChu}
+    };
+
+    if (_gioDiemDanh.has_value()) 
+        j["gioDiemDanh"] = _gioDiemDanh->toTimeString();
+    else
+        j["gioDiemDanh"] = nullptr;
+    return j;
+}
+
+ChiTietDiemDanh ChiTietDiemDanh::fromJson(const nlohmann::json &j)
+{
+    using namespace utility_json;
+    auto maSV = require<std::string>(j, "maSV");
+    auto trangThai = static_cast<Status>(optional<int>(j, "trangThai", 0));
+    auto ghiChu = optional<std::string>(j, "ghiChu", "");
+
+    DateTime gio = DateTime();
+    if (!j["gioDiemDanh"].is_null()) {
+        std::string gioStr = require<std::string>(j, "gioDiemDanh");
+        int h = 0, m = 0, s = 0;
+        if (std::sscanf(gioStr.c_str(), "%d:%d:%d", &h, &m, &s) == 3) {
+            auto now = DateTime();
+            gio = DateTime(now.day(), now.month(), now.year(), h, m, s);
+        }
+    }
+    return ChiTietDiemDanh(maSV, gio, trangThai, ghiChu);
+}
 
 // ================ BuoiDiemDanh ================
 
@@ -165,4 +204,54 @@ int BuoiDiemDanh::demVangMat() const
     for (const auto& chiTiet : _danhSachChiTiet)
         if (chiTiet.getTrangThai() == Status::VANG) ++count;
     return count;
+}
+
+nlohmann::json BuoiDiemDanh::toJson() const
+{
+    using namespace utility_json;
+    nlohmann::json j = {
+        {"caDiemDanh", static_cast<int>(_caDiemDanh)},
+        {"soTiet", _soTiet},
+        {"khoaDiemDanh", _khoaDiemDanh},
+        {"chiTiet", dump_array<ChiTietDiemDanh>(
+            _danhSachChiTiet,
+            [](const ChiTietDiemDanh& chiTiet) { return chiTiet.toJson(); }
+        )}
+    };
+
+    if (_ngayDiemDanh.has_value())
+        j["ngayDiemDanh"] = _ngayDiemDanh->toDayString();
+    else
+        j["ngayDiemDanh"] = nullptr;
+    return j;
+}
+
+BuoiDiemDanh BuoiDiemDanh::fromJson(const nlohmann::json &j)
+{
+    using namespace utility_json;
+
+    DateTime ngay = DateTime();
+    if (!j["ngayDiemDanh"].is_null()) {
+        std::string ngayStr = require<std::string>(j, "ngayDiemDanh");
+        int d = 0, m = 0, y = 0;
+        if (std::sscanf(ngayStr.c_str(), "%d/%d/%d", &d, &m, &y) == 3)
+            ngay = DateTime(d, m, y);
+    }
+
+    auto ca = static_cast<CaHoc>(optional<int>(j, "caDiemDanh", 0));
+    auto soTiet = optional<int>(j, "soTiet", 0);
+    
+    BuoiDiemDanh buoi(ngay, ca, soTiet);
+
+    buoi._danhSachChiTiet = load_array<ChiTietDiemDanh> (
+        j, "chiTiet",
+        [] (const nlohmann::json& item) {
+            return ChiTietDiemDanh::fromJson(item);
+        }
+    );
+
+    if (optional<bool>(j, "khoaDiemDanh", false))
+        buoi.khoaBuoi();
+
+    return buoi;
 }

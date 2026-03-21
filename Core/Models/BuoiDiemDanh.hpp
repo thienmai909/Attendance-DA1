@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DataType.hpp>
+#include <Utility.hpp>
 
 #include <string>
 #include <optional>
@@ -46,10 +47,14 @@ public:
     Status getTrangThai() const;
     std::string getTrangThaiStr() const;
     const std::string& getGhiChu() const;
+    std::optional<DateTime> getGioDiemDanh() const;
     std::string getGioDiemDanhStr() const;
 
     void setTrangThai(Status trangThai);
     void setGhiChu(const std::string& ghiChu);
+
+    nlohmann::json toJson() const;
+    static ChiTietDiemDanh fromJson(const nlohmann::json& j);
 };
 
 // =============== Buoi Diem Danh ===============
@@ -81,4 +86,7 @@ public:
     void capNhatTrangThai(const std::string& maSV, Status trangThai);
     void capNhatGhiChu(const std::string& maSV, const std::string& ghiChu);
     int demVangMat() const;
+
+    nlohmann::json toJson() const;
+    static BuoiDiemDanh fromJson(const nlohmann::json& j);
 };
