@@ -7,6 +7,7 @@ target_sources(Models
 		SinhVien.cpp
 		LopHocPhan.cpp
 		BuoiDiemDanh.cpp
+		DangKyHoc.cpp
 	PUBLIC
 		FILE_SET HEADERS
 		FILES
@@ -15,6 +16,7 @@ target_sources(Models
 			SinhVien.hpp
 			LopHocPhan.hpp
 			BuoiDiemDanh.hpp
+			DangKyHoc.hpp
 )
 
 target_link_libraries(Models
