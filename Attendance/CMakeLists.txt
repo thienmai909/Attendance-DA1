@@ -25,4 +25,5 @@ endif()
 target_link_libraries(Attendance
 	PUBLIC
 		Core
+		Manager
 )

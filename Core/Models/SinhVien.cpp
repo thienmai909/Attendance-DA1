@@ -241,3 +241,58 @@ SinhVien SinhVien::fromCSVRow(const utility_csv::Row &row)
 
     return sv;
 }
+
+nlohmann::json SinhVien::toJson() const
+{
+    nlohmann::json j = {
+            {"maSV",       _maSV},
+            {"tenSV",      _tenSV},
+            {"lopSinhHoat", static_cast<int>(_lopSinhHoat)}
+    };
+    if (_ngaySinh)
+        j["ngaySinh"] = _ngaySinh->toString();
+    if (_lienHe)
+        j["lienHe"] = { {"email", _lienHe->getEmail()}, {"sdt", _lienHe->getPhoneNumber()} };
+
+    return j;
+}
+
+SinhVien SinhVien::fromJson(const nlohmann::json &j)
+{
+    using namespace utility_json;
+
+    SinhVien sinhVien(
+        require<std::string>(j, "maSV"),
+        require<std::string>(j, "tenSV")
+    );
+
+    sinhVien.setLopSH(static_cast<LopSinhHoat>(optional<int>(j, "lopSinhHoat", 0)));
+
+    if (j.contains("ngaySinh") && !j["ngaySinh"].is_null()) {
+        std::string ngayStr = require<std::string>(j, "ngaySinh");
+        int d = 0, m = 0, y = 0;
+        if (std::sscanf(ngayStr.c_str(), "%d/%d/%d", &d, &m, &y) == 3) {
+            try {
+                sinhVien.setNgaySinh(d, m, y);
+            } catch (const std::invalid_argument& e) {
+                throw std::runtime_error(
+                    "SinhVien '" + sinhVien.getMaSV() + "': ngaySinh không hợp lệ: " + ngayStr
+                );
+            }
+        } else {
+            throw std::runtime_error(
+                "SinhVien '" + sinhVien.getMaSV() + "': ngaySinh sai định dạng: " + ngayStr
+            );
+        }
+    }
+
+    if (j.contains("lienHe") && !j["lienHe"].is_null()) {
+        const auto& lienHe = j["lienHe"];
+        auto email = optional<std::string>(lienHe, "email", "");
+        auto sdt   = optional<std::string>(lienHe, "sdt",   "");
+        if (!email.empty() || !sdt.empty())
+            sinhVien.setLienHe(email, sdt);
+    }
+
+    return sinhVien;
+}

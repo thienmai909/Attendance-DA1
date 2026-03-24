@@ -54,4 +54,6 @@ public:
 
     utility_csv::Row toCSVRow() const;
     static SinhVien fromCSVRow(const utility_csv::Row& row);
+    nlohmann::json toJson() const;
+    static SinhVien fromJson(const nlohmann::json& j);
 };
