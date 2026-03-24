@@ -377,40 +377,7 @@ namespace utility_json {
             );
         }
     }
-
-    template <typename T>
-    std::vector<T> load_from_file(
-        const std::filesystem::path& file,
-        std::string_view key,
-        std::function<T(const json&)> from_json
-    ) {
-        if (!std::filesystem::exists(file))
-            return {};
-        
-        json root = read_json(file);
-        return load_array<T>(root, key, from_json);
-    }
-
-    template <typename T>
-    void save_to_file(
-        const std::filesystem::path& file,
-        std::string_view key,
-        const std::vector<T>& vec,
-        std::function<json(const T&)> to_json
-    ) {
-        json root;
-        if (std::filesystem::exists(file)) {
-            try {
-                root = read_json(file);
-            } catch(...) {
-                root = json::object();
-            }
-        }
-
-        root[std::string(key)] = dump_array<T>(vec, to_json);
-        write_json(file, root);
-    }
-
+    
     // ── Đọc field bắt buộc (ném exception nếu thiếu hoặc sai kiểu) ──
     template <typename T>
     T require(const json& j, std::string_view key) {
@@ -482,6 +449,39 @@ namespace utility_json {
         for (const auto& item : vec) 
             arr.push_back(to_json(item));
         return arr;
+    }
+
+    template <typename T>
+    std::vector<T> load_from_file(
+        const std::filesystem::path& file,
+        std::string_view key,
+        std::function<T(const json&)> from_json
+    ) {
+        if (!std::filesystem::exists(file))
+            return {};
+        
+        json root = read_json(file);
+        return load_array<T>(root, key, from_json);
+    }
+
+    template <typename T>
+    void save_to_file(
+        const std::filesystem::path& file,
+        std::string_view key,
+        const std::vector<T>& vec,
+        std::function<json(const T&)> to_json
+    ) {
+        json root;
+        if (std::filesystem::exists(file)) {
+            try {
+                root = read_json(file);
+            } catch(...) {
+                root = json::object();
+            }
+        }
+
+        root[std::string(key)] = dump_array<T>(vec, to_json);
+        write_json(file, root);
     }
 
     // ── Kiểm tra file JSON hợp lệ mà không ném exception ────────
