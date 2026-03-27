@@ -55,4 +55,7 @@ public:
 
     utility_csv::Row toCSVRow() const;
     static GiangVien fromCSVRow(const utility_csv::Row& row);
+
+    nlohmann::json toJson() const;
+    static GiangVien fromJson(const nlohmann::json& j);
 };

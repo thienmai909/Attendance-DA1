@@ -234,3 +234,45 @@ GiangVien GiangVien::fromCSVRow(const utility_csv::Row &row)
 
     return gv;
 }
+
+nlohmann::json GiangVien::toJson() const
+{
+    nlohmann::json j = {
+        {"maGv", _maGv},
+        {"hoTen", _hoTen},
+        {"hocVi", static_cast<int>(_hocVi)},
+        {"isAdmin", _isAdmin}
+    };
+
+    if (_taiKhoan) j["taiKhoan"] = {
+        {"tenTaiKhoan", getTenTaiKhoan()},
+        {"matKhauHash", getMatKhauHash()}
+    };
+    if (_lienHe) j["lienHe"] = {
+        {"email", _lienHe->getEmail()},
+        {"sdt", _lienHe->getPhoneNumber()}
+    };
+    return j;
+}
+
+GiangVien GiangVien::fromJson(const nlohmann::json & j)
+{
+    using namespace utility_json;
+    GiangVien giangVien{
+        require<std::string>(j, "maGv"),
+        require<std::string>(j, "hoTen"),
+        optional<bool>(j, "isAdmin", false)
+    };
+    giangVien.setHocVi(static_cast<Degree>(optional<int>(j, "hocVi", 0)));
+    if (j.contains("taiKhoan"))
+        giangVien.khoiPhucTaiKhoan(
+            require<std::string>(j["taiKhoan"], "tenTaiKhoan"),
+            require<std::string>(j["taiKhoan"], "matKhauHash")
+        );
+    if (j.contains("lienHe"))
+        giangVien.setLienHe(
+            require<std::string>(j["lienHe"], "email"),
+            require<std::string>(j["lienHe"], "sdt")
+        );
+    return giangVien;
+}
