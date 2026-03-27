@@ -1,5 +1,5 @@
 #include <AppManager.hpp>
-#include "SinhVienManager.hpp"
+#include <SinhVienManager.hpp>
 
 std::vector<SinhVien>::iterator SinhVienManager::timIterator(const std::string &maSV)
 {

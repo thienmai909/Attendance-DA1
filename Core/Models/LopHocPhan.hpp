@@ -70,6 +70,7 @@ public:
     int tongTietDaDiemDanh() const;
     double tyLeVang(const std::string& maSV) const;
     bool biCamThi(const std::string& maSV) const;
+    bool matchTen(const std::string& keyword) const;
 
     utility_csv::Row toCSVRow() const;
     static LopHocPhan fromCSVRow(const utility_csv::Row& row);

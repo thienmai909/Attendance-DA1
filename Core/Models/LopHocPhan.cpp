@@ -166,11 +166,13 @@ void LopHocPhan::themBuoiDiemDanh(const DateTime &ngayDiemDanh, CaHoc caDiemDanh
 {
     for (const auto& buoi : _dsBuoiDiemDanh) {
         const auto& buoi_1 = buoi.getNgayDiemDanh();
+        CaHoc ca_buoi_1 = buoi.getCaDiemDanh();
         if (buoi_1.has_value())
             if (
                 buoi_1->year() == ngayDiemDanh.year() &&
                 buoi_1->month() == ngayDiemDanh.month() &&
-                buoi_1->day() == ngayDiemDanh.day()
+                buoi_1->day() == ngayDiemDanh.day() &&
+                ca_buoi_1 == caDiemDanh
             )
                 throw std::runtime_error("Buổi điểm danh bị trùng");
         }
@@ -215,6 +217,18 @@ double LopHocPhan::tyLeVang(const std::string &maSV) const
 bool LopHocPhan::biCamThi(const std::string &maSV) const
 {
     return tyLeVang(maSV) > _nguongCamThi;
+}
+
+bool LopHocPhan::matchTen(const std::string &keyword) const
+{
+    auto toLower = [] (const std::string& s) {
+        std::string result = s;
+        std::transform(result.begin(), result.end(), result.begin(),
+            [](unsigned char c) { return std::tolower(c); }
+        );
+        return result;
+    };
+    return toLower(_tenLHP).find(toLower(keyword)) != std::string::npos;
 }
 
 utility_csv::Row LopHocPhan::toCSVRow() const
