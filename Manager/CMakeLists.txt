@@ -5,12 +5,14 @@ target_sources(Manager
         AppManager.cpp
         SinhVienManager.cpp
         GiangVienManager.cpp
+        DangKyHocManager.cpp
     PUBLIC 
         FILE_SET HEADERS
     FILES
         AppManager.hpp
         SinhVienManager.hpp
         GiangVienManager.hpp
+        DangKyHocManager.hpp
 )
 
 target_link_libraries(Manager

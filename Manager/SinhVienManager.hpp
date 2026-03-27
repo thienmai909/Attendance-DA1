@@ -10,8 +10,6 @@
 #include <algorithm>
 #include <filesystem>
 
-const std::string data_root = "data/";
-
 class SinhVienManager {
     std::vector<SinhVien> _dsSinhVien;
     std::filesystem::path _filePath;
@@ -20,7 +18,7 @@ class SinhVienManager {
     std::vector<SinhVien>::iterator timIterator(const std::string& maSV);
 
 public:
-    explicit SinhVienManager(std::filesystem::path filePath = std::format("{}sinhvien.json", data_root));
+    explicit SinhVienManager(std::filesystem::path filePath = "data/sinhvien.json");
 
     void load();
     void save();

@@ -8,7 +8,6 @@
 #include <optional>
 #include <filesystem>
 
-const std::string data_root = "data/";
 
 class GiangVienManager {
     std::vector<GiangVien> _dsGiangVien;
@@ -16,7 +15,7 @@ class GiangVienManager {
     bool _isDirty = false;
 
 public:
-    explicit GiangVienManager(std::filesystem::path filePath = std::format("{}giangvien.json", data_root));
+    explicit GiangVienManager(std::filesystem::path filePath = "data/giangvien.json");
 
     void load();
     void save();

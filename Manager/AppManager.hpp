@@ -1,10 +1,13 @@
 #pragma once
 
 #include <SinhVienManager.hpp>
+#include <GiangVienManager.hpp>
+#include <DangKyHocManager.hpp>
 
 class AppManager{
     SinhVienManager _svManager;
-
+    GiangVienManager _gvManager;
+    DangKyHocManager _dkhManager;
 public:
     AppManager() = default;
 
@@ -12,4 +15,6 @@ public:
     void dongLai();
 
     SinhVienManager& getSVManager();
+    GiangVienManager& getGVManager();
+    DangKyHocManager& getDKHManager();
 };
