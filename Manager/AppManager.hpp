@@ -5,13 +5,15 @@
 #include <DangKyHocManager.hpp>
 #include <LopHocPhanManager.hpp>
 #include <DiemDanhManager.hpp>
+#include <ThongKeManager.hpp>
 
 class AppManager{
     SinhVienManager _svManager;
     GiangVienManager _gvManager;
     LopHocPhanManager _lhpManager;
-    DangKyHocManager _dkhManager;
+    DangKyHocManager _dkManager;
     DiemDanhManager _ddManager;
+    ThongKeManager _tkManager;
 public:
     AppManager();
 
@@ -20,7 +22,7 @@ public:
 
     SinhVienManager& getSVManager();
     GiangVienManager& getGVManager();
-    DangKyHocManager& getDKHManager();
+    DangKyHocManager& getDKManager();
     LopHocPhanManager& getLHPManager();
-    DiemDanhManager& getDDManager();
+    ThongKeManager& getTKManager();
 };
