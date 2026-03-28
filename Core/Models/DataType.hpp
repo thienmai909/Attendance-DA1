@@ -98,5 +98,6 @@ public:
 
     std::string getTenPhong() const;
     int getSucChua() const;
-    std::string getLoaiPhong() const;
+    std::string getLoaiPhongStr() const;
+    RoomType getLoaiPhong() const;
 };

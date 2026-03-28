@@ -254,7 +254,7 @@ utility_csv::Row LopHocPhan::toCSVRow() const
     row.push_back(std::to_string(_soBuoiDaHoc));
     row.push_back(std::to_string(_nguongCamThi));
     row.push_back(hocKi);
-    row.push_back(_phongHoc.has_value() ? _phongHoc->getLoaiPhong() : "(none)");
+    row.push_back(_phongHoc.has_value() ? _phongHoc->getLoaiPhongStr() : "(none)");
     row.push_back(_phongHoc.has_value() ? _phongHoc->getTenPhong() : "(none)");
     row.push_back(_phongHoc.has_value() ? std::to_string(_phongHoc->getSucChua()) : "(none)");
     
@@ -297,5 +297,69 @@ LopHocPhan LopHocPhan::fromCSVRow(const utility_csv::Row &row)
         lopHocPhan.setPhongHoc(phongHoc);
     }
 
+    return lopHocPhan;
+}
+
+nlohmann::json LopHocPhan::toJson() const
+{
+    nlohmann::json j = {
+        {"maLHP", _maLHP},
+        {"tenLHP", _tenLHP},
+        {"soTC", _soTC},
+        {"tongSoTiet", _tongSoTiet},
+        {"soTietDaHoc", _soTietDaHoc},
+        {"soBuoiDaHoc", _soBuoiDaHoc},
+        {"nguongCamThi", _nguongCamThi},
+        {"hocKi", static_cast<int>(_hocKi)},
+        {
+            "buoiDiemDanh", utility_json::dump_array<BuoiDiemDanh>(
+                _dsBuoiDiemDanh,
+                [](const BuoiDiemDanh& buoiDiemDanh){ return buoiDiemDanh.toJson(); }
+            )
+        }
+    };
+
+    if (_phongHoc.has_value())
+        j["phongHoc"] = {
+            {"tenPhong", _phongHoc->getTenPhong()},
+            {"sucChua", _phongHoc->getSucChua()},
+            {"loaiPhong", static_cast<int>(_phongHoc->getLoaiPhong())}
+        };
+    else
+        j["phongHoc"] = nullptr;
+    return j;
+}
+
+LopHocPhan LopHocPhan::fromJson(const nlohmann::json &j)
+{
+    using namespace utility_json;
+
+    LopHocPhan lopHocPhan(
+        require<std::string>(j, "maLHP"),
+        require<std::string>(j, "tenLHP"),
+        require<int>(j, "soTC"),
+        require<int>(j, "tongSoTiet"),
+        require<double>(j, "nguongCamThi"),
+        static_cast<HocKi>(optional<int>(j, "hocKi", 0))
+    );
+
+    lopHocPhan.setSoTietDaHoc(optional<int>(j, "soTietDaHoc", 0));
+    lopHocPhan.setSoBuoiDaHoc(optional<int>(j, "soBuoiDaHoc", 0));
+
+    if (j.contains("phongHoc") && !j["phongHoc"].is_null()) {
+        const auto& phongHoc = j["phongHoc"];
+        lopHocPhan.setPhongHoc(
+            require<std::string>(phongHoc, "tenPhong"),
+            optional<int>(phongHoc, "sucChua", 0),
+            static_cast<RoomType>(optional<int>(phongHoc, "loaiPhong", 0))
+        );
+    }
+
+    lopHocPhan._dsBuoiDiemDanh = load_array<BuoiDiemDanh>(
+        j, "buoiDiemDanh",
+        [](const nlohmann::json& item) {
+            return BuoiDiemDanh::fromJson(item);
+        }
+    );
     return lopHocPhan;
 }

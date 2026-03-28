@@ -279,7 +279,7 @@ int ClassRoom::getSucChua() const
     return _sucChua;
 }
 
-std::string ClassRoom::getLoaiPhong() const
+std::string ClassRoom::getLoaiPhongStr() const
 {
     switch(_loaiPhong) {
         case RoomType::PhongLyThuyet:
@@ -288,4 +288,9 @@ std::string ClassRoom::getLoaiPhong() const
             return "Phòng thực hành";
     }
     return "Không xác định";
+}
+
+RoomType ClassRoom::getLoaiPhong() const
+{
+    return _loaiPhong;
 }

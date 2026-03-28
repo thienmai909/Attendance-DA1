@@ -4,6 +4,28 @@ LopHocPhanManager::LopHocPhanManager(std::filesystem::path filePath)
     : _filePath(std::move(filePath))
 {}
 
+void LopHocPhanManager::load()
+{
+    _dsLHP = utility_json::load_from_file<LopHocPhan>(
+        _filePath, "data", LopHocPhan::fromJson
+    );
+    _isDirty = false;
+}
+
+void LopHocPhanManager::save()
+{
+    utility_json::save_to_file<LopHocPhan>(
+        _filePath, "data", _dsLHP,
+        [](const LopHocPhan& lopHocPhan) { return lopHocPhan.toJson(); }
+    );
+    _isDirty = false;
+}
+
+void LopHocPhanManager::saveDirty()
+{
+    if (_isDirty) save();
+}
+
 void LopHocPhanManager::them(const LopHocPhan &lopHocPhan)
 {
     if (timTheoMa(lopHocPhan.getMaLHP()).has_value())
@@ -40,7 +62,7 @@ std::optional<LopHocPhan> LopHocPhanManager::timTheoMa(const std::string &maLHP)
 std::vector<LopHocPhan> LopHocPhanManager::timTheoTen(const std::string &keyword) const
 {
     std::vector<LopHocPhan> result;
-    for (const auto& lopHocPhan : _dslopHocPhan)
+    for (const auto& lopHocPhan : _dsLHP)
         if (lopHocPhan.matchTen(keyword))
             result.push_back(lopHocPhan);
     return result;
