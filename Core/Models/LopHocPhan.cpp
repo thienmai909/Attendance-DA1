@@ -143,7 +143,7 @@ int LopHocPhan::soTietVangToiDa() const
 
 bool LopHocPhan::kiemTraViPham(int soTietVang) const
 {
-    return soTietVang > this->soTietVangToiDa();
+    return soTietVang > soTietVangToiDa();
 }
 
 void LopHocPhan::ghiNhanBuoiHoc(int soTiet)
@@ -154,12 +154,19 @@ void LopHocPhan::ghiNhanBuoiHoc(int soTiet)
 
 double LopHocPhan::tiLeVangHienTai(int tongSoTietVang) const
 {
-    return tongSoTietVang / _soTietDaHoc;
+    if (_soTietDaHoc == 0) return 0.0;
+    return static_cast<double>(tongSoTietVang) / _soTietDaHoc;
 }
 
-int LopHocPhan::soTietVangDoiDaChoPhep() const
+int LopHocPhan::soTietVangToiDaChoPhep(const std::string& maSV) const
 {
-    return _tongSoTiet * _nguongCamThi;
+    int daVang = 0;
+    for (const auto& buoi : _dsBuoiDiemDanh)
+        for (const auto& chiTiet : buoi.getDanhSachChiTiet())
+            if (chiTiet.getMaSV() == maSV && chiTiet.getTrangThai() == Status::VANG)
+                daVang += buoi.getSoTiet();
+    int conChoPhep = soTietVangToiDa() - daVang;
+    return conChoPhep > 0 ? conChoPhep : 0;
 }
 
 std::string LopHocPhan::tienDoHocTapStr() const
@@ -212,16 +219,13 @@ int LopHocPhan::tongTietDaDiemDanh() const
 
 double LopHocPhan::tyLeVang(const std::string &maSV) const
 {
-    if (_dsBuoiDiemDanh.empty()) return 0.0;
-    int vang = 0, tong = 0;
+    if (_soTietDaHoc == 0) return 0.0;
+    int soTietVang = 0;
     for (const auto& buoi : _dsBuoiDiemDanh)
         for (const auto& chiTiet : buoi.getDanhSachChiTiet())
-            if (chiTiet.getMaSV() == maSV) {
-                ++tong;
-                if (chiTiet.getTrangThai() == Status::VANG)
-                    ++vang;
-            }
-    return tong > 0 ? (double)vang / tong : 0.0;
+            if (chiTiet.getMaSV() == maSV && chiTiet.getTrangThai() == Status::VANG)
+                soTietVang += buoi.getSoTiet();
+    return static_cast<double>(soTietVang) / _soTietDaHoc;
 }
 
 bool LopHocPhan::coGiangVien() const

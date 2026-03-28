@@ -1,5 +1,13 @@
 #include <AppManager.hpp>
 
+AppManager::AppManager()
+    : _svManager("data/sinhvien.json")
+    , _gvManager("data/giangvien.json")
+    , _lhpManager("data/lophocphan.json")
+    , _dkhManager("data/dangkyhoc.json")
+    , _ddManager(_lhpManager)
+{}
+
 void AppManager::khoiDong()
 {
     _svManager.load();

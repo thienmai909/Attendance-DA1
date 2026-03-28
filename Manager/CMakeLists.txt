@@ -7,6 +7,7 @@ target_sources(Manager
         GiangVienManager.cpp
         DangKyHocManager.cpp
         LopHocPhanManager.cpp
+        DiemDanhManager.cpp
     PUBLIC 
         FILE_SET HEADERS
     FILES
@@ -15,6 +16,7 @@ target_sources(Manager
         GiangVienManager.hpp
         DangKyHocManager.hpp
         LopHocPhanManager.hpp
+        DiemDanhManager.hpp
 )
 
 target_link_libraries(Manager

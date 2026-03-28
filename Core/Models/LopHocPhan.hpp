@@ -65,7 +65,7 @@ public:
     bool kiemTraViPham(int soTietVang) const; // kiểm tả một con số tiết vắng cụ thể có vượt ngưỡng của lớp này không
     void ghiNhanBuoiHoc(int soTiet);
     double tiLeVangHienTai(int tongSoTietVang) const;
-    int soTietVangDoiDaChoPhep() const;
+    int soTietVangToiDaChoPhep(const std::string& maSV) const;
     std::string tienDoHocTapStr() const;
     void themBuoiDiemDanh(const DateTime& ngayDiemDanh, CaHoc caDiemDanh, int soTiet);
     BuoiDiemDanh& getBuoi(std::size_t index);

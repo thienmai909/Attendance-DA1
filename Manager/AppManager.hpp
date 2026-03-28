@@ -4,14 +4,16 @@
 #include <GiangVienManager.hpp>
 #include <DangKyHocManager.hpp>
 #include <LopHocPhanManager.hpp>
+#include <DiemDanhManager.hpp>
 
 class AppManager{
     SinhVienManager _svManager;
     GiangVienManager _gvManager;
-    DangKyHocManager _dkhManager;
     LopHocPhanManager _lhpManager;
+    DangKyHocManager _dkhManager;
+    DiemDanhManager _ddManager;
 public:
-    AppManager() = default;
+    AppManager();
 
     void khoiDong();
     void dongLai();
@@ -20,4 +22,5 @@ public:
     GiangVienManager& getGVManager();
     DangKyHocManager& getDKHManager();
     LopHocPhanManager& getLHPManager();
+    DiemDanhManager& getDDManager();
 };
