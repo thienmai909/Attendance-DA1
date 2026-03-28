@@ -35,6 +35,11 @@ const std::string &LopHocPhan::getTenLHP() const
     return _tenLHP;
 }
 
+const std::string &LopHocPhan::getMaGV() const
+{
+    return _maGV;
+}
+
 int LopHocPhan::getSoTC() const
 {
     return _soTC;
@@ -99,6 +104,11 @@ const std::vector<BuoiDiemDanh> &LopHocPhan::getDsBuoiDiemDanh() const
 void LopHocPhan::setTenLHP(const std::string &tenLHP)
 {
     _tenLHP = tenLHP;
+}
+
+void LopHocPhan::setMaGV(const std::string &maGV)
+{
+    _maGV = maGV;
 }
 
 void LopHocPhan::setSoTC(int soTC)
@@ -214,6 +224,16 @@ double LopHocPhan::tyLeVang(const std::string &maSV) const
     return tong > 0 ? (double)vang / tong : 0.0;
 }
 
+bool LopHocPhan::coGiangVien() const
+{
+    return !_maGV.empty();
+}
+
+void LopHocPhan::xoaGiangVien()
+{
+    _maGV.clear();
+}
+
 bool LopHocPhan::biCamThi(const std::string &maSV) const
 {
     return tyLeVang(maSV) > _nguongCamThi;
@@ -305,6 +325,7 @@ nlohmann::json LopHocPhan::toJson() const
     nlohmann::json j = {
         {"maLHP", _maLHP},
         {"tenLHP", _tenLHP},
+        {"maGV", _maGV},
         {"soTC", _soTC},
         {"tongSoTiet", _tongSoTiet},
         {"soTietDaHoc", _soTietDaHoc},
@@ -345,6 +366,7 @@ LopHocPhan LopHocPhan::fromJson(const nlohmann::json &j)
 
     lopHocPhan.setSoTietDaHoc(optional<int>(j, "soTietDaHoc", 0));
     lopHocPhan.setSoBuoiDaHoc(optional<int>(j, "soBuoiDaHoc", 0));
+    lopHocPhan.setMaGV(optional<std::string>(j, "maGV", ""));
 
     if (j.contains("phongHoc") && !j["phongHoc"].is_null()) {
         const auto& phongHoc = j["phongHoc"];

@@ -31,6 +31,7 @@ public:
     std::optional<SinhVien> timTheoMa(const std::string& maSV) const;
     std::vector<SinhVien> timTheoTen(const std::string& keyword) const;
     std::vector<SinhVien> locTheoLop(LopSinhHoat lopSinhHoat) const;
+    SinhVien& getSinhVienRef(const std::string& maSV);
     const std::vector<SinhVien>& getAll() const;
     std::size_t soLuong() const;
     bool isDirty() const;

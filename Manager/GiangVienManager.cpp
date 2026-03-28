@@ -96,6 +96,14 @@ std::optional<GiangVien> GiangVienManager::dangNhap(
     return std::nullopt;
 }
 
+GiangVien &GiangVienManager::getGiangVienRef(const std::string &maGV)
+{
+    auto it = timIterator(maGV);
+    if (it == _dsGiangVien.end())
+        throw std::invalid_argument("Không tìm thấy giảng viên: " + maGV);
+    return *it;
+}
+
 const std::vector<GiangVien> &GiangVienManager::getAll() const
 {
     return _dsGiangVien;

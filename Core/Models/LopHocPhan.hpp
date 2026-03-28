@@ -15,6 +15,7 @@ enum class HocKi {
 class LopHocPhan {
     std::string _maLHP;
     std::string _tenLHP;
+    std::string _maGV;
     int _soTC;
     int _tongSoTiet;
     int _soTietDaHoc = 0;
@@ -40,6 +41,7 @@ public:
 
     const std::string& getMaLHP() const;
     const std::string& getTenLHP() const;
+    const std::string& getMaGV() const;
     int getSoTC() const;
     int getTongSoTiet() const;
     int getSoTietDaHoc() const;
@@ -52,6 +54,7 @@ public:
     const std::vector<BuoiDiemDanh>& getDsBuoiDiemDanh() const;
 
     void setTenLHP(const std::string& tenLHP);
+    void setMaGV(const std::string& maGV);
     void setSoTC(int soTC);
     void setTongSoTiet(int tongSoTiet);
     void setNguongCamThi(double nguongCamThi);
@@ -69,6 +72,8 @@ public:
     std::size_t soBuoi() const;
     int tongTietDaDiemDanh() const;
     double tyLeVang(const std::string& maSV) const;
+    bool coGiangVien() const;
+    void xoaGiangVien();
     bool biCamThi(const std::string& maSV) const;
     bool matchTen(const std::string& keyword) const;
 

@@ -27,6 +27,7 @@ public:
     std::optional<LopHocPhan> timTheoMa(const std::string& maLHP) const;
     std::vector<LopHocPhan> timTheoTen(const std::string& keyword) const;
     std::vector<LopHocPhan> locTheoHocKi(HocKi hocKi) const;
+    std::vector<LopHocPhan> getLopTheoGV(const std::string& maGV) const;
 
     void themBuoi(
         const std::string& maLHP,
@@ -36,6 +37,8 @@ public:
     );
     LopHocPhan& getLopRef(const std::string& maLHP);
     void markDirty();
+    void ganGiangVien(const std::string& maLHP, const std::string& maGV);
+    void xoaGiangVien(const std::string& maGV);
 
     const std::vector<LopHocPhan>& getAll() const;
     std::size_t soLuong() const;

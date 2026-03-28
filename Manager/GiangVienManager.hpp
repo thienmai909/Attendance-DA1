@@ -33,6 +33,7 @@ public:
         const std::string& username,
         const std::string& password
     ) const;
+    GiangVien& getGiangVienRef(const std::string& maGV);
     const std::vector<GiangVien>& getAll() const;
     std::size_t soLuong() const;
     bool isDirty() const;

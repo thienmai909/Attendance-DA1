@@ -76,6 +76,15 @@ std::vector<LopHocPhan> LopHocPhanManager::locTheoHocKi(HocKi hocKi) const
     return result;
 }
 
+std::vector<LopHocPhan> LopHocPhanManager::getLopTheoGV(const std::string &maGV) const
+{
+    std::vector<LopHocPhan> result;
+    for (const auto& lopHocPhan : _dsLHP)
+        if (lopHocPhan.getMaGV() == maGV)
+            result.push_back(lopHocPhan);
+    return result;
+}
+
 void LopHocPhanManager::themBuoi(
     const std::string &maLHP,
     const DateTime &ngay,
@@ -101,6 +110,20 @@ LopHocPhan &LopHocPhanManager::getLopRef(const std::string &maLHP)
 
 void LopHocPhanManager::markDirty()
 {
+    _isDirty = true;
+}
+
+void LopHocPhanManager::ganGiangVien(const std::string &maLHP, const std::string &maGV)
+{
+    auto& lopHocPhan = getLopRef(maLHP);
+    lopHocPhan.setMaGV(maGV);
+    _isDirty = true;
+}
+
+void LopHocPhanManager::xoaGiangVien(const std::string &maGV)
+{
+    auto& lopHocPhan = getLopRef(maGV);
+    lopHocPhan.xoaGiangVien();
     _isDirty = true;
 }
 

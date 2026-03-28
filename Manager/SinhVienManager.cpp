@@ -90,6 +90,14 @@ std::vector<SinhVien> SinhVienManager::locTheoLop(LopSinhHoat lopSinhHoat) const
     return result;
 }
 
+SinhVien &SinhVienManager::getSinhVienRef(const std::string &maSV)
+{
+    auto it = timIterator(maSV);
+    if (it == _dsSinhVien.end())
+        throw std::invalid_argument("Không tìm thấy sinh viên: " + maSV);
+    return *it;
+}
+
 const std::vector<SinhVien> &SinhVienManager::getAll() const
 {
     return _dsSinhVien;
