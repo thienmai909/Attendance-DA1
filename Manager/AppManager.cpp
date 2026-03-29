@@ -23,7 +23,7 @@ void AppManager::dongLai()
     _svManager.saveIfDirty();
     _gvManager.saveIfDirty();
     _dkManager.saveIfDirty();
-    _lhpManager.saveDirty();
+    _lhpManager.saveIfDirty();
 }
 
 SinhVienManager &AppManager::getSVManager()
@@ -39,6 +39,11 @@ GiangVienManager &AppManager::getGVManager()
 DangKyHocManager &AppManager::getDKManager()
 {
     return _dkManager;
+}
+
+DiemDanhManager &AppManager::getDDManager()
+{
+    return _ddManager;
 }
 
 LopHocPhanManager &AppManager::getLHPManager()

@@ -41,3 +41,11 @@ find_package(unofficial-vincentlaucsb-csv-parser CONFIG REQUIRED)
 
 # Create a standard alias for the project
 add_library(deps::csv-parser ALIAS unofficial::vincentlaucsb-csv-parser::csv)
+
+find_package(ftxui CONFIG REQUIRED)
+add_library(deps::ftxui INTERFACE IMPORTED GLOBAL)
+target_link_libraries(deps::ftxui INTERFACE
+    ftxui::screen
+    ftxui::dom
+    ftxui::component
+)

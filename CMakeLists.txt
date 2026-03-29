@@ -39,4 +39,5 @@ endif()
 
 add_subdirectory(Core)
 add_subdirectory(Manager)
+add_subdirectory(Ui)
 add_subdirectory(Attendance)

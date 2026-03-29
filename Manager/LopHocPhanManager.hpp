@@ -18,7 +18,7 @@ public:
 
     void load();
     void save();
-    void saveDirty();
+    void saveIfDirty();
 
     void them(const LopHocPhan& lopHocPhan);
     void capNhat(const LopHocPhan& lopHocPhan);

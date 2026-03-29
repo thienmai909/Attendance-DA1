@@ -21,7 +21,7 @@ void LopHocPhanManager::save()
     _isDirty = false;
 }
 
-void LopHocPhanManager::saveDirty()
+void LopHocPhanManager::saveIfDirty()
 {
     if (_isDirty) save();
 }

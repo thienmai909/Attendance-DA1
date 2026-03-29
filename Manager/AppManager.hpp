@@ -25,6 +25,7 @@ public:
     SinhVienManager& getSVManager();
     GiangVienManager& getGVManager();
     DangKyHocManager& getDKManager();
+    DiemDanhManager& getDDManager();
     LopHocPhanManager& getLHPManager();
     ThongKeManager& getTKManager();
     BaoCaoManager& getBCManager();
