@@ -7,6 +7,7 @@ AppManager::AppManager()
     , _dkManager("data/dangkyhoc.json")
     , _ddManager(_lhpManager)
     , _tkManager(_lhpManager, _svManager, _dkManager)
+    , _bcManager(_tkManager, "output")
 {}
 
 void AppManager::khoiDong()
@@ -48,4 +49,9 @@ LopHocPhanManager &AppManager::getLHPManager()
 ThongKeManager &AppManager::getTKManager()
 {
     return _tkManager;
+}
+
+BaoCaoManager &AppManager::getBCManager()
+{
+    return _bcManager;
 }

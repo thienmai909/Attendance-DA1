@@ -24,7 +24,7 @@ ThongKeSinhVien ThongKeManager::thongKeSV(
         tkSV.tenSV = sinhVien->getTenSV();
     tinhChiTietSV(lopHocPhan, maSV, tkSV.soTietVang, tkSV.soTietMuon, tkSV.soTietCoMat);
 
-    tkSV.tyleVang = lopHocPhan.tyLeVang(maSV);
+    tkSV.tyLeVang = lopHocPhan.tyLeVang(maSV);
     tkSV.biCamThi = lopHocPhan.biCamThi(maSV);
 
     return tkSV;
@@ -42,7 +42,7 @@ std::vector<ThongKeSinhVien> ThongKeManager::thongKeToanLop(
     
     std::sort(result.begin(), result.end(),
         [](const ThongKeSinhVien& a, const ThongKeSinhVien& b) {
-            return a.tyleVang > b.tyleVang;
+            return a.tyLeVang > b.tyLeVang;
         }
     );
 
@@ -139,7 +139,7 @@ ThongKeLop ThongKeManager::thongKeLop(const std::string &maLHP) const
     if (!all.empty()) {
         double tongTyLe = 0.0;
         for (const auto& sinhVien : all) {
-            tongTyLe += sinhVien.tyleVang;
+            tongTyLe += sinhVien.tyLeVang;
             if (sinhVien.biCamThi) ++tkL.soSVBiCamThi;
         }
         tkL.tyLeVangTrungBinh = tongTyLe / all.size();
@@ -190,6 +190,27 @@ std::map<CaHoc, double> ThongKeManager::tyLeVangTheoCa(
             ? static_cast<double>(soVang[caHoc]) / tong 
             : 0.0;
 
+    return result;
+}
+
+std::vector<std::pair<std::string, Status>> ThongKeManager::baoCaoBuoi(
+    const std::string &maLHP,
+    std::size_t buoiIndex
+) const {
+    const auto& buoi = timLop(maLHP).getDsBuoiDiemDanh().at(buoiIndex);
+    std::vector<std::pair<std::string, Status>> result;
+    for (const auto& chiTiet : buoi.getDanhSachChiTiet())
+        result.emplace_back(chiTiet.getMaSV(), chiTiet.getTrangThai());
+    return result;
+}
+
+std::vector<std::pair<std::string, int>> ThongKeManager::tongHopLop(
+    const std::string &maLHP
+) const {
+    auto dsSV = thongKeToanLop(maLHP);
+    std::vector<std::pair<std::string, int>> result;
+    for (const auto& sinhVien : dsSV) 
+        result.emplace_back(sinhVien.maSV, sinhVien.soTietVang);
     return result;
 }
 

@@ -9,6 +9,7 @@ target_sources(Manager
         LopHocPhanManager.cpp
         DiemDanhManager.cpp
         ThongKeManager.cpp
+        BaoCaoManager.cpp
     PUBLIC 
         FILE_SET HEADERS
     FILES
@@ -19,6 +20,7 @@ target_sources(Manager
         LopHocPhanManager.hpp
         DiemDanhManager.hpp
         ThongKeManager.hpp
+        BaoCaoManager.hpp
 )
 
 target_link_libraries(Manager

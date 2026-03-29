@@ -14,7 +14,7 @@ struct ThongKeSinhVien {
     int soTietVang = 0;
     int soTietMuon = 0;
     int soTietCoMat = 0;
-    double tyleVang = 0.0;
+    double tyLeVang = 0.0;
     bool biCamThi = false;
 };
 
@@ -82,6 +82,14 @@ public:
     std::optional<ThongKeLop> lopVangCaoNhat() const;
 
     std::map<CaHoc, double> tyLeVangTheoCa(
+        const std::string& maLHP
+    ) const;
+
+    std::vector<std::pair<std::string, Status>> baoCaoBuoi(
+        const std::string& maLHP,
+        std::size_t buoiIndex
+    ) const;
+    std::vector<std::pair<std::string, int>> tongHopLop(
         const std::string& maLHP
     ) const;
 private:
