@@ -1,11 +1,91 @@
 #include <BaoCaoManager.hpp>
 
+#include <iostream>
+
 BaoCaoManager::BaoCaoManager(
     ThongKeManager &tkManager,
     std::filesystem::path outputDir
 ) : _tkManager(tkManager)
   , _outputDir(std::move(outputDir))
 {}
+
+void BaoCaoManager::xuatBaoCaoBuoi(
+    const std::string &maLHP,
+    std::size_t buoiIndex,
+    DinhDangXuat dinhDang
+) {
+    ensureOutputDir();
+    auto path = taoTenFile(
+        maLHP,
+        "buoi_" + std::to_string(buoiIndex + 1),
+        dinhDang
+    );
+    if (dinhDang == DinhDangXuat::CSV)
+        xuatBuoiCSV(maLHP, buoiIndex, path);
+    else
+        xuatBuoiJSON(maLHP, buoiIndex, path);
+    
+    std::cout << "Đã xuất: " << path.string() << "\n";
+}
+
+void BaoCaoManager::xuatBaoCaoTatCaBuoi(
+    const std::string &maLHP,
+    DinhDangXuat dinhDang
+) {
+    ensureOutputDir();
+    auto path = taoTenFile(maLHP, "tatca_buoi", dinhDang);
+
+    if (dinhDang == DinhDangXuat::CSV)
+        xuatTatCaBuoiCSV(maLHP, path);
+    else
+        xuatTatCaBuoiJSON(maLHP, path);
+    
+    std::cout << "Đã xuất: " << path.string() << "\n";
+}
+
+void BaoCaoManager::xuatBaoCaoSinhVien(
+    const std::string &maLHP,
+    DinhDangXuat dinhDang
+) {
+    ensureOutputDir();
+    auto path = taoTenFile(maLHP, "sinhvien", dinhDang);
+
+    if (dinhDang == DinhDangXuat::CSV)
+        xuatSinhVienCSV(maLHP, path);
+    else
+        xuatSinhVienJSON(maLHP, path);
+    
+    std::cout << "Đã xuất: " << path.string() << "\n";
+}
+
+void BaoCaoManager::xuatDanhSachCamThi(
+    const std::string &maLHP,
+    DinhDangXuat dinhDang
+) {
+    ensureOutputDir();
+    auto path = taoTenFile(maLHP, "camthi", dinhDang);
+    
+    if (dinhDang == DinhDangXuat::CSV)
+        xuatCamThiCSV(maLHP, path);
+    else
+        xuatCamThiJSON(maLHP, path);
+    
+    std::cout << "Đã xuất: " << path.string() << "\n";
+}
+
+void BaoCaoManager::xuatBaoCaoTongQuan(
+    DinhDangXuat dinhDang
+) {
+    ensureOutputDir();
+    auto path = taoTenFile("tongquan", dinhDang);
+
+    if (dinhDang == DinhDangXuat::CSV)
+        xuatTongQuanCSV(path);
+    else
+        xuatTongQuanJSON(path);
+    
+    std::cout << "Đã xuất: " << path.string() << "\n";
+}
 
 void BaoCaoManager::ensureOutputDir()
 {

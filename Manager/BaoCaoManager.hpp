@@ -23,11 +23,11 @@ public:
     void xuatBaoCaoBuoi(
         const std::string&maLHP,
         std::size_t buoiIndex,
-        DinhDangXuat dinhdang = DinhDangXuat::CSV
+        DinhDangXuat dinhDang = DinhDangXuat::CSV
     );
     void xuatBaoCaoTatCaBuoi(
         const std::string& maLHP,
-        DinhDangXuat dingDang = DinhDangXuat::CSV
+        DinhDangXuat dinhDang = DinhDangXuat::CSV
     );
     void xuatBaoCaoSinhVien(
         const std::string& maLHP,
