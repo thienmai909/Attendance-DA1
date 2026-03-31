@@ -503,3 +503,79 @@ namespace utility_json {
         return base;
     }
 }
+
+namespace utility_log {
+    enum class Level { DEBUG, INFO, WARNING, ERR };
+
+    inline std::string levelToStr(Level level) {
+        switch(level) {
+            case Level::DEBUG: return "DEBUG";
+            case Level::INFO: return "INFO";
+            case Level::WARNING: return "WARN";
+            case Level::ERR: return "ERROR";
+            default: return "????";
+        }
+    }
+
+    class Logger {
+        std::filesystem::path _filePath;
+        std::ofstream _ofs;
+        Level _minLevel = Level::DEBUG;
+
+        Logger() = default;
+
+    public:
+        static Logger& instance() {
+            static Logger inst;
+            return inst;
+        }
+
+        void init(
+            const std::filesystem::path& path,
+            Level minLevel = Level::DEBUG
+        ) {
+            _filePath = path;
+            _minLevel = minLevel;
+            std::filesystem::create_directories(path.parent_path());
+            _ofs.open(path, std::ios::app);
+            if (!_ofs)
+                throw std::runtime_error("Logger: cannot open " + path.string());
+            log(Level::INFO, "Logger", "=== Session start ===");
+        }
+
+        void log(
+            Level level,
+            std::string_view category,
+            const std::string& message
+        ) {
+            if (level < _minLevel || !_ofs.is_open()) return;
+
+            auto now = std::chrono::system_clock::now();
+            auto time = std::chrono::system_clock::to_time_t(now);
+            char buf[20];
+            auto timeLocal = std::localtime(&time);
+            std::strftime(buf, sizeof(buf), "%H:%M:%S", timeLocal);
+
+            _ofs << "[" << buf << "] "
+                << "[" << levelToStr(level) << "] "
+                << message << "\n";
+            _ofs.flush();
+        }
+
+        void close() {
+            if (_ofs.is_open()) {
+                log(Level::INFO, "Logger", "=== Session end ===");
+                _ofs.close();
+            }
+        }
+
+        ~Logger() {
+            close();
+        }
+    };
+
+    #define LOG_DEBUG(cat, msg)   utility_log::Logger::instance().log(utility_log::Level::DEBUG,   cat, msg)
+    #define LOG_INFO(cat, msg)    utility_log::Logger::instance().log(utility_log::Level::INFO,    cat, msg)
+    #define LOG_WARNING(cat, msg) utility_log::Logger::instance().log(utility_log::Level::WARNING, cat, msg)
+    #define LOG_ERROR(cat, msg)   utility_log::Logger::instance().log(utility_log::Level::ERR,   cat, msg)
+}
