@@ -1,17 +1,13 @@
-// UIManager.hpp
 #pragma once
 
 #include <AppManager.hpp>
-#include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/component/component.hpp>
-#include <ftxui/dom/elements.hpp>
+#include <string>
 
-using namespace ftxui;
-
-class UIManager {
+class UiManager {
     AppManager& _app;
+    std::string _maGVHienTai;
 
 public:
-    explicit UIManager(AppManager& app) : _app(app) {}
+    explicit UiManager(AppManager& app);
     void run();
 };
