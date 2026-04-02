@@ -91,7 +91,7 @@ std::optional<std::string> screenLogin(AppManager &app)
                 separator(),
                 hbox({
                     btnDangNhap->Render(),
-                    text(" ") | size(WIDTH, EQUAL, 20),
+                    text(" ") | size(WIDTH, EQUAL, 15),
                     btnThoat->Render()
                 }) | center,
                 separator(),
@@ -103,6 +103,7 @@ std::optional<std::string> screenLogin(AppManager &app)
     }) | CatchEvent([&](Event e) {
         if (e == Event::Custom) return false;
         if (e == Event::Character('q') || e == Event::Character('Q') || e == Event::Escape) {
+            dangChay = false;
             screen.Exit();
             return true;
         }

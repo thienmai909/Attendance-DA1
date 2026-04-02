@@ -1,5 +1,6 @@
 build-win32/
 build-unix/
 .vscode/
-git clone --recurse-submodules https://github.com/thienmai909/Attendance-DA1.git
 data/
+logs/
+git clone --recurse-submodules https://github.com/thienmai909/Attendance-DA1.git
