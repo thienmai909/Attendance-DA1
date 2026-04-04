@@ -6,6 +6,9 @@ target_sources(Ui
         Core/UiColors.cpp
         Screen/LoginScreen.cpp
         Screen/MainMenuScreen.cpp
+        Screen/SinhVienScreen.cpp
+
+        Form/SinhVienForm.cpp
     PUBLIC
         FILE_SET HEADERS
         FILES
@@ -14,7 +17,9 @@ target_sources(Ui
             Core/UiHelper.hpp
             Screen/LoginScreen.hpp
             Screen/MainMenuScreen.hpp
+            Screen/SinhVienScreen.hpp
 
+            Form/SinhVienForm.hpp
 )
 
 target_link_libraries(Ui

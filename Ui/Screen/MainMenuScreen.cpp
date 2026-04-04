@@ -24,7 +24,7 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
 
     int selected = 0;
     int ketQua = 4;
-    auto menu = Menu(&entries, &selected);
+    auto menu = Menu(&entries, &selected, MenuOption::Vertical());
 
     auto renderer = Renderer(menu, [&] {
         int soLop = static_cast<int>(app.getLHPManager().getAll().size());

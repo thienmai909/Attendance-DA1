@@ -6,9 +6,9 @@
 std::string SinhVien::lopSinhHoatStr(LopSinhHoat lopSinhHoat)
 {
     switch(lopSinhHoat) {
-        case LopSinhHoat::DHSTIN23A: return "DHSTIN23A";
-        case LopSinhHoat::DHSTIN23B: return "DHSTIN23A";
-        case LopSinhHoat::DHSTIN23C: return "DHSTIN23C";
+        case LopSinhHoat::DHSTIN23A: return "ĐHSTIN23A";
+        case LopSinhHoat::DHSTIN23B: return "ĐHSTIN23A";
+        case LopSinhHoat::DHSTIN23C: return "ĐHSTIN23C";
         default:                     return "DEFAULT";
     };
     return "(none)";
@@ -49,7 +49,12 @@ LopSinhHoat SinhVien::getLopSH() const
     return _lopSinhHoat;
 }
 
-const std::string& SinhVien::getMaSV() const
+std::string SinhVien::getLopSHStr() const
+{
+    return lopSinhHoatStr(_lopSinhHoat);
+}
+
+const std::string &SinhVien::getMaSV() const
 {
     return _maSV;
 }

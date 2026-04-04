@@ -30,6 +30,7 @@ public:
     void setLienHe(const Contact& lienHe);
 
     LopSinhHoat getLopSH() const;
+    std::string getLopSHStr() const;
     const std::string& getMaSV() const;
     const std::string& getTenSV() const;
     std::optional<DateTime> getNgaySinh() const;

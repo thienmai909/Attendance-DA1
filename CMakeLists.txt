@@ -6,6 +6,7 @@ option(BUILD_TESTING "Enable testing and build test" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(CMAKE_BUILD_TYPE Debug)
 set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg")
 
 if(WIN32)
