@@ -7,7 +7,7 @@ std::string SinhVien::lopSinhHoatStr(LopSinhHoat lopSinhHoat)
 {
     switch(lopSinhHoat) {
         case LopSinhHoat::DHSTIN23A: return "ĐHSTIN23A";
-        case LopSinhHoat::DHSTIN23B: return "ĐHSTIN23A";
+        case LopSinhHoat::DHSTIN23B: return "ĐHSTIN23B";
         case LopSinhHoat::DHSTIN23C: return "ĐHSTIN23C";
         default:                     return "DEFAULT";
     };

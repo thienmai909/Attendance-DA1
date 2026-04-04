@@ -9,13 +9,17 @@ using namespace ftxui;
 void screenSinhVien(AppManager &app)
 {
     bool thoat = false;
+    int selected = 0;
 
     while (!thoat) {
         auto screen = ScreenInteractive::Fullscreen();
 
         const auto& danhSach = app.getSVManager().getAll();
-        int selected = 0;
         int luaChon = -1;
+
+        if (!danhSach.empty())
+            selected = std::min(selected, static_cast<int>(danhSach.size()) - 1);
+        else selected = 0;
 
         std::vector<std::string> entries;
         for (const auto& sinhVien : danhSach)
@@ -71,7 +75,7 @@ void screenSinhVien(AppManager &app)
                         menuSinhVien->Render() | flex
                     })| border | flex,
 
-                    chiTiet | border | size(WIDTH, EQUAL, 50)                    
+                    chiTiet | border | size(WIDTH, EQUAL, 80)                    
                 }) | flex,
                 separator(),
                 UiHelper::makeFooter("[↑↓] Chọn  [T]hêm  [S]ửa  [X]óa  [Q]uay lại")
@@ -100,8 +104,8 @@ void screenSinhVien(AppManager &app)
             std::string maSVChon = danhSach[selected].getMaSV();
             switch (luaChon) {
                 case 0: formThemSinhVien(app); break;
-                case 1: break;
-                case 2: break;
+                case 1: formSuaSinhVien(app, maSVChon); break;
+                case 2: formXoaSinhVien(app, maSVChon); break;
                 case 3: thoat = true; break;
             }
         } else {
