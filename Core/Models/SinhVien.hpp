@@ -7,7 +7,7 @@
 #include <string>
 
 enum class LopSinhHoat {
-    DEFAULT = 0, DHSTIN23B, DHSTIN23A, DHSTIN23C
+    DEFAULT = 0, DHSTIN23A, DHSTIN23B, DHSTIN23C
 };
 
 class SinhVien {
