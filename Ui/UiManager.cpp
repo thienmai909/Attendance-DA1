@@ -14,13 +14,16 @@ void UiManager::run()
     if (!maGV.has_value()) return;
     _maGVHienTai = *maGV;
 
+    auto giangVienOpt = _app.getGVManager().timTheoMa(_maGVHienTai);
+    bool isAdmin      = giangVienOpt.has_value() && giangVienOpt->isAdmin();
+
     bool thoat = false;
     while (!thoat) {
         int luaChon = screenMainMenu(_app, _maGVHienTai);
         switch(luaChon) {
             case 1: screenLopHocPhan(_app, _maGVHienTai); break;
-            case 2: screenSinhVien(_app); break;
-            case 4: thoat = true; break;
+            case 2: if (isAdmin) screenSinhVien(_app); break;
+            case 99: thoat = true; break;
         }
     }
 }
