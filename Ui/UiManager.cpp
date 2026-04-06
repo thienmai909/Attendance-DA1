@@ -2,6 +2,7 @@
 #include <LoginScreen.hpp>
 #include <MainMenuScreen.hpp>
 #include <SinhVienScreen.hpp>
+#include <LopHocPhanScreen.hpp>
 
 UiManager::UiManager(AppManager &app)
     : _app(app)
@@ -17,6 +18,7 @@ void UiManager::run()
     while (!thoat) {
         int luaChon = screenMainMenu(_app, _maGVHienTai);
         switch(luaChon) {
+            case 1: screenLopHocPhan(_app, _maGVHienTai); break;
             case 2: screenSinhVien(_app); break;
             case 4: thoat = true; break;
         }

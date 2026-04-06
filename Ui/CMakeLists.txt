@@ -7,8 +7,9 @@ target_sources(Ui
         Screen/LoginScreen.cpp
         Screen/MainMenuScreen.cpp
         Screen/SinhVienScreen.cpp
-
+        Screen/LopHocPhanScreen.cpp
         Form/SinhVienForm.cpp
+        Form/LopHocPhanForm.cpp
     PUBLIC
         FILE_SET HEADERS
         FILES
@@ -18,8 +19,10 @@ target_sources(Ui
             Screen/LoginScreen.hpp
             Screen/MainMenuScreen.hpp
             Screen/SinhVienScreen.hpp
-
+            Screen/LopHocPhanScreen.hpp
             Form/SinhVienForm.hpp
+            Form/LopHocPhanForm.hpp
+
 )
 
 target_link_libraries(Ui
