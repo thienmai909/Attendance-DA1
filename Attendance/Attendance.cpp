@@ -18,6 +18,9 @@ int main() {
         return 1;
     }
 
+    // GiangVien gv("002342", "Nguyễn Thị Thùy Dung");
+    // gv.setTaiKhoan("thuydung", "thuydung123");
+    // app.getGVManager().them(gv);
     UiManager ui(app);
     ui.run();
 

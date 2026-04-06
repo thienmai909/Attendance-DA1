@@ -38,7 +38,12 @@ bool formThemLop(AppManager &app, const std::string &maGV)
     std::string maLHP, tenLHP, soTCStr, tongSoTietStr, nguongStr;
     int selectedHocKi = 0;
 
+    auto giangVienOpt = app.getGVManager().timTheoMa(maGV);
+    bool isAdmin = giangVienOpt.has_value() && giangVienOpt->isAdmin();
+
     std::string maGVChon = maGV;
+    std::string inputMaGVStr = maGV;
+    std::string maGVThongBao;
 
     auto hocKiEntries = std::vector<std::string> {
         "Chưa xác định", "Học kì I", "Học kì II", "Học kì hè"
@@ -52,7 +57,27 @@ bool formThemLop(AppManager &app, const std::string &maGV)
     auto inputSoTC     = Input(&soTCStr, "3", opt);
     auto inputTongTiet = Input(&tongSoTietStr, "45", opt);
     auto inputNguong   = Input(&nguongStr, "0.3", opt);
+    auto inputMaGV     = Input(&inputMaGVStr, "00234...", opt);
     auto menuHocKi     = Radiobox(&hocKiEntries, &selectedHocKi);
+
+    inputMaGV |= CatchEvent([&](Event e) {
+        if (e == Event::Return || e == Event::Tab) {
+            if (inputMaGVStr.empty()) {
+                maGVChon = maGV;
+                maGVThongBao = "";
+                return false;
+            }
+            auto giangVien = app.getGVManager().timTheoMa(inputMaGVStr);
+            if (giangVien.has_value()) {
+                maGVChon = inputMaGVStr;
+                maGVThongBao = "[OK] " + giangVien->getHoTenGV();
+            } else {
+                maGVChon = maGV;
+                maGVThongBao = "[ERR] Không tìm thấy GV: " + inputMaGVStr;
+            }
+        }
+        return false;
+    });
 
     auto btnThem = Button("Thêm", [&] {
         try {
@@ -86,14 +111,50 @@ bool formThemLop(AppManager &app, const std::string &maGV)
 
     auto btnHuy = Button("Hủy", [&]{ screen.Exit(); }, btnStyle());
 
-    auto layout = Container::Vertical({
-        inputMa, inputTen, inputSoTC,
-        inputTongTiet, inputNguong,
-        menuHocKi,
-        Container::Horizontal({ btnThem, btnHuy })
-    });
+    Component layout;
+    if (isAdmin) {
+        layout = Container::Vertical({
+            inputMa, inputTen, inputSoTC,
+            inputTongTiet, inputNguong,
+            inputMaGV,
+            menuHocKi,
+            Container::Horizontal({ btnThem, btnHuy })
+        });
+    } else {
+        layout = Container::Vertical({
+            inputMa, inputTen, inputSoTC,
+            inputTongTiet, inputNguong,
+            menuHocKi,
+            Container::Horizontal({ btnThem, btnHuy })
+        });
+    }
 
     auto renderer = Renderer(layout, [&]{
+        Element dongGiangVien;
+        if (isAdmin) {
+            dongGiangVien = vbox({
+                hbox({
+                    text(" Giảng viên     : ") | size(WIDTH, EQUAL, 16),
+                    inputMaGV->Render() | size(WIDTH, EQUAL, 16),
+                    text(" "),
+                    text(maGVThongBao) | color(
+                        maGVThongBao.starts_with("[OK]")
+                            ? Color::Green : Color::Red
+                    )
+                }),
+                hbox({
+                    text("              ") | size(WIDTH, EQUAL, 16),
+                    text(" [Tab/Enter] để kiểm tra mã GV ") | dim
+                })
+            });
+        } else {
+            std::string tenGV = giangVienOpt.has_value() ? giangVienOpt->getHoTenGV() : maGV;
+            dongGiangVien = hbox({
+                text(" Giảng viên     : ") | size(WIDTH, EQUAL, 16),
+                text(tenGV + " (" + maGV + ")") | bold
+            });
+        }
+
         return vbox({
             filler(),
             vbox({
@@ -104,7 +165,9 @@ bool formThemLop(AppManager &app, const std::string &maGV)
                 hbox({ text(" Số tín chỉ     : ") | size(WIDTH, EQUAL, 16), inputSoTC->Render() | flex }),
                 hbox({ text(" Tổng số tiết   : ") | size(WIDTH, EQUAL, 16), inputTongTiet->Render() | flex }),
                 hbox({ text(" Ngưỡng cấm thi : ") | size(WIDTH, EQUAL, 16), inputNguong->Render() | flex }),
-                hbox({ text(" Giảng viên     : ") | size(WIDTH, EQUAL, 16), text(maGVChon) | bold }),
+                dongGiangVien,
+                separator(),
+                hbox({ text(" Học kì         : ") | size(WIDTH, EQUAL, 16), menuHocKi->Render() }),
                 separator(),
                 hbox({ btnThem->Render(), text(" "), btnHuy->Render() }) | center,
                 separator(),

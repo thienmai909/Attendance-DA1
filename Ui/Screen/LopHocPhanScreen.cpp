@@ -301,7 +301,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
             if (e == Event::Character('q') || e == Event::Character('Q')
                 || e == Event::Escape)
                 { thoat = true; screen.Exit(); return true; }
-            return true;
+            return false;
         });
 
         screen.Loop(renderer);
