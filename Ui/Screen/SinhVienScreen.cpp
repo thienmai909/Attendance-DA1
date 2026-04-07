@@ -40,19 +40,24 @@ void screenSinhVien(AppManager &app)
 
         auto layout = Container::Horizontal({ menuSinhVien, menuAction });
         auto renderer = Renderer(layout, [&] {
-            Element chiTiet = filler();
-            if (!danhSach.empty() && selected < static_cast<int>(danhSach.size())) {
-                const auto& sinhVien = danhSach[selected];
-                chiTiet = vbox({
-                    text(" CHI TIẾT ") | bold | center,
-                    separator(),
-                    hbox({ text(" Mã SV     : ") | dim, text(sinhVien.getMaSV()) | bold }),
-                    hbox({ text(" Họ tên    : ") | dim, text(sinhVien.getTenSV()) | bold }),
-                    hbox({ text(" Lớp SH    : ") | dim, text(sinhVien.getLopSHStr()) }),
-                    hbox({ text(" Ngày sinh : ") | dim, text(sinhVien.getNgaySinhStr()) }),
-                    hbox({ text(" Liên hệ   : ") | dim, text(sinhVien.getLienHeStr()) }),
-                    filler()
-                });
+            static int    cachedSelected = -1;
+            static Element cachedChiTiet = filler();
+
+            if (selected != cachedSelected) {
+                cachedSelected = selected;
+                if (!danhSach.empty() && selected < static_cast<int>(danhSach.size())) {
+                    const auto& sv = danhSach[selected];
+                    cachedChiTiet = vbox({
+                        text(" CHI TIET ") | bold | center,
+                        separator(),
+                        hbox({ text(" Mã SV     : ") | dim, text(sv.getMaSV())       | bold }),
+                        hbox({ text(" Họ tên    : ") | dim, text(sv.getTenSV())      | bold }),
+                        hbox({ text(" Lớp SH    : ") | dim, text(sv.getLopSHStr())    }),
+                        hbox({ text(" Ngày sinh : ") | dim, text(sv.getNgaySinhStr()) }),
+                        hbox({ text(" Liên hệ   : ") | dim, text(sv.getLienHeStr())   }),
+                        filler()
+                    });
+                }
             }
 
             return vbox({
@@ -75,7 +80,7 @@ void screenSinhVien(AppManager &app)
                         menuSinhVien->Render() | flex
                     })| border | flex,
 
-                    chiTiet | border | size(WIDTH, EQUAL, 80)                    
+                    cachedChiTiet | border | size(WIDTH, EQUAL, 80)                    
                 }) | flex,
                 separator(),
                 UiHelper::makeFooter("[↑↓] Chọn  [T]hêm  [S]ửa  [X]óa  [Q]uay lại")

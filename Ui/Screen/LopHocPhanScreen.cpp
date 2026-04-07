@@ -14,8 +14,8 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
     while (!thoat) {
         auto screen = ScreenInteractive::Fullscreen();
         
-        auto giaoVien = app.getGVManager().timTheoMa(maGV);
-        bool isAdmin = giaoVien.has_value() && giaoVien->isAdmin();
+        auto giangVien = app.getGVManager().timTheoMa(maGV);
+        bool isAdmin = giangVien.has_value() && giangVien->isAdmin();
 
         const std::vector<LopHocPhan>& dsLHP = isAdmin
             ? app.getLHPManager().getAll()
@@ -33,32 +33,42 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
         if (entries.empty())
             entries.push_back("(Chưa có lớp học phần)");
 
-        auto menuLHP = Menu(&entries, &selected);
-        auto thaoTacEntries = std::vector<std::string> {
-            "[T] Thêm lớp",
-            "[S] Sửa lớp",
-            "[X] Xóa lớp",
-            "[D] Quản lý SV trong lớp",
-            "[Q] Quay lại",
-        };
+        std::vector<std::string> thaoTacEntries;
+        std::vector<int>         actionCodes;
+
+        if (isAdmin) {
+            thaoTacEntries.push_back("[T] Thêm lớp");    actionCodes.push_back(0);
+            thaoTacEntries.push_back("[S] Sửa lớp");     actionCodes.push_back(1);
+            thaoTacEntries.push_back("[X] Xóa lớp");     actionCodes.push_back(2);
+        }
+        thaoTacEntries.push_back("[D] Quản lý SV");      actionCodes.push_back(3);
+        thaoTacEntries.push_back("[Q] Quay lại");        actionCodes.push_back(99);
+
         int selectedAction = 0;
+        auto menuLHP = Menu(&entries, &selected);
         auto menuAction = Menu(&thaoTacEntries, &selectedAction);
-        
         auto layout = Container::Horizontal({ menuLHP, menuAction });
 
         auto renderer = Renderer(layout, [&] {
             Element chiTiet = filler();
             if (!dsLHP.empty() && selected < static_cast<int>(dsLHP.size())) {
                 const auto& lhp = dsLHP[selected];
-                int soSV = static_cast<int>(
-                    app.getDKManager().getDsMaSVTheoLop(lhp.getMaLHP()).size()
-                );
 
-                std::string tenGV = lhp.getMaGV();
-                auto giangVienLop = app.getGVManager().timTheoMa(lhp.getMaGV());
-                if (giangVienLop.has_value())
-                    tenGV = giangVienLop->getHoTenGV() + " (" + lhp.getMaGV() + ")";
-                
+                static int cachedSelected = -1;
+                static int cachedSoSV = 0;
+                static std::string cachedTenGV;
+
+                if (selected != cachedSelected) {
+                    cachedSelected = selected;
+                    cachedSoSV = static_cast<int>(
+                        app.getDKManager().getDsMaSVTheoLop(lhp.getMaLHP()).size()
+                    );
+                    auto giangVienLop = app.getGVManager().timTheoMa(lhp.getMaGV());
+                    cachedTenGV = giangVienLop.has_value()
+                        ? giangVienLop->getHoTenGV() + " (" + lhp.getMaGV() + ")"
+                        : lhp.getMaGV();
+                }
+
                 chiTiet = vbox({
                     text(" CHI TIẾT ") | bold | center,
                     separator(),
@@ -66,8 +76,8 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                     hbox({ text(" Tên lớp    : ") | dim, text(lhp.getTenLHP()) | bold }),
                     hbox({ text(" Tín chỉ    : ") | dim, text(std::to_string(lhp.getSoTC())) }),
                     hbox({ text(" Học kì     : ") | dim, text(lhp.getHocKiStr()) }),
-                    hbox({ text(" Giảng viên : ") | dim, text(tenGV) }),
-                    hbox({ text(" Số SV      : ") | dim, text(std::to_string(soSV)) | bold }),
+                    hbox({ text(" Giảng viên : ") | dim, text(cachedTenGV) }),
+                    hbox({ text(" Số SV      : ") | dim, text(std::to_string(cachedSoSV)) | bold }),
                     hbox({ text(" Tiến độ    : ") | dim, text(lhp.tienDoHocTapStr()) }),
                     hbox({ text(" Ngưỡng CT  : ") | dim, 
                         text(std::to_string(static_cast<int>(lhp.getNguongCamThi() * 100)) + "%") 
@@ -108,22 +118,26 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                 }) | flex,
                 separator(),
                 UiHelper::makeFooter(
-                    "[↑↓] Chọn  [T]hêm  [S]ửa  [X]óa  [D]s quản lý SV  [Q]uay lại"
+                    isAdmin
+                        ? "[↑↓] Chọn  [T]hêm  [S]ửa  [X]óa  [D] Quản lý SV  [Q] Quay lại"
+                        : "[↑↓] Chọn  [D] Quản lý SV  [Q] Quay lại"
                 )
             });
         }) | CatchEvent([&](Event e) {
             if (e == Event::Return && layout->ActiveChild() == menuAction)
                 { luaChon = selectedAction; screen.Exit(); return true; }
-            if (e == Event::Character('t') || e == Event::Character('T'))
-                { luaChon = 0; screen.Exit(); return true; }
-            if (e == Event::Character('s') || e == Event::Character('S'))
-                { luaChon = 1; screen.Exit(); return true; }
-            if (e == Event::Character('x') || e == Event::Character('X'))
-                { luaChon = 2; screen.Exit(); return true; }
+            if (isAdmin) {
+                if (e == Event::Character('t') || e == Event::Character('T'))
+                    { luaChon = 0; screen.Exit(); return true; }
+                if (e == Event::Character('s') || e == Event::Character('S'))
+                    { luaChon = 1; screen.Exit(); return true; }
+                if (e == Event::Character('x') || e == Event::Character('X'))
+                    { luaChon = 2; screen.Exit(); return true; }
+            }
             if (e == Event::Character('d') || e == Event::Character('D'))
                 { luaChon = 3; screen.Exit(); return true; }
             if (e == Event::Character('q') || e == Event::Character('Q') || e == Event::Escape)
-                { luaChon = 4; screen.Exit(); return true; }
+                { luaChon = 99; screen.Exit(); return true; }
             return false;
         });
 
@@ -134,20 +148,18 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
         
         switch(luaChon) {
             case 0:
-                if (isAdmin) formThemLop(app, maGV);
-                // formThemLop(app, maGV);
+                formThemLop(app, maGV);
                 break;
             case 1:
                 if (!maLHPChon.empty()) formSuaLop(app, maLHPChon);
                 break;
             case 2:
-                if (!maLHPChon.empty() && isAdmin) formXoaLop(app, maLHPChon);
-                // if (!maLHPChon.empty()) formXoaLop(app, maLHPChon);
+                if (!maLHPChon.empty()) formXoaLop(app, maLHPChon);
                 break;
             case 3:
                 if (!maLHPChon.empty()) screenQuanLySVTrongLop(app, maLHPChon);
                 break;
-            case 4:
+            case 99:
                 thoat = true;
                 break;
         }
@@ -182,7 +194,6 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
 
         auto menuSV = Menu(&sinhVienEntries, &selected);
 
-        // Thêm SV
         std::string inputMaSVStr;
         InputOption inputOpt;
         inputOpt.multiline = false;
@@ -203,6 +214,8 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
                 LOG_INFO("QuanLySVLop", "Thêm SV " + inputMaSVStr + " vào " + maLHP);
                 thongBao = "[OK] Đã thêm SV: " + inputMaSVStr;
                 inputMaSVStr.clear();
+                luaChon = 0;
+                screen.Exit();
             } catch (const std::exception& e) {
                 thongBao = "[ERR] " + std::string(e.what());
                 LOG_ERROR("QuanLySVLop", e.what());
@@ -220,6 +233,8 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
                 LOG_INFO("QuanLySVLop", "Hủy ĐK SV " + maSVHuy + " khỏi " + maLHP);
                 thongBao = "[OK] Đã hủy đăng ký: " + maSVHuy;
                 selected = std::max(0, selected - 1);
+                luaChon = 0;
+                screen.Exit();
             } catch (const std::exception& e) {
                 thongBao = "[ERR] " + std::string(e.what());
                 LOG_ERROR("QuanLySVLop", e.what());
@@ -238,24 +253,31 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
         });
 
         auto renderer = Renderer(layout, [&] {
-            auto lhpOpt = app.getLHPManager().timTheoMa(maLHP);
-            std::string tenLHP = lhpOpt.has_value() ? lhpOpt->getTenLHP() : maLHP;
+            static int    cachedSelected = -1;
+            static Element cachedChiTiet = filler();
 
-            Element chiTietSV = filler();
-            if (!danhSachMaSV.empty() && selected < static_cast<int>(danhSachMaSV.size())) {
-                auto sinhVienOpt = app.getSVManager().timTheoMa(danhSachMaSV[selected]);
-                if (sinhVienOpt.has_value()) {
-                    chiTietSV = vbox({
-                        text(" CHI TIẾT SINH VIÊN ") | bold | center,
-                        separator(),
-                        hbox({ text(" Mã SV   : ") | dim, text(sinhVienOpt->getMaSV())  | bold }),
-                        hbox({ text(" Họ tên  : ") | dim, text(sinhVienOpt->getTenSV()) | bold }),
-                        hbox({ text(" Lớp SH  : ") | dim, text(sinhVienOpt->getLopSHStr()) }),
-                        hbox({ text(" Liên hệ : ") | dim, text(sinhVienOpt->getLienHeStr()) }),
-                        filler()
-                    });
+            if (selected != cachedSelected) {
+                cachedSelected = selected;
+                if (!danhSachMaSV.empty() && selected < static_cast<int>(danhSachMaSV.size())) {
+                    auto sinhVienOpt = app.getSVManager().timTheoMa(danhSachMaSV[selected]);
+                    if (sinhVienOpt.has_value()) {
+                        cachedChiTiet = vbox({
+                            text(" CHI TIẾT SINH VIÊN ") | bold | center,
+                            separator(),
+                            hbox({ text(" Mã SV   : ") | dim, text(sinhVienOpt->getMaSV())     | bold }),
+                            hbox({ text(" Họ tên  : ") | dim, text(sinhVienOpt->getTenSV())    | bold }),
+                            hbox({ text(" Lớp SH  : ") | dim, text(sinhVienOpt->getLopSHStr()) }),
+                            hbox({ text(" Liên hê : ") | dim, text(sinhVienOpt->getLienHeStr()) }),
+                            filler()
+                        });
+                    }
+                } else {
+                    cachedChiTiet = filler();
                 }
             }
+
+            auto lhpOpt = app.getLHPManager().timTheoMa(maLHP);
+            std::string tenLHP = lhpOpt.has_value() ? lhpOpt->getTenLHP() : maLHP;
 
             return vbox({
                 UiHelper::makeHeader(
@@ -283,7 +305,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
                         separator(),
                         menuSV->Render() | flex
                     }) | border | flex,
-                    chiTietSV | border | size(WIDTH, EQUAL, 30)
+                    cachedChiTiet | border | size(WIDTH, EQUAL, 30)
                 }) | flex,
                 separator(),
                 hbox({

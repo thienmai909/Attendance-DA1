@@ -29,9 +29,20 @@ void DangKyHocManager::saveIfDirty()
 
 void DangKyHocManager::dangKy(const std::string &maSV, const std::string &maLHP)
 {
-    if (daDangKy(maSV, maLHP))
-        throw std::invalid_argument("SV " + maSV + " đã đăng ký lớp " + maLHP + "!");
-    _dsDangKy.emplace_back(maSV, maLHP, DateTime(), true);
+    auto it = std::find_if(
+        _dsDangKy.begin(), _dsDangKy.end(),
+        [&](const DangKyHoc& dk) { return dk.trungVoi(maSV, maLHP); }
+    );
+
+    if (it != _dsDangKy.end()) {
+        if (it->isActive())
+            throw std::invalid_argument(
+                "SV " + maSV + " da dang ky lop " + maLHP + "!");
+        else
+            it->kichHoatLai();
+    } else {
+        _dsDangKy.emplace_back(maSV, maLHP, DateTime(), true);
+    }
     _isDirty = true;
 }
 
