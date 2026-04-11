@@ -55,7 +55,7 @@ std::vector<ThongKeSinhVien> ThongKeManager::topSVVangNhieu(
 ) const {
     auto all = thongKeToanLop(maLHP);
     if (static_cast<int>(all.size()) <= topN) return all;
-    return { all.begin(), all.begin() + 5 };
+    return { all.begin(), all.begin() + topN };
 }
 
 std::vector<ThongKeSinhVien> ThongKeManager::dsSVBiCamThi(
@@ -228,12 +228,11 @@ void ThongKeManager::tinhChiTietSV(
 ) const {
     soTietVang = soTietMuon = soTietCoMat = 0;
     for (const auto& buoi : lhp.getDsBuoiDiemDanh())
-        for (const auto& chiTiet : buoi.getDanhSachChiTiet()) {
-            if (chiTiet.getMaSV() != maSV) continue;
-            switch(chiTiet.getTrangThai()) {
-                case Status::VANG: soTietVang += buoi.getSoTiet(); break;
-                case Status::MUON: soTietMuon += buoi.getSoTiet(); break;
-                case Status::CO_MAT: soTietCoMat += buoi.getSoTiet(); break;
+        if (auto* ct = buoi.findChiTiet(maSV)) {
+            switch(ct->getTrangThai()) {
+                case Status::VANG:   soTietVang   += buoi.getSoTiet(); break;
+                case Status::MUON:   soTietMuon   += buoi.getSoTiet(); break;
+                case Status::CO_MAT: soTietCoMat  += buoi.getSoTiet(); break;
                 default: break;
             }
         }

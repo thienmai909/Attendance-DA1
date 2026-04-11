@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
+#include <mutex>
 
 std::optional<std::string> screenLogin(AppManager &app)
 {
@@ -14,8 +15,9 @@ std::optional<std::string> screenLogin(AppManager &app)
 
     std::string username, password;
     std::string thongBao;
+    std::mutex thongBaoMutex;
     std::optional<std::string> ketQua = std::nullopt;
-    std::atomic<bool> dangChay = true;
+    std::atomic<bool> dangChay{true};
 
     InputOption usernameOpt;
     usernameOpt.multiline = false;
@@ -30,9 +32,17 @@ std::optional<std::string> screenLogin(AppManager &app)
     std::thread timerThread([&] {
         while(dangChay) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            if (!thongBao.empty()) {
+            bool hasMsg = false;
+            {
+                std::lock_guard<std::mutex> lk(thongBaoMutex);
+                hasMsg = !thongBao.empty();
+            }
+            if (hasMsg) {
                 std::this_thread::sleep_for(std::chrono::seconds(2));
-                thongBao.clear();
+                {
+                    std::lock_guard<std::mutex> lk(thongBaoMutex);
+                    thongBao.clear();
+                }
                 screen.PostEvent(Event::Custom);
             }
         }
@@ -45,6 +55,7 @@ std::optional<std::string> screenLogin(AppManager &app)
             LOG_INFO("Login", "Đăng nhập thành công: " + username);
             screen.Exit();
         } else {
+            std::lock_guard<std::mutex> lk(thongBaoMutex);
             thongBao = "[ERR] Sai tài khoản hoặc mật khẩu!";
             LOG_WARNING("Login", "Đăng nhập thất bại: " + username);
             password.clear();
@@ -81,6 +92,11 @@ std::optional<std::string> screenLogin(AppManager &app)
     );
 
     auto renderer = Renderer(layout, [&] {
+        std::string msgSnap;
+        {
+            std::lock_guard<std::mutex> lk(thongBaoMutex);
+            msgSnap = thongBao;
+        }
         return vbox({
             filler(),
             vbox({
@@ -95,7 +111,7 @@ std::optional<std::string> screenLogin(AppManager &app)
                     btnThoat->Render()
                 }) | center,
                 separator(),
-                !thongBao.empty() ? UiHelper::makeMessage(thongBao) : filler()
+                !msgSnap.empty() ? UiHelper::makeMessage(msgSnap) : filler()
             }) | border | size(WIDTH, EQUAL, 100) | center,
             filler(),
             UiHelper::makeFooter("[Tab] Chuyển ô  [Enter] Xác nhận  [Q] Thoát")

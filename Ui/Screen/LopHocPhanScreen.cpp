@@ -49,14 +49,14 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
         auto menuAction = Menu(&thaoTacEntries, &selectedAction);
         auto layout = Container::Horizontal({ menuLHP, menuAction });
 
+        int cachedSelected = -1;
+        int cachedSoSV = 0;
+        std::string cachedTenGV;
+
         auto renderer = Renderer(layout, [&] {
             Element chiTiet = filler();
             if (!dsLHP.empty() && selected < static_cast<int>(dsLHP.size())) {
                 const auto& lhp = dsLHP[selected];
-
-                static int cachedSelected = -1;
-                static int cachedSoSV = 0;
-                static std::string cachedTenGV;
 
                 if (selected != cachedSelected) {
                     cachedSelected = selected;

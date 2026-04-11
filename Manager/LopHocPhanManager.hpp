@@ -36,6 +36,7 @@ public:
         int soTiet
     );
     LopHocPhan& getLopRef(const std::string& maLHP);
+    const LopHocPhan& getLopRef(const std::string& maLHP) const;
     void markDirty();
     void ganGiangVien(const std::string& maLHP, const std::string& maGV);
     void xoaGiangVien(const std::string& maGV);

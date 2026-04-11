@@ -3,90 +3,95 @@
 #include <DataType.hpp>
 #include <Utility.hpp>
 
-#include <string>
 #include <optional>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
+enum class CaHoc { DEFAULT = 0, SANG, CHIEU, TOI };
 
-enum class CaHoc {
-    DEFAULT = 0, SANG, CHIEU, TOI
-};
-
-enum class Status {
-    DEFAULT = 0, VANG, CO_MAT, MUON
-};
+enum class Status { DEFAULT = 0, VANG, CO_MAT, MUON };
 
 inline std::string caHocToStr(CaHoc caHoc) {
-    switch(caHoc) {
-        case CaHoc::SANG: return "Sáng";
-        case CaHoc::CHIEU: return "Chiều";
-        case CaHoc::TOI: return "Tối";
-        default: return "Chưa xác định";
-    }
+  switch (caHoc) {
+  case CaHoc::SANG:
+    return "Sáng";
+  case CaHoc::CHIEU:
+    return "Chiều";
+  case CaHoc::TOI:
+    return "Tối";
+  default:
+    return "Chưa xác định";
+  }
 }
 
 inline std::string statusToStr(Status status) {
-    switch(status) {
-        case Status::CO_MAT: return "Có mặt";
-        case Status::VANG: return "Vắng";
-        case Status::MUON: return "Muộn";
-        default: return "Chưa điểm danh";
-    }
+  switch (status) {
+  case Status::CO_MAT:
+    return "Có mặt";
+  case Status::VANG:
+    return "Vắng";
+  case Status::MUON:
+    return "Muộn";
+  default:
+    return "Chưa điểm danh";
+  }
 }
 
 class ChiTietDiemDanh {
-    std::string _maSV;
-    std::optional<DateTime> _gioDiemDanh;
-    Status _trangThai = Status::DEFAULT;
-    std::string _ghiChu;
+  std::string _maSV;
+  std::optional<DateTime> _gioDiemDanh;
+  Status _trangThai = Status::DEFAULT;
+  std::string _ghiChu;
 
 public:
-    ChiTietDiemDanh(std::string maSV, DateTime gioDiemDanh, Status trangThai, std::string ghiChu = "");
+  ChiTietDiemDanh(std::string maSV, DateTime gioDiemDanh, Status trangThai,
+                  std::string ghiChu = "");
 
-    const std::string& getMaSV() const;
-    Status getTrangThai() const;
-    std::string getTrangThaiStr() const;
-    const std::string& getGhiChu() const;
-    std::optional<DateTime> getGioDiemDanh() const;
-    std::string getGioDiemDanhStr() const;
+  const std::string &getMaSV() const;
+  Status getTrangThai() const;
+  std::string getTrangThaiStr() const;
+  const std::string &getGhiChu() const;
+  std::optional<DateTime> getGioDiemDanh() const;
+  std::string getGioDiemDanhStr() const;
 
-    void setTrangThai(Status trangThai);
-    void setGhiChu(const std::string& ghiChu);
+  void setTrangThai(Status trangThai);
+  void setGhiChu(const std::string &ghiChu);
 
-    nlohmann::json toJson() const;
-    static ChiTietDiemDanh fromJson(const nlohmann::json& j);
+  nlohmann::json toJson() const;
+  static ChiTietDiemDanh fromJson(const nlohmann::json &j);
 };
 
 // =============== Buoi Diem Danh ===============
 class BuoiDiemDanh {
-    std::optional<DateTime> _ngayDiemDanh;
-    CaHoc _caDiemDanh;
-    int _soTiet;
-    bool _khoaDiemDanh = false;
-    std::vector<ChiTietDiemDanh> _danhSachChiTiet;
+  std::optional<DateTime> _ngayDiemDanh;
+  CaHoc _caDiemDanh;
+  int _soTiet;
+  bool _khoaDiemDanh = false;
+  std::vector<ChiTietDiemDanh> _danhSachChiTiet;
+  std::unordered_map<std::string, std::size_t> _svIndex;
 
 public:
-    BuoiDiemDanh(DateTime ngayDiemDanh, CaHoc caDiemDanh, int soTiet);
+  BuoiDiemDanh(DateTime ngayDiemDanh, CaHoc caDiemDanh, int soTiet);
 
-    std::string getNgayDiemDanhStr() const;
-    std::optional<DateTime> getNgayDiemDanh() const;
-    CaHoc getCaDiemDanh() const;
-    std::string getCaDiemDanhStr() const;
-    int getSoTiet() const;
-    bool isKhoaDiemDanh() const;
-    const std::vector<ChiTietDiemDanh>& getDanhSachChiTiet() const;
+  std::string getNgayDiemDanhStr() const;
+  std::optional<DateTime> getNgayDiemDanh() const;
+  CaHoc getCaDiemDanh() const;
+  std::string getCaDiemDanhStr() const;
+  int getSoTiet() const;
+  bool isKhoaDiemDanh() const;
+  const std::vector<ChiTietDiemDanh> &getDanhSachChiTiet() const;
 
-    void khoaBuoi();
-    void themChiTiet(
-        const std::string& maSV,
-        const DateTime& gioDiemDanh,
-        Status trangThai,
-        const std::string& ghiChu
-    );
-    void capNhatTrangThai(const std::string& maSV, Status trangThai);
-    void capNhatGhiChu(const std::string& maSV, const std::string& ghiChu);
-    int demVangMat() const;
+  void khoaBuoi();
+  void themChiTiet(const std::string &maSV, const DateTime &gioDiemDanh,
+                   Status trangThai, const std::string &ghiChu);
+  void capNhatTrangThai(const std::string &maSV, Status trangThai);
+  void capNhatGhiChu(const std::string &maSV, const std::string &ghiChu);
+  int demVangMat() const;
 
-    nlohmann::json toJson() const;
-    static BuoiDiemDanh fromJson(const nlohmann::json& j);
+  const ChiTietDiemDanh *findChiTiet(const std::string &maSV) const;
+  bool daDiemDanh(const std::string &maSV) const;
+
+  nlohmann::json toJson() const;
+  static BuoiDiemDanh fromJson(const nlohmann::json &j);
 };

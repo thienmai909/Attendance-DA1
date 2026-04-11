@@ -1,4 +1,5 @@
 #include <LopHocPhanManager.hpp>
+#include <algorithm>
 
 LopHocPhanManager::LopHocPhanManager(std::filesystem::path filePath)
     : _filePath(std::move(filePath))
@@ -103,6 +104,17 @@ void LopHocPhanManager::themBuoi(
 LopHocPhan &LopHocPhanManager::getLopRef(const std::string &maLHP)
 {
     auto it = timIterator(maLHP);
+    if (it == _dsLHP.end())
+        throw std::invalid_argument("Không tìm thấy lớp: " + maLHP);
+    return *it;
+}
+
+const LopHocPhan &LopHocPhanManager::getLopRef(const std::string &maLHP) const
+{
+    auto it = std::find_if(
+        _dsLHP.begin(), _dsLHP.end(),
+        [&](const LopHocPhan& l){ return l.getMaLHP() == maLHP; }
+    );
     if (it == _dsLHP.end())
         throw std::invalid_argument("Không tìm thấy lớp: " + maLHP);
     return *it;

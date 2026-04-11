@@ -162,8 +162,8 @@ int LopHocPhan::soTietVangToiDaChoPhep(const std::string& maSV) const
 {
     int daVang = 0;
     for (const auto& buoi : _dsBuoiDiemDanh)
-        for (const auto& chiTiet : buoi.getDanhSachChiTiet())
-            if (chiTiet.getMaSV() == maSV && chiTiet.getTrangThai() == Status::VANG)
+        if (auto* ct = buoi.findChiTiet(maSV))
+            if (ct->getTrangThai() == Status::VANG)
                 daVang += buoi.getSoTiet();
     int conChoPhep = soTietVangToiDa() - daVang;
     return conChoPhep > 0 ? conChoPhep : 0;
@@ -222,8 +222,8 @@ double LopHocPhan::tyLeVang(const std::string &maSV) const
     if (_soTietDaHoc == 0) return 0.0;
     int soTietVang = 0;
     for (const auto& buoi : _dsBuoiDiemDanh)
-        for (const auto& chiTiet : buoi.getDanhSachChiTiet())
-            if (chiTiet.getMaSV() == maSV && chiTiet.getTrangThai() == Status::VANG)
+        if (auto* ct = buoi.findChiTiet(maSV))
+            if (ct->getTrangThai() == Status::VANG)
                 soTietVang += buoi.getSoTiet();
     return static_cast<double>(soTietVang) / _soTietDaHoc;
 }
