@@ -260,7 +260,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP, bool isAd
             }
         });
 
-        auto btnHuyDK = Button("Hủy ĐK", [&] {
+        auto btnHuyDK = Button("Hủy Đăng Ký", [&] {
             if (!isAdmin) {
                 thongBao = "[ERR] Không có quyền thêm sinh viên!";
                 return;
@@ -367,11 +367,11 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP, bool isAd
                     cachedChiTiet | border | size(WIDTH, EQUAL, 80)
                 }) | flex,
                 separator(),
-                hbox({
-                    btnHuyDK->Render(),
-                    text(" "),
-                    btnQuayLai->Render()
-                }) | center,
+                isAdmin
+                    ? hbox({
+                        btnHuyDK->Render(), text("  "), btnQuayLai->Render()
+                      }) | center
+                    : hbox({ btnQuayLai->Render() }) | center,
                 separator(),
                 UiHelper::makeMessage(thongBao),
                 UiHelper::makeFooter(
