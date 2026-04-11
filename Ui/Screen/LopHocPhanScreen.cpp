@@ -114,7 +114,7 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                         menuLHP->Render() | flex
                     }) | border | flex,
 
-                    chiTiet | border | size(WIDTH, EQUAL, 36)
+                    chiTiet | border | size(WIDTH, EQUAL, 80)
                 }) | flex,
                 separator(),
                 UiHelper::makeFooter(
@@ -157,7 +157,7 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                 if (!maLHPChon.empty()) formXoaLop(app, maLHPChon);
                 break;
             case 3:
-                if (!maLHPChon.empty()) screenQuanLySVTrongLop(app, maLHPChon);
+                if (!maLHPChon.empty()) screenQuanLySVTrongLop(app, maLHPChon, isAdmin);
                 break;
             case 99:
                 thoat = true;
@@ -166,7 +166,7 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
     }
 }
 
-void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
+void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP, bool isAdmin)
 {
     bool thoat = false;
     int selected = 0;
@@ -175,36 +175,40 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
     auto lhpOpt = app.getLHPManager().timTheoMa(maLHP);
     std::string tenLHP = lhpOpt.has_value() ? lhpOpt->getTenLHP() : maLHP;
 
+    struct SVInfo { std::string ten, lopSH, lienHe; };
     auto buildSVMap = [&]() {
-        std::unordered_map<std::string, std::string> map;
+        std::unordered_map<std::string, SVInfo> map;
         for (const auto& sinhVien : app.getSVManager().getAll())
-            map[sinhVien.getMaSV()] = sinhVien.getTenSV();
+            map[sinhVien.getMaSV()] = { 
+                sinhVien.getTenSV(),
+                sinhVien.getLopSHStr(),
+                sinhVien.getLienHeStr()
+            };
         return map;
     };
 
+    auto sinhVienMap = buildSVMap();
+
     auto buildEntries = [&](
-        const std::vector<std::string>& danhSachMaSV,
-        const std::unordered_map<std::string, std::string>& sinhVienMap
+        const std::vector<std::string>& danhSachMaSV
     ) {
         std::vector<std::string> entries;
         entries.reserve(danhSachMaSV.size());
         for (const auto& maSV : danhSachMaSV) {
             auto it = sinhVienMap.find(maSV);
-            std::string ten = (it != sinhVienMap.end()) ? it->second : "(?)";
-            entries.push_back(maSV + "  " + ten);
+            entries.push_back(maSV + "  " + ((it != sinhVienMap.end() )? it->second.ten : "(?)"));
         }
         if (entries.empty())
             entries.push_back("(Chưa có sinh viên)");
         return entries;
     };
 
-    auto sinhVienMap  = buildSVMap();
     auto danhSachMaSV = app.getDKManager().getDsMaSVTheoLop(maLHP);
-    auto entries      = buildEntries(danhSachMaSV, sinhVienMap);
+    auto entries      = buildEntries(danhSachMaSV);
 
     auto refresh = [&]() {
         danhSachMaSV = app.getDKManager().getDsMaSVTheoLop(maLHP);
-        entries      = buildEntries(danhSachMaSV, sinhVienMap);
+        entries      = buildEntries(danhSachMaSV);
         if (!danhSachMaSV.empty())
             selected = std::min(selected, static_cast<int>(danhSachMaSV.size()) - 1);
         else
@@ -214,6 +218,9 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
     while (!thoat) {
         auto screen = ScreenInteractive::Fullscreen();
         int luaChon = -1;
+
+        int cachedSelected = -1;
+        Element cachedChiTiet = filler();
 
         if (!danhSachMaSV.empty())
             selected = std::min(selected, static_cast<int>(danhSachMaSV.size()) - 1);
@@ -226,6 +233,10 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
         auto inputMaSV = Input(&inputMaSVStr, "Nhập mã SV...", inputOpt);
 
         auto btnThem = Button("Thêm", [&] {
+            if (!isAdmin) {
+                thongBao = "[ERR] Không có quyền thêm sinh viên!";
+                return;
+            }
             if (inputMaSVStr.empty()) {
                 thongBao = "[ERR] Vui lòng nhập mã SV!";
                 return; 
@@ -250,6 +261,10 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
         });
 
         auto btnHuyDK = Button("Hủy ĐK", [&] {
+            if (!isAdmin) {
+                thongBao = "[ERR] Không có quyền thêm sinh viên!";
+                return;
+            }
             if (danhSachMaSV.empty() || selected >= static_cast<int>(danhSachMaSV.size())) {
                 thongBao = "[ERR] Chưa chọn sinh viên!";
                 return;
@@ -274,16 +289,21 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
             screen.Exit();
         });
 
-        auto layout = Container::Vertical({
-            inputMaSV,
-            Container::Horizontal({ btnThem, btnHuyDK, btnQuayLai }),
-            menuSV
-        });
+        Component layout;
+        if (isAdmin) {
+            layout = Container::Vertical({
+                inputMaSV,
+                Container::Horizontal({ btnThem, btnHuyDK, btnQuayLai }),
+                menuSV
+            });
+        } else {
+            layout = Container::Vertical({
+                Container::Horizontal({ btnQuayLai }),
+                menuSV
+            });
+        }
 
         auto renderer = Renderer(layout, [&] {
-            static int    cachedSelected = -1;
-            static Element cachedChiTiet = filler();
-
             if (selected != cachedSelected) {
                 cachedSelected = selected;
                 cachedChiTiet = filler();
@@ -294,18 +314,37 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
                     if (it != sinhVienMap.end()) {
                         auto sinhVienOpt = app.getSVManager().timTheoMa(maSV);
                         if (sinhVienOpt.has_value()){
+                            const auto& info = it->second;
                             cachedChiTiet = vbox({
                                 text(" CHI TIẾT SINH VIÊN ") | bold | center,
                                 separator(),
-                                hbox({ text(" Mã SV   : ") | dim, text(sinhVienOpt->getMaSV())     | bold }),
-                                hbox({ text(" Họ tên  : ") | dim, text(sinhVienOpt->getTenSV())    | bold }),
-                                hbox({ text(" Lớp SH  : ") | dim, text(sinhVienOpt->getLopSHStr()) }),
-                                hbox({ text(" Liên hê : ") | dim, text(sinhVienOpt->getLienHeStr()) }),
+                                hbox({ text(" Mã SV   : ") | dim, text(danhSachMaSV[selected]) | bold }),
+                                hbox({ text(" Họ tên  : ") | dim, text(info.ten)               | bold }),
+                                hbox({ text(" Lớp SH  : ") | dim, text(info.lopSH)  }),
+                                hbox({ text(" Liên hệ : ") | dim, text(info.lienHe) }),
                                 filler()
                             });
                         }
                     }
                 }
+            }
+
+            Element vungThaoTac;
+            if (isAdmin) {
+                vungThaoTac = vbox({
+                    text(" THÊM SINH VIÊN ") | bold | center,
+                    separator(),
+                    hbox({
+                        text(" Mã SV : ") | size(WIDTH, EQUAL, 10),
+                        inputMaSV->Render() | size(WIDTH, EQUAL, 20),
+                        text("  "),
+                        btnThem->Render()
+                    })
+                }) | border;
+            } else {
+                vungThaoTac = vbox({
+                    text(" CHỈ XEM - Không có quyền chỉnh sửa ") | dim | center
+                }) | border;
             }
 
             return vbox({
@@ -314,16 +353,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
                     maLHP + " - " + tenLHP
                 ),
                 separator(),
-                vbox({
-                    text(" THÊM SINH VIÊN ") | bold | center,
-                    separator(),
-                    hbox({
-                        text(" Mã SV : ") | size(WIDTH, EQUAL, 10),
-                        inputMaSV->Render() | size(WIDTH, EQUAL, 20),
-                        text(" "),
-                        btnThem->Render()
-                    }),
-                }) | border,
+                vungThaoTac,
                 hbox({
                     vbox({
                         hbox({
@@ -334,7 +364,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP)
                         separator(),
                         menuSV->Render() | flex
                     }) | border | flex,
-                    cachedChiTiet | border | size(WIDTH, EQUAL, 30)
+                    cachedChiTiet | border | size(WIDTH, EQUAL, 80)
                 }) | flex,
                 separator(),
                 hbox({

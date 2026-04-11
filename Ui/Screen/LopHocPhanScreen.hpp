@@ -4,4 +4,4 @@
 #include <string>
 
 void screenLopHocPhan(AppManager& app, const std::string& maGV);
-void screenQuanLySVTrongLop(AppManager& app, const std::string& maLHP);
+void screenQuanLySVTrongLop(AppManager& app, const std::string& maLHP, bool isAdmin = false);

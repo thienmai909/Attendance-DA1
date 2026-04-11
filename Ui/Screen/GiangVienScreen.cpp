@@ -92,7 +92,7 @@ void screenGiangVien(AppManager &app)
                         menuGV->Render() | flex
                     }) | border | flex,
 
-                    chiTiet | border | size(WIDTH, EQUAL, 34)
+                    chiTiet | border | size(WIDTH, EQUAL, 80)
                 }) | flex,
                 separator(),
                 UiHelper::makeFooter("[↑↓] Chọn  [T]hêm  [S]ửa  [X]óa  [Q]uay lại")
