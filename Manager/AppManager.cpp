@@ -18,6 +18,18 @@ void AppManager::khoiDong()
     _lhpManager.load();
 }
 
+void AppManager::khoiTaoDuLieuMacDinh()
+{
+    if (!_gvManager.getAll().empty()) return;
+
+    GiangVien admin("ADMIN", "Quản Trị Viên", true);
+    admin.setTaiKhoan("admin", "admin123");
+    _gvManager.them(admin);
+    _gvManager.save();
+
+    LOG_INFO("AppManager", "Đã tạo tài khoản admin mặc định");
+}
+
 void AppManager::dongLai()
 {
     _svManager.saveIfDirty();

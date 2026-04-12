@@ -17,10 +17,7 @@ int main() {
         LOG_ERROR("Main", "Khoi dong that bai: " + std::string(e.what()));
         return 1;
     }
-
-    // GiangVien gv("002342", "Nguyễn Thị Thùy Dung");
-    // gv.setTaiKhoan("thuydung", "thuydung123");
-    // app.getGVManager().them(gv);
+    
     UiManager ui(app);
     ui.run();
 

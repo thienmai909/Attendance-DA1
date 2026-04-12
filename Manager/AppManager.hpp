@@ -20,6 +20,7 @@ public:
     AppManager();
 
     void khoiDong();
+    void khoiTaoDuLieuMacDinh();
     void dongLai();
 
     SinhVienManager& getSVManager();
@@ -29,4 +30,5 @@ public:
     LopHocPhanManager& getLHPManager();
     ThongKeManager& getTKManager();
     BaoCaoManager& getBCManager();
+
 };
