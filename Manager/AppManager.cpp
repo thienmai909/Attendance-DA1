@@ -16,6 +16,8 @@ void AppManager::khoiDong()
     _gvManager.load();
     _dkManager.load();
     _lhpManager.load();
+
+    khoiTaoDuLieuMacDinh();
 }
 
 void AppManager::khoiTaoDuLieuMacDinh()
