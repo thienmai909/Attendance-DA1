@@ -145,15 +145,29 @@ static void screenDiemDanhBuoi(
 
         auto btnTatCaCoMat = Button("Tất cả có mặt [A]", [&] {
             if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
-            try {
-                app.getDDManager().diemDanhHangLoat(
-                    maLHP, buoiIndex, dsMaSV, Status::CO_MAT);
-                thongBao = "[OK] Đã điểm danh tất cả có mặt";
-                luaChon  = 0;
-                screen.Exit();
-            } catch (const std::exception& e) {
-                thongBao = "[ERR] " + std::string(e.what());
+            bool coLoi = false;
+            for (int i = 0; i < static_cast<int>(dsMaSV.size()); ++i) {
+                const std::string& maSV = dsMaSV[i];
+                try {
+                    if (trangThaiMap.count(maSV))
+                        app.getDDManager().capNhatTrangThai(
+                            maLHP, buoiIndex, maSV, Status::CO_MAT);
+                    else
+                        app.getDDManager().diemDanh(
+                            maLHP, buoiIndex, maSV, DateTime(), Status::CO_MAT, "");
+
+                    trangThaiMap[maSV] = Status::CO_MAT;
+                    auto itSV = svMap.find(maSV);
+                    std::string ten = (itSV != svMap.end()) ? itSV->second.ten : "(?)";
+                    entries[i] = statusStr(Status::CO_MAT) + "  " + maSV + "  " + ten;
+                } catch (const std::exception& e) {
+                    thongBao = "[ERR] " + std::string(e.what());
+                    coLoi = true;
+                    break;
+                }
             }
+            if (!coLoi)
+                thongBao = "[OK] Đã điểm danh tất cả có mặt";
         });
 
         auto btnKhoa = Button("Khóa buổi [K]", [&] {
@@ -297,26 +311,8 @@ void screenDiemDanh(AppManager &app, const std::string &maGV)
         
         auto menuLop = Menu(&lopEntries, &selLop);
 
+        // buoiEntries được cập nhật động trong renderer khi selLop thay đổi
         std::vector<std::string> buoiEntries;
-        if (!dsLHP.empty() && selLop < static_cast<int>(dsLHP.size())) {
-            const auto& lhp = dsLHP[selLop];
-            for (std::size_t i = 0; i < lhp.getDsBuoiDiemDanh().size(); ++i) {
-                const auto& b = lhp.getDsBuoiDiemDanh()[i];
-                std::string line = "Buổi " + std::to_string(i + 1)
-                    + "  " + b.getNgayDiemDanhStr()
-                    + "  " + b.getCaDiemDanhStr()
-                    + "  " + std::to_string(b.getSoTiet()) + " tiết"
-                    + (b.isKhoaDiemDanh() ? "  [KHÓA]" : "");
-                buoiEntries.push_back(line);
-            }
-        }
-
-        if (buoiEntries.empty())
-            buoiEntries.push_back("(Chưa có buổi điểm danh)");
-
-        if (!buoiEntries.empty())
-            selBuoi = std::min(selBuoi, static_cast<int>(buoiEntries.size()) - 1);
-        
         auto menuBuoi = Menu(&buoiEntries, &selBuoi);
 
         auto btnTaoBuoi = Button("Tạo buổi mới [N]", [&] {
@@ -354,19 +350,32 @@ void screenDiemDanh(AppManager &app, const std::string &maGV)
             })
         });
 
-        auto renderer = Renderer(layout, [&] {
-            // Cache thống kê lớp đang chọn
-            static int    cachedSelLop = -1;
-            static int    cachedSoSV   = 0;
-            static int    cachedSoBuoi = 0;
+        int cachedSelLop = -1;
+        int cachedSoSV   = 0;
+        int cachedSoBuoi = 0;
 
+        auto renderer = Renderer(layout, [&] {
             if (selLop != cachedSelLop) {
                 cachedSelLop = selLop;
+                buoiEntries.clear();
+                selBuoi = 0; // reset về buổi đầu khi đổi lớp
                 if (!dsLHP.empty() && selLop < static_cast<int>(dsLHP.size())) {
                     const auto& lhp = dsLHP[selLop];
                     cachedSoSV   = static_cast<int>(
                         app.getDKManager().getDsMaSVTheoLop(lhp.getMaLHP()).size());
                     cachedSoBuoi = static_cast<int>(lhp.getDsBuoiDiemDanh().size());
+                    for (std::size_t i = 0; i < lhp.getDsBuoiDiemDanh().size(); ++i) {
+                        const auto& b = lhp.getDsBuoiDiemDanh()[i];
+                        buoiEntries.push_back(
+                            "Buổi " + std::to_string(i + 1)
+                            + "  " + b.getNgayDiemDanhStr()
+                            + "  " + b.getCaDiemDanhStr()
+                            + "  " + std::to_string(b.getSoTiet()) + " tiết"
+                            + (b.isKhoaDiemDanh() ? "  [KHÓA]" : "")
+                        );
+                    }
+                    if (buoiEntries.empty())
+                        buoiEntries.push_back("(Chưa có buổi điểm danh)");
                 }
             }
 
