@@ -77,9 +77,13 @@ bool formTaoBuoiDiemDanh(AppManager &app, const std::string &maLHP)
         Container::Horizontal({ btnTao, btnHuy })
     });
 
-    auto renderer = Renderer(layout, [&] {
+    std::string tenLHP;
+    {
         auto lhpOpt = app.getLHPManager().timTheoMa(maLHP);
-        std::string tenLHP = lhpOpt.has_value() ? lhpOpt->getTenLHP() : maLHP;
+        tenLHP = lhpOpt.has_value() ? lhpOpt->getTenLHP() : maLHP;
+    }
+
+    auto renderer = Renderer(layout, [&] {
 
         return vbox({
             filler(),

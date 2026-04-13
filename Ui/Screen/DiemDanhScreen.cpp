@@ -80,67 +80,79 @@ static void screenDiemDanhBuoi(
         if (!dsMaSV.empty())
             selected = std::min(selected, static_cast<int>(dsMaSV.size()) - 1);
 
+        int soCoMat = 0, soVang = 0, soMuon = 0, soChuaDD = 0;
+        auto recalcStats = [&]() {
+            soCoMat = soVang = soMuon = soChuaDD = 0;
+            for (const auto& sv : dsMaSV) {
+                auto it = trangThaiMap.find(sv);
+                if (it == trangThaiMap.end() || it->second == Status::DEFAULT) ++soChuaDD;
+                else if (it->second == Status::CO_MAT) ++soCoMat;
+                else if (it->second == Status::VANG)   ++soVang;
+                else if (it->second == Status::MUON)   ++soMuon;
+            }
+        };
+        recalcStats();
+
         auto menuSV = Menu(&entries, &selected);
 
         auto btnCoMat = Button("Có mặt [1]", [&] {
             if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
             if (dsMaSV.empty() || selected >= static_cast<int>(dsMaSV.size())) return;
+            const std::string& maSV = dsMaSV[selected];
             try {
-                app.getDDManager().capNhatTrangThai(
-                    maLHP, buoiIndex, dsMaSV[selected], Status::CO_MAT);
-            } catch (...) {
-                try {
-                    app.getDDManager().diemDanh(
-                        maLHP, buoiIndex, dsMaSV[selected],
-                        DateTime(), Status::CO_MAT, "");
-                } catch (const std::exception& e) {
-                    thongBao = "[ERR] " + std::string(e.what());
-                    return;
-                }
+                if (trangThaiMap.count(maSV))
+                    app.getDDManager().capNhatTrangThai(maLHP, buoiIndex, maSV, Status::CO_MAT);
+                else
+                    app.getDDManager().diemDanh(maLHP, buoiIndex, maSV, DateTime(), Status::CO_MAT, "");
+                trangThaiMap[maSV] = Status::CO_MAT;
+                auto itSV = svMap.find(maSV);
+                entries[selected] = statusStr(Status::CO_MAT) + "  " + maSV + "  "
+                    + (itSV != svMap.end() ? itSV->second.ten : "(?)");
+                recalcStats();
+                thongBao = "[OK] Có mặt: " + maSV;
+            } catch (const std::exception& e) {
+                thongBao = "[ERR] " + std::string(e.what());
             }
-            thongBao = "[OK] Có mặt: " + dsMaSV[selected];
-            luaChon  = 0;
-            screen.Exit();
         });
 
         auto btnVang = Button("Vắng   [2]", [&] {
             if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
             if (dsMaSV.empty() || selected >= static_cast<int>(dsMaSV.size())) return;
+            const std::string& maSV = dsMaSV[selected];
             try {
-                app.getDDManager().capNhatTrangThai(
-                    maLHP, buoiIndex, dsMaSV[selected], Status::VANG);
-            } catch (...) {
-                try {
-                    app.getDDManager().diemDanh(
-                        maLHP, buoiIndex, dsMaSV[selected],
-                        DateTime(), Status::VANG, "");
-                } catch (const std::exception& e) {
-                    thongBao = "[ERR] " + std::string(e.what()); return;
-                }
+                if (trangThaiMap.count(maSV))
+                    app.getDDManager().capNhatTrangThai(maLHP, buoiIndex, maSV, Status::VANG);
+                else
+                    app.getDDManager().diemDanh(maLHP, buoiIndex, maSV, DateTime(), Status::VANG, "");
+                trangThaiMap[maSV] = Status::VANG;
+                auto itSV = svMap.find(maSV);
+                entries[selected] = statusStr(Status::VANG) + "  " + maSV + "  "
+                    + (itSV != svMap.end() ? itSV->second.ten : "(?)");
+                recalcStats();
+                thongBao = "[OK] Vắng: " + maSV;
+            } catch (const std::exception& e) {
+                thongBao = "[ERR] " + std::string(e.what());
             }
-            thongBao = "[OK] Vắng: " + dsMaSV[selected];
-            luaChon  = 0;
-            screen.Exit();
         });
 
         auto btnMuon = Button("Muộn   [3]", [&] {
             if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
             if (dsMaSV.empty() || selected >= static_cast<int>(dsMaSV.size())) return;
+            const std::string& maSV = dsMaSV[selected];
             try {
-                app.getDDManager().capNhatTrangThai(
-                    maLHP, buoiIndex, dsMaSV[selected], Status::MUON);
-            } catch (...) {
-                try {
-                    app.getDDManager().diemDanh(
-                        maLHP, buoiIndex, dsMaSV[selected],
-                        DateTime(), Status::MUON, "");
-                } catch (const std::exception& e) {
-                    thongBao = "[ERR] " + std::string(e.what()); return;
-                }
+                if (trangThaiMap.count(maSV))
+                    app.getDDManager().capNhatTrangThai(maLHP, buoiIndex, maSV, Status::MUON);
+                else
+                    app.getDDManager().diemDanh(maLHP, buoiIndex, maSV, DateTime(), Status::MUON, "");
+                trangThaiMap[maSV] = Status::MUON;
+                auto itSV = svMap.find(maSV);
+                entries[selected] = statusStr(Status::MUON) + "  " + maSV + "  "
+                    + (itSV != svMap.end() ? itSV->second.ten : "(?)");
+                recalcStats();
+                thongBao = "[OK] Muộn: " + maSV;
+            } catch (const std::exception& e) {
+                thongBao = "[ERR] " + std::string(e.what());
             }
-            thongBao = "[OK] Muộn: " + dsMaSV[selected];
-            luaChon  = 0;
-            screen.Exit();
         });
 
         auto btnTatCaCoMat = Button("Tất cả có mặt [A]", [&] {
@@ -194,29 +206,14 @@ static void screenDiemDanhBuoi(
             Container::Horizontal({ btnTatCaCoMat, btnKhoa, btnQuayLai })
         });
 
-        auto renderer = Renderer(layout, [&] {
-            // Thống kê nhanh
-            int soCoMat = 0, soVang = 0, soMuon = 0, soChuaDD = 0;
-            for (const auto& maSV : dsMaSV) {
-                auto it = trangThaiMap.find(maSV);
-                if (it == trangThaiMap.end() || it->second == Status::DEFAULT)     
-                    ++soChuaDD;
-                else if (it->second == Status::CO_MAT) 
-                    ++soCoMat;
-                else if (it->second == Status::VANG)   
-                    ++soVang;
-                else if (it->second == Status::MUON)   
-                    ++soMuon;
-            }
+        const std::string headerSub = maLHP + "  |  Buổi " + std::to_string(buoiIndex + 1)
+            + "  |  " + buoi.getNgayDiemDanhStr()
+            + "  " + buoi.getCaDiemDanhStr()
+            + (khoa ? "  [ĐÃ KHÓA]" : "");
 
+        auto renderer = Renderer(layout, [&] {
             return vbox({
-                UiHelper::makeHeader(
-                    "ĐIỂM DANH",
-                    maLHP + "  |  Buổi " + std::to_string(buoiIndex + 1)
-                    + "  |  " + buoi.getNgayDiemDanhStr()
-                    + "  " + buoi.getCaDiemDanhStr()
-                    + (khoa ? "  [ĐÃ KHÓA]" : "")
-                ),
+                UiHelper::makeHeader("ĐIỂM DANH", headerSub),
                 separator(),
                 // Thống kê nhanh
                 hbox({
