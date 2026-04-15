@@ -76,6 +76,7 @@ public:
     void xoaGiangVien();
     bool biCamThi(const std::string& maSV) const;
     bool matchTen(const std::string& keyword) const;
+    void xoaBuoiTaiIndex(std::size_t index);
 
     utility_csv::Row toCSVRow() const;
     static LopHocPhan fromCSVRow(const utility_csv::Row& row);

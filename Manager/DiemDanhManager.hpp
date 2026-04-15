@@ -41,6 +41,8 @@ public:
         Status trangThai
     );
     void khoaBuoi(const std::string& maLHP, std::size_t buoiIndex);
+    void moKhoaBuoi(const std::string& maLHP, std::size_t buoiIndex);
+    void xoaBuoi(const std::string& maLHP, std::size_t buoiIndex);
 
     // Số tiết vắng của 1 sinh viên trong 1 lớp
     int soTietVang(const std::string& maLHP, const std::string& maSV) const;

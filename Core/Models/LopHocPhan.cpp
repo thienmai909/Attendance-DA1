@@ -255,6 +255,18 @@ bool LopHocPhan::matchTen(const std::string &keyword) const
     return toLower(_tenLHP).find(toLower(keyword)) != std::string::npos;
 }
 
+void LopHocPhan::xoaBuoiTaiIndex(std::size_t index)
+{
+    if (index >= _dsBuoiDiemDanh.size())
+        throw std::out_of_range("Index buổi không hợp lệ!");
+    
+    if (_dsBuoiDiemDanh[index].isKhoaDiemDanh()) {
+        _soTietDaHoc  = std::max(0, _soTietDaHoc  - _dsBuoiDiemDanh[index].getSoTiet());
+        _soBuoiDaHoc  = std::max(0, _soBuoiDaHoc  - 1);
+    }
+    _dsBuoiDiemDanh.erase(_dsBuoiDiemDanh.begin() + index);
+}
+
 utility_csv::Row LopHocPhan::toCSVRow() const
 {
     std::string hocKi{};

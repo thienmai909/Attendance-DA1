@@ -60,6 +60,28 @@ void DiemDanhManager::khoaBuoi(const std::string &maLHP,
   _lhpManager.markDirty();
 }
 
+void DiemDanhManager::moKhoaBuoi(
+  const std::string &maLHP,
+  std::size_t buoiIndex
+) {
+  auto& buoi = _lhpManager.getLopRef(maLHP).getBuoi(buoiIndex);
+    if (!buoi.isKhoaDiemDanh())
+        throw std::runtime_error("Buổi chưa bị khóa!");
+    buoi.moKhoa();
+    _lhpManager.markDirty();
+}
+
+void DiemDanhManager::xoaBuoi(
+  const std::string &maLHP,
+  std::size_t buoiIndex
+) {
+  auto& lhp = _lhpManager.getLopRef(maLHP);
+  if (buoiIndex >= lhp.getDsBuoiDiemDanh().size())
+      throw std::out_of_range("Index buổi không hợp lệ!");
+  lhp.xoaBuoiTaiIndex(buoiIndex);
+  _lhpManager.markDirty();
+}
+
 int DiemDanhManager::soTietVang(const std::string &maLHP,
                                 const std::string &maSV) const {
   const auto &lopHocPhan = timLopConst(maLHP);

@@ -112,6 +112,13 @@ const std::vector<ChiTietDiemDanh> &BuoiDiemDanh::getDanhSachChiTiet() const {
 
 void BuoiDiemDanh::khoaBuoi() { _khoaDiemDanh = true; }
 
+void BuoiDiemDanh::moKhoa()
+{
+  if (!_khoaDiemDanh)
+    throw std::runtime_error("Buổi chưa bị khóa!");
+  _khoaDiemDanh = false;
+}
+
 void BuoiDiemDanh::themChiTiet(const std::string &maSV,
                                const DateTime &gioDiemDanh, Status trangThai,
                                const std::string &ghiChu) {

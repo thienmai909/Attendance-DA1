@@ -83,6 +83,7 @@ public:
   const std::vector<ChiTietDiemDanh> &getDanhSachChiTiet() const;
 
   void khoaBuoi();
+  void moKhoa();
   void themChiTiet(const std::string &maSV, const DateTime &gioDiemDanh,
                    Status trangThai, const std::string &ghiChu);
   void capNhatTrangThai(const std::string &maSV, Status trangThai);
