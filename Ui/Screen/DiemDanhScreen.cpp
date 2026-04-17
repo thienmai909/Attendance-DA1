@@ -8,7 +8,7 @@ using namespace ftxui;
 
 static void screenDiemDanhBuoi(
     AppManager& app,
-    const std::string maLHP,
+    const std::string& maLHP,
     std::size_t buoiIndex,
     bool isAdmin
 ) {
@@ -200,11 +200,42 @@ static void screenDiemDanhBuoi(
             screen.Exit();
         });
 
-        auto layout = Container::Vertical({
-            menuSV,
-            Container::Horizontal({ btnCoMat, btnVang, btnMuon }),
-            Container::Horizontal({ btnTatCaCoMat, btnKhoa, btnQuayLai })
+        auto btnMoKhoa = Button("Mở khóa [M]", [&] {
+            if (!khoa) { thongBao = "[ERR] Buổi chưa bị khóa!"; return; }
+            try {
+                app.getDDManager().moKhoaBuoi(maLHP, buoiIndex);
+                thongBao = "[OK] Đã mở khóa buổi";
+                luaChon  = 0;
+                screen.Exit();
+            } catch (const std::exception& e) {
+                thongBao = "[ERR] " + std::string(e.what());
+            }
         });
+
+        auto btnXoaBuoi = Button("Xóa buổi [X]", [&] {
+            try {
+                app.getDDManager().xoaBuoi(maLHP, buoiIndex);
+                thongBao = "[OK] Đã xóa buổi";
+                luaChon  = 99;
+                screen.Exit();
+            } catch (const std::exception& e) {
+                thongBao = "[ERR] " + std::string(e.what());
+            }
+        });
+
+        Component layout;
+        if (isAdmin) {
+            layout = Container::Vertical({
+                menuSV,
+                Container::Horizontal({ btnMoKhoa, btnXoaBuoi, btnKhoa, btnQuayLai})
+            });
+        } else {
+            layout = Container::Vertical({
+                menuSV,
+                Container::Horizontal({ btnCoMat, btnVang, btnMuon }),
+                Container::Horizontal({ btnTatCaCoMat, btnKhoa, btnQuayLai })    
+            });
+        }
 
         const std::string headerSub = maLHP + "  |  Buổi " + std::to_string(buoiIndex + 1)
             + "  |  " + buoi.getNgayDiemDanhStr()
@@ -236,28 +267,56 @@ static void screenDiemDanhBuoi(
                 khoa
                     ? text(" Buổi này đã bị khóa - không thể điểm danh thêm ") 
                         | color(Color::Red) | center
-                    : vbox({
-                        hbox({
-                            btnCoMat->Render(), text(" "),
-                            btnVang->Render(),  text(" "),
-                            btnMuon->Render()
-                        }) | center,
-                        hbox({
-                            btnTatCaCoMat->Render(), text(" "),
-                            btnKhoa->Render(),       text(" "),
-                            btnQuayLai->Render()
-                        }) | center
-                    }),
+                    : [&]() -> Element {
+                        if (isAdmin) {
+                            return vbox({
+                                text(" CHẾ ĐỘ: XEM & QUẢN LÝ ") | bold | color(Color::Yellow) | center,
+                                separator(),
+                                hbox({
+                                    khoa ? btnMoKhoa->Render() : text(" [Chưa khóa] ") | dim,
+                                    text(" "),
+                                    btnXoaBuoi->Render(),
+                                    text(" "),
+                                    !khoa ? btnKhoa->Render()
+                                        : text(" [Đã khóa] ") | dim,
+                                    text(" "),
+                                    btnQuayLai->Render()
+                                }) | center
+                            });
+                        } else {
+                            return vbox({
+                                hbox({
+                                    btnCoMat->Render(), text(" "),
+                                    btnVang->Render(),  text(" "),
+                                    btnMuon->Render()
+                                }) | center,
+                                hbox({
+                                    btnTatCaCoMat->Render(), text(" "),
+                                    btnKhoa->Render(),       text(" "),
+                                    btnQuayLai->Render()
+                                }) | center
+                            });
+                        }
+                    }(),
                 separator(),
                 UiHelper::makeMessage(thongBao),
                 UiHelper::makeFooter(
-                    khoa
-                        ? "[Q] Quay lại"
-                        : "[1] Có mặt  [2] Vắng  [3] Muộn  [A] Tất cả  [K] Khóa  [Q] Quay lai"
+                    isAdmin
+                        ? (khoa ? "[M] Mở khóa  [X] Xóa buổi  [Q] Quay lại"
+                                : "[K] Khóa  [X] Xóa buổi  [Q] Quay lại")
+                        : (khoa ? "[Q] Quay lại"
+                                : "[1] Có mặt  [2] Vắng  [3] Muộn  [A] Tất cả  [K] Khóa  [Q] Quay lai")
                 )
             });
         }) | CatchEvent([&](Event e) {
-            if (!khoa) {
+            if (isAdmin) {
+                if (e == Event::Character('m') || e == Event::Character('M'))
+                    { btnMoKhoa->OnEvent(Event::Return); return true; }
+                if (e == Event::Character('x') || e == Event::Character('X'))
+                    { btnXoaBuoi->OnEvent(Event::Return); return true; }
+                if (e == Event::Character('k') || e == Event::Character('K'))
+                    { btnKhoa->OnEvent(Event::Return); return true; }
+            } else if (!khoa) {
                 if (e == Event::Character('1'))
                     { btnCoMat->OnEvent(Event::Return); return true; }
                 if (e == Event::Character('2'))

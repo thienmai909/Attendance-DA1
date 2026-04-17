@@ -23,7 +23,7 @@ void UiManager::run()
     while (!thoat) {
         int luaChon = screenMainMenu(_app, _maGVHienTai);
         switch(luaChon) {
-            case 0: if (!isAdmin) screenDiemDanh(_app, _maGVHienTai); break;
+            case 0: screenDiemDanh(_app, _maGVHienTai); break;
             case 1: screenLopHocPhan(_app, _maGVHienTai); break;
             case 2: if (isAdmin) screenSinhVien(_app); break;
             case 3: if (isAdmin) screenGiangVien(_app); break;

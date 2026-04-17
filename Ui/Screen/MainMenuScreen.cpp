@@ -17,9 +17,8 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
     std::vector<std::string> entries;
     std::vector<int>         indices;
 
-    if (!isAdmin)
-        entries.push_back("  [D]  Điểm danh");        indices.push_back(0);
-    
+    // if (!isAdmin)
+    entries.push_back("  [D]  Điểm danh");        indices.push_back(0);
     entries.push_back("  [L]  Quản lý lớp HP");       indices.push_back(1);
 
     if (isAdmin) {
@@ -67,7 +66,7 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
             separator(),
             UiHelper::makeFooter(
                 isAdmin
-                    ? "[L/S/G/B/Q] Phím tắt  [↑↓] Di chuyển  [Enter] Chọn"
+                    ? "[D/L/S/G/B/Q] Phím tắt  [↑↓] Di chuyển  [Enter] Chọn"
                     : "[D/L/B/Q] Phím tắt  [↑↓] Di chuyển  [Enter] Chọn"
             )
         });
@@ -75,9 +74,9 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
         if (e == Event::Return)
             { ketQua = indices[selected]; screen.Exit(); return true; }
 
-        if (!isAdmin)
-            if (e == Event::Character('d') || e == Event::Character('D'))
-                { ketQua = 0;  screen.Exit(); return true; }
+        // if (!isAdmin)
+        if (e == Event::Character('d') || e == Event::Character('D'))
+            { ketQua = 0;  screen.Exit(); return true; }
 
         if (e == Event::Character('l') || e == Event::Character('L'))
             { ketQua = 1;  screen.Exit(); return true; }
