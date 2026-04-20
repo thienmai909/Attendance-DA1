@@ -60,24 +60,19 @@ void DiemDanhManager::khoaBuoi(const std::string &maLHP,
   _lhpManager.markDirty();
 }
 
-void DiemDanhManager::moKhoaBuoi(
-  const std::string &maLHP,
-  std::size_t buoiIndex
-) {
-  auto& buoi = _lhpManager.getLopRef(maLHP).getBuoi(buoiIndex);
-    if (!buoi.isKhoaDiemDanh())
-        throw std::runtime_error("Buổi chưa bị khóa!");
-    buoi.moKhoa();
-    _lhpManager.markDirty();
+void DiemDanhManager::moKhoaBuoi(const std::string &maLHP,
+                                 std::size_t buoiIndex) {
+  auto &buoi = _lhpManager.getLopRef(maLHP).getBuoi(buoiIndex);
+  if (!buoi.isKhoaDiemDanh())
+    throw std::runtime_error("Buổi chưa bị khóa!");
+  buoi.moKhoa();
+  _lhpManager.markDirty();
 }
 
-void DiemDanhManager::xoaBuoi(
-  const std::string &maLHP,
-  std::size_t buoiIndex
-) {
-  auto& lhp = _lhpManager.getLopRef(maLHP);
+void DiemDanhManager::xoaBuoi(const std::string &maLHP, std::size_t buoiIndex) {
+  auto &lhp = _lhpManager.getLopRef(maLHP);
   if (buoiIndex >= lhp.getDsBuoiDiemDanh().size())
-      throw std::out_of_range("Index buổi không hợp lệ!");
+    throw std::out_of_range("Index buổi không hợp lệ!");
   lhp.xoaBuoiTaiIndex(buoiIndex);
   _lhpManager.markDirty();
 }
@@ -126,19 +121,11 @@ std::vector<std::string> DiemDanhManager::dsSVChuaDiemDanh(
     const std::string &maLHP, std::size_t buoiIndex,
     const std::vector<std::string> &dsMaSVTrongLop) const {
   const auto &buoi = timLopConst(maLHP).getDsBuoiDiemDanh().at(buoiIndex);
-  const auto &dsChiTiet = buoi.getDanhSachChiTiet();
 
   std::vector<std::string> result;
-  for (const auto &maSV : dsMaSVTrongLop) {
-    bool daDiemDanh = false;
-    for (const auto &chiTiet : dsChiTiet)
-      if (chiTiet.getMaSV() == maSV) {
-        daDiemDanh = true;
-        break;
-      }
-    if (!daDiemDanh)
+  for (const auto &maSV : dsMaSVTrongLop)
+    if (!buoi.daDiemDanh(maSV))
       result.push_back(maSV);
-  }
   return result;
 }
 

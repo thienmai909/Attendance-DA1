@@ -10,6 +10,7 @@ void DangKyHocManager::load()
     _dsDangKy = utility_json::load_from_file<DangKyHoc>(
         _filePath, "data", DangKyHoc::fromJson
     );
+    _rebuildIndex();
     _isDirty = false;
 }
 
@@ -43,6 +44,7 @@ void DangKyHocManager::dangKy(const std::string &maSV, const std::string &maLHP)
     } else {
         _dsDangKy.emplace_back(maSV, maLHP, DateTime(), true);
     }
+    _rebuildIndex();
     _isDirty = true;
 }
 
@@ -52,6 +54,7 @@ void DangKyHocManager::huyDangKy(const std::string &maSV, const std::string &maL
     if (it == _dsDangKy.end())
         throw std::invalid_argument("Không tìm thấy đăng ký!");
     it->huyDangKy();
+    _rebuildIndex();
     _isDirty = true;
 }
 
@@ -61,6 +64,7 @@ void DangKyHocManager::kichHoatLai(const std::string &maSV, const std::string &m
     if (it == _dsDangKy.end())
         throw std::invalid_argument("Không tìm thấy đăng ký!");
     it->kichHoatLai();
+    _rebuildIndex();
     _isDirty = true;
 }
 
@@ -71,13 +75,11 @@ bool DangKyHocManager::daDangKy(const std::string &maSV, const std::string &maLH
     return false;
 }
 
-std::vector<std::string> DangKyHocManager::getDsMaSVTheoLop(const std::string &maLHP) const
+const std::vector<std::string>& DangKyHocManager::getDsMaSVTheoLop(const std::string &maLHP) const
 {
-    std::vector<std::string> result;
-    for (const auto& dangKy : _dsDangKy)
-        if (dangKy.getMaLopHocPhan() == maLHP && dangKy.isActive())
-            result.push_back(dangKy.getMaSV());
-    return result;
+    static const std::vector<std::string> empty;
+    auto it = _indexByLHP.find(maLHP);
+    return (it != _indexByLHP.end()) ? it->second : empty;
 }
 
 std::vector<std::string> DangKyHocManager::getDsMaLHPTheoSV(const std::string &maSV) const
@@ -129,4 +131,12 @@ std::vector<DangKyHoc>::iterator DangKyHocManager::timIterator(
         _dsDangKy.end(),
         [&](const DangKyHoc& dangKyHoc) { return dangKyHoc.trungVoi(maSV, maLHP); }
     );
+}
+
+void DangKyHocManager::_rebuildIndex()
+{
+    _indexByLHP.clear();
+    for (const auto& dk : _dsDangKy)
+        if (dk.isActive())
+            _indexByLHP[dk.getMaLopHocPhan()].push_back(dk.getMaSV());
 }
