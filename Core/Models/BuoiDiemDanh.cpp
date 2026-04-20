@@ -1,9 +1,10 @@
 #include <BuoiDiemDanh.hpp>
 
 ChiTietDiemDanh::ChiTietDiemDanh(std::string maSV, DateTime gioDiemDanh,
-                                 Status trangThai, std::string ghiChu)
+                                 Status trangThai, std::string ghiChu,
+                                 bool coPhep)
     : _maSV(std::move(maSV)), _gioDiemDanh(std::move(gioDiemDanh)),
-      _trangThai(trangThai), _ghiChu(std::move(ghiChu)) {}
+      _trangThai(trangThai), _ghiChu(std::move(ghiChu)), _coPhep(coPhep) {}
 
 const std::string &ChiTietDiemDanh::getMaSV() const { return _maSV; }
 
@@ -38,11 +39,16 @@ void ChiTietDiemDanh::setTrangThai(Status trangThai) { _trangThai = trangThai; }
 
 void ChiTietDiemDanh::setGhiChu(const std::string &ghiChu) { _ghiChu = ghiChu; }
 
+bool ChiTietDiemDanh::isCoPhep() const { return _coPhep; }
+
+void ChiTietDiemDanh::setCoPhep(bool coPhep) { _coPhep = coPhep; }
+
 nlohmann::json ChiTietDiemDanh::toJson() const {
   using namespace utility_json;
   nlohmann::json j = {{"maSV", _maSV},
                       {"trangThai", static_cast<int>(_trangThai)},
-                      {"ghiChu", _ghiChu}};
+                      {"ghiChu", _ghiChu},
+                      {"coPhep", _coPhep}};
 
   if (_gioDiemDanh.has_value())
     j["gioDiemDanh"] = _gioDiemDanh->toTimeString();
@@ -56,6 +62,7 @@ ChiTietDiemDanh ChiTietDiemDanh::fromJson(const nlohmann::json &j) {
   auto maSV = require<std::string>(j, "maSV");
   auto trangThai = static_cast<Status>(optional<int>(j, "trangThai", 0));
   auto ghiChu = optional<std::string>(j, "ghiChu", "");
+  auto coPhep  = optional<bool>(j, "coPhep", false); // backward-compat: cũ = false
 
   DateTime gio = DateTime();
   if (!j["gioDiemDanh"].is_null()) {
@@ -66,7 +73,7 @@ ChiTietDiemDanh ChiTietDiemDanh::fromJson(const nlohmann::json &j) {
       gio = DateTime(now.day(), now.month(), now.year(), h, m, s);
     }
   }
-  return ChiTietDiemDanh(maSV, gio, trangThai, ghiChu);
+  return ChiTietDiemDanh(maSV, gio, trangThai, ghiChu, coPhep);
 }
 
 // ================ BuoiDiemDanh ================
@@ -121,7 +128,7 @@ void BuoiDiemDanh::moKhoa()
 
 void BuoiDiemDanh::themChiTiet(const std::string &maSV,
                                const DateTime &gioDiemDanh, Status trangThai,
-                               const std::string &ghiChu) {
+                               const std::string &ghiChu, bool coPhep) {
   if (_khoaDiemDanh)
     throw std::runtime_error("Buổi điểm danh đã bị khóa!");
 
@@ -129,7 +136,7 @@ void BuoiDiemDanh::themChiTiet(const std::string &maSV,
     throw std::invalid_argument("Sinh viên đã được điểm danh!");
 
   _svIndex[maSV] = _danhSachChiTiet.size();
-  _danhSachChiTiet.emplace_back(maSV, gioDiemDanh, trangThai, ghiChu);
+  _danhSachChiTiet.emplace_back(maSV, gioDiemDanh, trangThai, ghiChu, coPhep);
 }
 
 void BuoiDiemDanh::capNhatTrangThai(const std::string &maSV, Status trangThai) {
@@ -151,6 +158,13 @@ void BuoiDiemDanh::capNhatGhiChu(const std::string &maSV,
   if (it == _svIndex.end())
     throw std::invalid_argument("Không tìm thấy sinh viên!");
   _danhSachChiTiet[it->second].setGhiChu(ghiChu);
+}
+
+void BuoiDiemDanh::capNhatCoPhep(const std::string &maSV, bool coPhep) {
+  auto it = _svIndex.find(maSV);
+  if (it == _svIndex.end())
+    throw std::invalid_argument("Không tìm thấy sinh viên!");
+  _danhSachChiTiet[it->second].setCoPhep(coPhep);
 }
 
 int BuoiDiemDanh::demVangMat() const {

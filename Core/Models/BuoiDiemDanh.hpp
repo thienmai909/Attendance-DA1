@@ -43,10 +43,11 @@ class ChiTietDiemDanh {
   std::optional<DateTime> _gioDiemDanh;
   Status _trangThai = Status::DEFAULT;
   std::string _ghiChu;
+  bool _coPhep = false;  // chỉ lưu thông tin, không ảnh hưởng tỷ lệ vắng
 
 public:
   ChiTietDiemDanh(std::string maSV, DateTime gioDiemDanh, Status trangThai,
-                  std::string ghiChu = "");
+                  std::string ghiChu = "", bool coPhep = false);
 
   const std::string &getMaSV() const;
   Status getTrangThai() const;
@@ -54,9 +55,11 @@ public:
   const std::string &getGhiChu() const;
   std::optional<DateTime> getGioDiemDanh() const;
   std::string getGioDiemDanhStr() const;
+  bool isCoPhep() const;
 
   void setTrangThai(Status trangThai);
   void setGhiChu(const std::string &ghiChu);
+  void setCoPhep(bool coPhep);
 
   nlohmann::json toJson() const;
   static ChiTietDiemDanh fromJson(const nlohmann::json &j);
@@ -85,9 +88,11 @@ public:
   void khoaBuoi();
   void moKhoa();
   void themChiTiet(const std::string &maSV, const DateTime &gioDiemDanh,
-                   Status trangThai, const std::string &ghiChu);
+                   Status trangThai, const std::string &ghiChu,
+                   bool coPhep = false);
   void capNhatTrangThai(const std::string &maSV, Status trangThai);
   void capNhatGhiChu(const std::string &maSV, const std::string &ghiChu);
+  void capNhatCoPhep(const std::string &maSV, bool coPhep);
   int demVangMat() const;
 
   const ChiTietDiemDanh *findChiTiet(const std::string &maSV) const;

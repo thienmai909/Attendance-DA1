@@ -155,10 +155,68 @@ DiemDanhManager::tongHopLop(const std::string &maLHP) const {
   return result;
 }
 
+void DiemDanhManager::capNhatGhiChu(const std::string &maLHP,
+                                    std::size_t buoiIndex,
+                                    const std::string &maSV,
+                                    const std::string &ghiChu) {
+  timLop(maLHP).getBuoi(buoiIndex).capNhatGhiChu(maSV, ghiChu);
+  _lhpManager.markDirty();
+}
+
 LopHocPhan &DiemDanhManager::timLop(const std::string &maLHP) {
   return _lhpManager.getLopRef(maLHP);
 }
 
 const LopHocPhan &DiemDanhManager::timLopConst(const std::string &maLHP) const {
   return _lhpManager.getLopRef(maLHP);
+}
+
+DiemDanhManager::TrangThaiNguong
+DiemDanhManager::kiemTraNguong(const std::string &maLHP,
+                               const std::string &maSV) const {
+  const auto &lhp = timLopConst(maLHP);
+  TrangThaiNguong t;
+  t.tyLeVang = lhp.tyLeVang(maSV);            // đã có
+  double nguong = lhp.getNguongCamThi();
+  t.phanTramNguong = (nguong > 0.0) ? (t.tyLeVang / nguong) : 0.0;
+  t.soTietConLai   = lhp.soTietVangToiDaChoPhep(maSV); // đã có
+  t.biCamThi       = lhp.biCamThi(maSV);      // đã có
+  t.daVuotNguong   = !t.biCamThi && (t.phanTramNguong > 0.8);
+  t.sapVuotNguong  = !t.biCamThi && !t.daVuotNguong && (t.phanTramNguong > 0.5);
+  return t;
+}
+
+std::vector<DiemDanhManager::LichSuBuoi>
+DiemDanhManager::lichSuDiemDanhSV(const std::string &maLHP,
+                                   const std::string &maSV) const {
+  const auto &lhp = timLopConst(maLHP);
+  std::vector<LichSuBuoi> result;
+  const auto &dsBuoi = lhp.getDsBuoiDiemDanh();
+  result.reserve(dsBuoi.size());
+  for (std::size_t i = 0; i < dsBuoi.size(); ++i) {
+    const auto &buoi = dsBuoi[i];
+    LichSuBuoi ls;
+    ls.buoiIndex = i;
+    ls.ngay      = buoi.getNgayDiemDanhStr();
+    ls.ca        = buoi.getCaDiemDanhStr();
+    ls.soTiet    = buoi.getSoTiet();
+    if (const auto *ct = buoi.findChiTiet(maSV)) {
+      ls.trangThai = ct->getTrangThai();
+      ls.coPhep    = ct->isCoPhep();
+      ls.ghiChu    = ct->getGhiChu();
+    } else {
+      ls.trangThai = Status::DEFAULT;
+      ls.coPhep    = false;
+      ls.ghiChu    = "";
+    }
+    result.push_back(std::move(ls));
+  }
+  return result;
+}
+
+void DiemDanhManager::capNhatCoPhep(const std::string &maLHP,
+                                    std::size_t buoiIndex,
+                                    const std::string &maSV, bool coPhep) {
+  timLop(maLHP).getBuoi(buoiIndex).capNhatCoPhep(maSV, coPhep);
+  _lhpManager.markDirty();
 }

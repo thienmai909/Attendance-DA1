@@ -10,6 +10,7 @@ target_sources(Ui
         Screen/GiangVienScreen.cpp
         Screen/LopHocPhanScreen.cpp
         Screen/DiemDanhScreen.cpp
+        Screen/SinhVienHistoryScreen.cpp
         Form/BuoiDiemDanhForm.cpp
         Form/SinhVienForm.cpp
         Form/GiangVienForm.cpp
@@ -26,6 +27,7 @@ target_sources(Ui
             Screen/GiangVienScreen.hpp
             Screen/LopHocPhanScreen.hpp
             Screen/DiemDanhScreen.hpp
+            Screen/SinhVienHistoryScreen.hpp
             Form/BuoiDiemDanhForm.hpp
             Form/SinhVienForm.hpp
             Form/GiangVienForm.hpp

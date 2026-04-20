@@ -40,6 +40,12 @@ public:
         const std::string& maSV,
         Status trangThai
     );
+    void capNhatGhiChu(
+        const std::string& maLHP,
+        std::size_t buoiIndex,
+        const std::string& maSV,
+        const std::string& ghiChu
+    );
     void khoaBuoi(const std::string& maLHP, std::size_t buoiIndex);
     void moKhoaBuoi(const std::string& maLHP, std::size_t buoiIndex);
     void xoaBuoi(const std::string& maLHP, std::size_t buoiIndex);
@@ -67,6 +73,36 @@ public:
     std::vector<std::pair<std::string, int>> tongHopLop(
         const std::string& maLHP
     ) const;
+
+    // Kiểm tra ngưỡng vắng — hỗ trợ hiển thị cảnh báo sớm (Feature 2)
+    struct TrangThaiNguong {
+        double tyLeVang;        // 0.0–1.0
+        double phanTramNguong;  // tyLeVang / nguongCamThi (0.0–1.0+)
+        int soTietConLai;       // số tiết còn được vắng
+        bool sapVuotNguong;     // > 50% ngưỡng
+        bool daVuotNguong;      // > 80% ngưỡng
+        bool biCamThi;          // đã vượt ngưỡng
+    };
+    TrangThaiNguong kiemTraNguong(const std::string& maLHP,
+                                    const std::string& maSV) const;
+
+    // Lịch sử điểm danh từng buổi của 1 SV (Feature 6)
+    struct LichSuBuoi {
+        std::size_t buoiIndex;
+        std::string ngay;
+        std::string ca;
+        int soTiet;
+        Status trangThai;
+        bool coPhep;
+        std::string ghiChu;
+    };
+    std::vector<LichSuBuoi> lichSuDiemDanhSV(const std::string& maLHP,
+                                            const std::string& maSV) const;
+
+    // Cập nhật cờ có phép cho một SV (Feature 1)
+    void capNhatCoPhep(const std::string& maLHP, std::size_t buoiIndex,
+                        const std::string& maSV, bool coPhep);
+
 private:
     LopHocPhan& timLop(const std::string& maLHP);
     const LopHocPhan& timLopConst(const std::string& maLHP) const;
