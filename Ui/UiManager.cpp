@@ -5,6 +5,8 @@
 #include <GiangVienScreen.hpp>
 #include <LopHocPhanScreen.hpp>
 #include <DiemDanhScreen.hpp>
+#include <PhongHocScreen.hpp>
+#include <BaoCaoScreen.hpp>
 
 UiManager::UiManager(AppManager &app)
     : _app(app)
@@ -27,6 +29,8 @@ void UiManager::run()
             case 1: screenLopHocPhan(_app, _maGVHienTai); break;
             case 2: if (isAdmin) screenSinhVien(_app); break;
             case 3: if (isAdmin) screenGiangVien(_app); break;
+            case 4: screenBaoCao(_app, _maGVHienTai); break;
+            case 5: if (isAdmin) screenPhongHoc(_app); break;
             case 99: thoat = true; break;
         }
     }

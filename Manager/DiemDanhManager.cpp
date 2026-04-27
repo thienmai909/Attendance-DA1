@@ -32,7 +32,6 @@ void DiemDanhManager::khoaBuoiVaAutoVang(
   auto &lhp = _lhpManager.getLopRef(maLHP);
   auto &buoi = lhp.getBuoi(buoiIndex);
 
-  // Tìm SV chưa điểm danh -> tự động VANG
   DateTime now;
 
   for (const auto &maSV : dsMaSVTrongLop) {
@@ -155,14 +154,6 @@ DiemDanhManager::tongHopLop(const std::string &maLHP) const {
   return result;
 }
 
-void DiemDanhManager::capNhatGhiChu(const std::string &maLHP,
-                                    std::size_t buoiIndex,
-                                    const std::string &maSV,
-                                    const std::string &ghiChu) {
-  timLop(maLHP).getBuoi(buoiIndex).capNhatGhiChu(maSV, ghiChu);
-  _lhpManager.markDirty();
-}
-
 LopHocPhan &DiemDanhManager::timLop(const std::string &maLHP) {
   return _lhpManager.getLopRef(maLHP);
 }
@@ -218,5 +209,13 @@ void DiemDanhManager::capNhatCoPhep(const std::string &maLHP,
                                     std::size_t buoiIndex,
                                     const std::string &maSV, bool coPhep) {
   timLop(maLHP).getBuoi(buoiIndex).capNhatCoPhep(maSV, coPhep);
+  _lhpManager.markDirty();
+}
+
+void DiemDanhManager::capNhatGhiChu(const std::string &maLHP,
+                                    std::size_t buoiIndex,
+                                    const std::string &maSV,
+                                    const std::string &ghiChu) {
+  timLop(maLHP).getBuoi(buoiIndex).capNhatGhiChu(maSV, ghiChu);
   _lhpManager.markDirty();
 }

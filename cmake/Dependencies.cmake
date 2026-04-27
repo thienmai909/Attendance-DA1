@@ -49,3 +49,20 @@ target_link_libraries(deps::ftxui INTERFACE
     ftxui::dom
     ftxui::component
 )
+
+# Find libxlsxwriter (no CMake config — locate manually)
+find_path(XLSXWRITER_INCLUDE_DIR NAMES xlsxwriter.h)
+find_library(XLSXWRITER_LIB_RELEASE NAMES xlsxwriter CONFIGS Release)
+find_library(XLSXWRITER_LIB_DEBUG   NAMES xlsxwriter CONFIGS Debug)
+
+if(NOT XLSXWRITER_INCLUDE_DIR OR NOT XLSXWRITER_LIB_RELEASE)
+    message(FATAL_ERROR "libxlsxwriter not found. Run: vcpkg install libxlsxwriter")
+endif()
+
+add_library(xlsxwriter::xlsxwriter SHARED IMPORTED GLOBAL)
+set_target_properties(xlsxwriter::xlsxwriter PROPERTIES
+    IMPORTED_IMPLIB         "${XLSXWRITER_LIB_RELEASE}"
+    IMPORTED_IMPLIB_DEBUG   "${XLSXWRITER_LIB_DEBUG}"
+    INTERFACE_INCLUDE_DIRECTORIES "${XLSXWRITER_INCLUDE_DIR}"
+)
+add_library(deps::xlsxwriter ALIAS xlsxwriter::xlsxwriter)

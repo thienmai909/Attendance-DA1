@@ -7,6 +7,7 @@
 #include <DiemDanhManager.hpp>
 #include <ThongKeManager.hpp>
 #include <BaoCaoManager.hpp>
+#include <PhongHocManager.hpp>
 
 class AppManager{
     SinhVienManager _svManager;
@@ -16,6 +17,7 @@ class AppManager{
     DiemDanhManager _ddManager;
     ThongKeManager _tkManager;
     BaoCaoManager _bcManager;
+    PhongHocManager _phManager;
 public:
     AppManager();
 
@@ -30,5 +32,6 @@ public:
     LopHocPhanManager& getLHPManager();
     ThongKeManager& getTKManager();
     BaoCaoManager& getBCManager();
+    PhongHocManager& getPHManager();
 
 };

@@ -10,6 +10,7 @@ target_sources(Manager
         DiemDanhManager.cpp
         ThongKeManager.cpp
         BaoCaoManager.cpp
+        PhongHocManager.cpp
     PUBLIC 
         FILE_SET HEADERS
     FILES
@@ -21,11 +22,13 @@ target_sources(Manager
         DiemDanhManager.hpp
         ThongKeManager.hpp
         BaoCaoManager.hpp
+        PhongHocManager.hpp
 )
 
 target_link_libraries(Manager
     PUBLIC
         Core
+        deps::xlsxwriter
 )
 
 target_include_directories(Manager

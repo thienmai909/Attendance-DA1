@@ -24,6 +24,7 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
     if (isAdmin) {
         entries.push_back("  [S]  Quản lý sinh viên");  indices.push_back(2);
         entries.push_back("  [G]  Quản lý giảng viên"); indices.push_back(3);
+        entries.push_back("  [P]  Quản lý phòng học");  indices.push_back(5);
     }
 
     entries.push_back("  [B]  Báo cáo & thống kê"); indices.push_back(4);
@@ -66,7 +67,7 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
             separator(),
             UiHelper::makeFooter(
                 isAdmin
-                    ? "[D/L/S/G/B/Q] Phím tắt  [↑↓] Di chuyển  [Enter] Chọn"
+                    ? "[D/L/S/G/P/B/Q] Phím tắt  [↑↓] Di chuyển  [Enter] Chọn"
                     : "[D/L/B/Q] Phím tắt  [↑↓] Di chuyển  [Enter] Chọn"
             )
         });
@@ -86,6 +87,8 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
                 { ketQua = 2;  screen.Exit(); return true; }
             if (e == Event::Character('g') || e == Event::Character('G'))
                 { ketQua = 3;  screen.Exit(); return true; }
+            if (e == Event::Character('p') || e == Event::Character('P'))
+                { ketQua = 5;  screen.Exit(); return true; }
         }
 
         if (e == Event::Character('b') || e == Event::Character('B'))

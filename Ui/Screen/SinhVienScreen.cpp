@@ -72,7 +72,7 @@ void screenSinhVien(AppManager &app) {
                   {UiHelper::makeHeader("QUẢN LÝ SINH VIÊN"), separator(),
                    hbox({vbox({text(" THAO TÁC ") | bold | center, separator(),
                                menuAction->Render(), filler()}) |
-                             border | size(WIDTH, EQUAL, 18),
+                             border | size(WIDTH, EQUAL, 25),
                          vbox({hbox({text(" DANH SÁCH (") | dim,
                                      text(std::to_string(danhSach.size())) |
                                          bold,

@@ -9,23 +9,18 @@ void screenSinhVienHistory(AppManager &app, const std::string &maLHP,
                            const std::string &maSV) {
   auto screen = ScreenInteractive::Fullscreen();
 
-  // Lấy tên SV
   std::string tenSV;
   auto svOpt = app.getSVManager().timTheoMa(maSV);
   if (svOpt.has_value()) tenSV = svOpt->getTenSV();
 
-  // Lấy tên lớp HP
   std::string tenLHP;
   auto lhpOpt = app.getLHPManager().timTheoMa(maLHP);
   if (lhpOpt.has_value()) tenLHP = lhpOpt->getTenLHP();
 
-  // Lấy lịch sử điểm danh
   auto lichSu = app.getDDManager().lichSuDiemDanhSV(maLHP, maSV);
 
-  // Lấy thông tin ngưỡng
   auto ng = app.getDDManager().kiemTraNguong(maLHP, maSV);
 
-  // Build danh sách hiển thị (dùng Menu để scroll được)
   std::vector<std::string> rows;
   for (const auto &ls : lichSu) {
     std::string stStr;
@@ -50,7 +45,6 @@ void screenSinhVienHistory(AppManager &app, const std::string &maLHP,
   auto btnQuayLai = Button("Quay lại [Q]", [&] { screen.Exit(); });
   auto layout = Container::Vertical({menu, btnQuayLai});
 
-  // Chuỗi màu cảnh báo
   std::string warnStr;
   Color warnColor = Color::Default;
   if (ng.biCamThi) {

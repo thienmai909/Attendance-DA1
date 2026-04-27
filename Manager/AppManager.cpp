@@ -8,6 +8,7 @@ AppManager::AppManager()
     , _ddManager(_lhpManager)
     , _tkManager(_lhpManager, _svManager, _dkManager)
     , _bcManager(_tkManager, "output")
+    , _phManager("data/phonghoc.json")
 {}
 
 void AppManager::khoiDong()
@@ -16,6 +17,7 @@ void AppManager::khoiDong()
     _gvManager.load();
     _dkManager.load();
     _lhpManager.load();
+    _phManager.load();
 
     khoiTaoDuLieuMacDinh();
 }
@@ -38,6 +40,7 @@ void AppManager::dongLai()
     _gvManager.saveIfDirty();
     _dkManager.saveIfDirty();
     _lhpManager.saveIfDirty();
+    _phManager.saveIfDirty();
 }
 
 SinhVienManager &AppManager::getSVManager()
@@ -73,4 +76,9 @@ ThongKeManager &AppManager::getTKManager()
 BaoCaoManager &AppManager::getBCManager()
 {
     return _bcManager;
+}
+
+PhongHocManager &AppManager::getPHManager()
+{
+    return _phManager;
 }

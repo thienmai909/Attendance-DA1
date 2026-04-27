@@ -41,6 +41,7 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
             thaoTacEntries.push_back("[T] Thêm lớp");    actionCodes.push_back(0);
             thaoTacEntries.push_back("[S] Sửa lớp");     actionCodes.push_back(1);
             thaoTacEntries.push_back("[X] Xóa lớp");     actionCodes.push_back(2);
+            thaoTacEntries.push_back("[R] Đặt phòng");   actionCodes.push_back(4);
         }
         thaoTacEntries.push_back("[Q] Quay lại");        actionCodes.push_back(99);
 
@@ -79,13 +80,31 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                     hbox({ text(" Giảng viên : ") | dim, text(cachedTenGV) }),
                     hbox({ text(" Số SV      : ") | dim, text(std::to_string(cachedSoSV)) | bold }),
                     hbox({ text(" Tiến độ    : ") | dim, text(lhp.tienDoHocTapStr()) }),
-                    hbox({ text(" Ngưỡng CT  : ") | dim, 
-                        text(std::to_string(static_cast<int>(lhp.getNguongCamThi() * 100)) + "%") 
+                    hbox({ text(" Ngưỡng CT  : ") | dim,
+                        text(std::to_string(static_cast<int>(lhp.getNguongCamThi() * 100)) + "%")
                     }),
                     separator(),
                     hbox({ text(" Số buổi    : ") | dim,
                         text(std::to_string(lhp.getDsBuoiDiemDanh().size()))
                     }),
+                    separator(),
+                    // Phong hoc
+                    [&]() -> Element {
+                        auto ph = lhp.getPhongHoc();
+                        if (ph.has_value()) {
+                            return vbox({
+                                hbox({ text(" Phòng      : ") | dim,
+                                       text(ph->getTenPhong()) | bold | color(Color::Cyan) }),
+                                hbox({ text(" Loại       : ") | dim,
+                                       text(ph->getLoaiPhongStr()) }),
+                                hbox({ text(" Sức chứa   : ") | dim,
+                                       text(std::to_string(ph->getSucChua()) + " chỗ") }),
+                            });
+                        } else {
+                            return hbox({ text(" Phòng      : ") | dim,
+                                          text("(Chưa có phòng)") | dim });
+                        }
+                    }(),
                     filler()
                 });
             }
@@ -119,8 +138,8 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                 separator(),
                 UiHelper::makeFooter(
                     isAdmin
-                        ? "[↑↓] Chọn  [T]hêm  [S]ửa  [X]óa  [D] Quản lý SV  [Q] Quay lại"
-                        : "[↑↓] Chọn  [D] Quản lý SV  [Q] Quay lại"
+                        ? "[T]hêm  [S]ửa  [X]óa  [R] Đặt phòng  [D] Quản lý SV  [Q] Quay lại"
+                        : "[D] Quản lý SV  [Q] Quay lại"
                 )
             });
         }) | CatchEvent([&](Event e) {
@@ -133,6 +152,8 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                     { luaChon = 1; screen.Exit(); return true; }
                 if (e == Event::Character('x') || e == Event::Character('X'))
                     { luaChon = 2; screen.Exit(); return true; }
+                if (e == Event::Character('r') || e == Event::Character('R'))
+                    { luaChon = 4; screen.Exit(); return true; }
             }
             if (e == Event::Character('d') || e == Event::Character('D'))
                 { luaChon = 3; screen.Exit(); return true; }
@@ -158,6 +179,9 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV)
                 break;
             case 3:
                 if (!maLHPChon.empty()) screenQuanLySVTrongLop(app, maLHPChon, isAdmin);
+                break;
+            case 4:
+                if (!maLHPChon.empty()) formSetPhongHoc(app, maLHPChon);
                 break;
             case 99:
                 thoat = true;

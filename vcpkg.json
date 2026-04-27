@@ -6,7 +6,8 @@
     "libsodium",
     "nlohmann-json",
     "vincentlaucsb-csv-parser",
-    "ftxui"
+    "ftxui",
+    "libxlsxwriter"
   ],
   "overrides": [
     {

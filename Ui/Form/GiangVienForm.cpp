@@ -62,7 +62,7 @@ bool formThemGiangVien(AppManager &app)
             if (maGV.empty() || hoTen.empty())
                 throw std::invalid_argument("Mã GV va Họ tên không được để trống!");
             if (taiKhoan.empty() || matKhau.empty())
-                throw std::invalid_argument("Tài khoản va mật khẩu không được để trống!");
+                throw std::invalid_argument("Tài khoản và mật khẩu không được để trống!");
 
             // GV tạo từ admin luôn là không phải admin
             GiangVien giangVien(maGV, hoTen, false);
@@ -153,7 +153,7 @@ bool formSuaGiangVien(AppManager &app, const std::string &maGV)
 
     auto inputTen   = Input(&hoTen,      "",                opt);
     auto inputTK    = Input(&taiKhoan,   "",                opt);
-    auto inputMK    = Input(&matKhauMoi, "De trong = giu nguyen", passOpt);
+    auto inputMK    = Input(&matKhauMoi, "Để trống = giữ nguyên", passOpt);
     auto inputEmail = Input(&email,      "",                opt);
     auto inputSdt   = Input(&sdt,        "",                opt);
     auto menuDegree = Radiobox(&degreeEntries, &selectedDegree);

@@ -8,35 +8,18 @@
 
 using namespace ftxui;
 
-// Form nhap/sua ghi chu cho 1 SV trong 1 buoi
-static void formGhiChu(AppManager &app, const std::string &maLHP,
-                       std::size_t buoiIndex, const std::string &maSV,
-                       const std::string &tenSV) {
+static std::string screenNhapGhiChu(const std::string &maSV,
+                                     const std::string &tenSV,
+                                     const std::string &ghiChuHienTai) {
   auto screen = ScreenInteractive::Fullscreen();
-  std::string ghiChu;
+  std::string ghiChu = ghiChuHienTai;
+  bool confirmed = false;
 
-  // Pre-fill voi ghi chu hien tai (neu co)
-  const auto &lhp = app.getLHPManager().getLopRef(maLHP);
-  if (buoiIndex < lhp.getDsBuoiDiemDanh().size()) {
-    if (const auto *ct = lhp.getDsBuoiDiemDanh()[buoiIndex].findChiTiet(maSV))
-      ghiChu = ct->getGhiChu();
-  }
-
-  std::string thongBao;
   InputOption opt;
   opt.multiline = false;
-  auto input = Input(&ghiChu, "Nhap ghi chu...", opt);
-
-  auto btnLuu = Button("Luu [Enter]", [&] {
-    try {
-      app.getDDManager().capNhatGhiChu(maLHP, buoiIndex, maSV, ghiChu);
-      screen.Exit();
-    } catch (const std::exception &e) {
-      thongBao = std::string("[ERR] ") + e.what();
-    }
-  });
-
-  auto btnHuy = Button("Huy [Esc]", [&] { screen.Exit(); });
+  auto input = Input(&ghiChu, "Nhập ghi chú...", opt);
+  auto btnLuu = Button("Lưu", [&] { confirmed = true; screen.Exit(); });
+  auto btnHuy = Button("Hủy [Esc]", [&] { screen.Exit(); });
   auto layout = Container::Vertical(
       {input, Container::Horizontal({btnLuu, btnHuy})});
 
@@ -44,26 +27,26 @@ static void formGhiChu(AppManager &app, const std::string &maLHP,
     return vbox({
         filler(),
         vbox({
-            text(" GHI CHU - " + maSV +
-                 (tenSV.empty() ? "" : " / " + tenSV)) | bold | center,
+            text(" GHI CHÚ — " + maSV +
+                 (tenSV.empty() ? "" : " — " + tenSV)) |
+                bold | center,
             separator(),
-            hbox({text(" Ghi chu: ") | dim, input->Render() | flex}),
+            hbox({text(" Ghi chú: ") | dim,
+                  input->Render() | flex}),
             separator(),
             hbox({btnLuu->Render(), text("  "), btnHuy->Render()}) | center,
-            UiHelper::makeMessage(thongBao),
-        }) | border | size(WIDTH, EQUAL, 50) | center,
+            text(" [Enter] Lưu   [Esc] Hủy ") | dim | center,
+        }) | border | size(WIDTH, EQUAL, 52) | center,
         filler(),
-        UiHelper::makeFooter("[Enter] Luu  [Esc] Huy"),
     });
   }) | CatchEvent([&](Event e) {
+    if (e == Event::Return) { confirmed = true; screen.Exit(); return true; }
     if (e == Event::Escape) { screen.Exit(); return true; }
-    if (e == Event::Return && !ghiChu.empty()) {
-      btnLuu->OnEvent(Event::Return); return true;
-    }
     return false;
   });
 
   screen.Loop(renderer);
+  return confirmed ? ghiChu : ghiChuHienTai;
 }
 
 static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
@@ -119,7 +102,6 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
     const auto &buoi = lhp.getDsBuoiDiemDanh()[buoiIndex];
     bool khoa = buoi.isKhoaDiemDanh();
 
-    // --- Maps trạng thái và có phép ---
     std::unordered_map<std::string, Status> trangThaiMap;
     std::unordered_map<std::string, bool>   coPhepMap;
     for (const auto &ct : buoi.getDanhSachChiTiet()) {
@@ -127,7 +109,6 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
       coPhepMap[ct.getMaSV()]    = ct.isCoPhep();
     }
 
-    // --- Feature 2: cảnh báo ngưỡng vắng ---
     std::unordered_map<std::string, std::string> warnSuffix;
     auto updateWarn = [&](const std::string &maSV) {
       auto ng = app.getDDManager().kiemTraNguong(maLHP, maSV);
@@ -138,7 +119,6 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
     };
     for (const auto &maSV : dsMaSV) updateWarn(maSV);
 
-    // --- buildEntry: tạo chuỗi hiển thị cho 1 SV ---
     auto buildEntry = [&](int i) -> std::string {
       const auto &maSV = dsMaSV[i];
       auto itSV = svMap.find(maSV);
@@ -147,17 +127,17 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
       Status st = (it != trangThaiMap.end()) ? it->second : Status::DEFAULT;
       bool cp = coPhepMap.count(maSV) ? coPhepMap.at(maSV) : false;
       std::string sPart;
-      if      (st == Status::CO_MAT) sPart = "[*] Co mat";
-      else if (st == Status::VANG)   sPart = cp ? "[P] V.Phep " : "[ ] Vang   ";
-      else if (st == Status::MUON)   sPart = "[~] Muon   ";
-      else                           sPart = "[-] Chua DD";
+      if      (st == Status::CO_MAT) sPart = "[*] Có mặt";
+      else if (st == Status::VANG)   sPart = cp ? "[P] V.Phép " : "[ ] Vắng   ";
+      else if (st == Status::MUON)   sPart = "[~] Muộn   ";
+      else                           sPart = "[-] Chưa ĐD";
       return sPart + "  " + maSV + "  " + ten + warnSuffix[maSV];
     };
 
     std::vector<std::string> entries;
     for (int i = 0; i < static_cast<int>(dsMaSV.size()); ++i)
       entries.push_back(buildEntry(i));
-    if (entries.empty()) entries.push_back("(Chua co sinh vien dang ky)");
+    if (entries.empty()) entries.push_back("(Chưa có sinh viên đăng ký)");
 
     if (!dsMaSV.empty())
       selected = std::min(selected, static_cast<int>(dsMaSV.size()) - 1);
@@ -175,19 +155,17 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
     };
     recalcStats();
 
-    // Feature 4: Quick Mark
     std::string quickInput;
-    auto inputMaSV = Input(&quickInput, "Ma SV...", InputOption::Default());
+    auto inputMaSV = Input(&quickInput, "Mã SV...", InputOption::Default());
 
     auto menuSV = Menu(&entries, &selected);
 
-    // Helper cập nhật entry + warn sau khi đổi trạng thái
     auto refreshEntry = [&](const std::string &maSV, int idx) {
       updateWarn(maSV);
       entries[idx] = buildEntry(idx);
     };
 
-    auto btnCoMat = Button("Co mat [1]", [&] {
+    auto btnCoMat = Button("Có mặt [1]", [&] {
       if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
       if (dsMaSV.empty() || selected >= static_cast<int>(dsMaSV.size())) return;
       const std::string &maSV = dsMaSV[selected];
@@ -200,13 +178,13 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
         coPhepMap[maSV] = false;
         refreshEntry(maSV, selected);
         recalcStats();
-        thongBao = "[OK] Co mat: " + maSV;
+        thongBao = "[OK] Có mặt: " + maSV;
       } catch (const std::exception &e) {
         thongBao = "[ERR] " + std::string(e.what());
       }
     });
 
-    auto btnVang = Button("Vang   [2]", [&] {
+    auto btnVang = Button("Vắng   [2]", [&] {
       if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
       if (dsMaSV.empty() || selected >= static_cast<int>(dsMaSV.size())) return;
       const std::string &maSV = dsMaSV[selected];
@@ -219,13 +197,13 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
         coPhepMap[maSV] = false; // mặc định không phép, dùng [P] để toggle
         refreshEntry(maSV, selected);
         recalcStats();
-        thongBao = "[OK] Vang: " + maSV + "  ([P] = Vang co phep)";
+        thongBao = "[OK] Vắng: " + maSV + "  ([P] = Vắng có phép)";
       } catch (const std::exception &e) {
         thongBao = "[ERR] " + std::string(e.what());
       }
     });
 
-    auto btnMuon = Button("Muon   [3]", [&] {
+    auto btnMuon = Button("Muộn   [3]", [&] {
       if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
       if (dsMaSV.empty() || selected >= static_cast<int>(dsMaSV.size())) return;
       const std::string &maSV = dsMaSV[selected];
@@ -238,13 +216,13 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
         coPhepMap[maSV] = false;
         refreshEntry(maSV, selected);
         recalcStats();
-        thongBao = "[OK] Muon: " + maSV;
+        thongBao = "[OK] Muộn: " + maSV;
       } catch (const std::exception &e) {
         thongBao = "[ERR] " + std::string(e.what());
       }
     });
 
-    auto btnTatCaCoMat = Button("Tat ca co mat [A]", [&] {
+    auto btnTatCaCoMat = Button("Tất cả có mặt [A]", [&] {
       if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
       bool coLoi = false;
       for (int i = 0; i < static_cast<int>(dsMaSV.size()); ++i) {
@@ -262,14 +240,13 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
           coLoi = true; break;
         }
       }
-      if (!coLoi) { recalcStats(); thongBao = "[OK] Da diem danh tat ca co mat"; }
+      if (!coLoi) { recalcStats(); thongBao = "[OK] Đã điểm danh tất cả có mặt"; }
     });
 
-    // Feature 5: confirm khóa
     bool showConfirmKhoa = false;
     int cfCoMat = 0, cfVang = 0, cfMuon = 0, cfChuaDD = 0, cfAtRisk = 0;
 
-    auto btnKhoa = Button("Khoa buoi [K]", [&] {
+    auto btnKhoa = Button("Khóa buổi [K]", [&] {
       if (khoa) { thongBao = "[ERR] Buổi đã khóa!"; return; }
       cfCoMat = soCoMat; cfVang = soVang; cfMuon = soMuon; cfChuaDD = soChuaDD;
       cfAtRisk = 0;
@@ -324,7 +301,6 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
           {menuSV, Container::Horizontal(
                        {btnMoKhoa, btnXoaBuoi, btnKhoa, btnQuayLai})});
     } else {
-      // Feature 4: inputMaSV đặt trước menuSV trong layout
       layout = Container::Vertical(
           {inputMaSV, menuSV,
            Container::Horizontal({btnCoMat, btnVang, btnMuon}),
@@ -337,38 +313,37 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
             [&] {
               int total = static_cast<int>(dsMaSV.size());
               auto mainContent = vbox({
-                  UiHelper::makeHeader("DIEM DANH", headerSub), separator(),
+                  UiHelper::makeHeader("ĐIỂM DANH", headerSub), separator(),
                   hbox({
-                      text("  Co mat: ") | dim,
+                      text("  Có mặt: ") | dim,
                       text(std::to_string(soCoMat)) | color(Color::Green) | bold,
-                      text("  Vang: ") | dim,
+                      text("  Vắng: ") | dim,
                       text(std::to_string(soVang)) | color(Color::Red) | bold,
-                      text("  Muon: ") | dim,
+                      text("  Muộn: ") | dim,
                       text(std::to_string(soMuon)) | color(Color::Yellow) | bold,
-                      text("  Chua DD: ") | dim,
+                      text("  Chưa ĐD: ") | dim,
                       text(std::to_string(soChuaDD)) | color(Color::GrayDark) | bold,
                       text("  /" + std::to_string(total)) | dim,
                   }) | center,
                   separator(),
-                  // Feature 4: quick mark input (chỉ GV)
-                  !isAdmin ? hbox({text(" Tim nhanh: ") | dim,
+                  !isAdmin ? hbox({text(" Tìm nhanh: ") | dim,
                                    inputMaSV->Render() | size(WIDTH, EQUAL, 16),
-                                   text(" [Enter]=Co mat") | dim, filler()})
+                                   text(" [Enter]=Có mặt") | dim, filler()})
                            : text(""),
                   vbox({menuSV->Render() | flex}) | border | flex,
                   separator(),
-                  khoa ? text(" Buoi nay da bi khoa ") | color(Color::Red) | center
+                  khoa ? text(" Buổi này đã bị khóa ") | color(Color::Red) | center
                        : [&]() -> Element {
                            if (isAdmin) {
-                             return vbox({text(" CHE DO: XEM & QUAN LY ") | bold |
+                             return vbox({text(" CHẾ ĐỘ: XEM & QUẢN LÝ ") | bold |
                                               color(Color::Yellow) | center,
                                           separator(),
                                           hbox({khoa ? btnMoKhoa->Render()
-                                                     : text(" [Chua khoa] ") | dim,
+                                                     : text(" [Chưa khóa] ") | dim,
                                                 text(" "), btnXoaBuoi->Render(),
                                                 text(" "),
                                                 !khoa ? btnKhoa->Render()
-                                                      : text(" [Da khoa] ") | dim,
+                                                      : text(" [Đã khóa] ") | dim,
                                                 text(" "), btnQuayLai->Render()}) |
                                               center});
                            } else {
@@ -382,38 +357,37 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                          }(),
                   separator(), UiHelper::makeMessage(thongBao),
                   UiHelper::makeFooter(
-                      isAdmin ? (khoa ? "[M] Mo khoa  [X] Xoa buoi  [Q] Quay lai"
-                                      : "[K] Khoa  [X] Xoa buoi  [Q] Quay lai")
-                              : (khoa ? "[Q] Quay lai"
-                                      : "[1] CM  [2] Vang  [3] Muon "
-                                        "[P] T.Phep  [A] Tat ca "
-                                        "[K] Khoa  [H] Lich su  [Q] Quay")),
+                       isAdmin ? (khoa ? "[M] Mở khóa  [X] Xóa buổi  [Q] Quay lại"
+                                       : "[K] Khóa  [X] Xóa buổi  [Q] Quay lại")
+                               : (khoa ? "[Q] Quay lại"
+                                       : "[1] CM  [2] Vắng  [3] Muộn  [P] T.Phép"
+                                         "  [G] Ghi chú  [A] Tất cả"
+                                         "  [K] Khóa  [H] Lịch sư  [Q] Quay lại")),
               });
 
-              // Feature 5: overlay confirm khóa
               if (showConfirmKhoa) {
                 auto dialog = vbox({
-                    text(" XAC NHAN KHOA BUOI? ") | bold | center,
+                    text(" XÁC NHẬN KHÓA BUỔI? ") | bold | center,
                     separator(),
-                    hbox({text("  Co mat : ") | dim,
+                    hbox({text("  Có mặt : ") | dim,
                           text(std::to_string(cfCoMat) + "/" +
                                std::to_string(total)) | bold | color(Color::Green)}),
-                    hbox({text("  Vang   : ") | dim,
+                    hbox({text("  Vắng   : ") | dim,
                           text(std::to_string(cfVang)) | bold | color(Color::Red)}),
-                    hbox({text("  Muon   : ") | dim,
+                    hbox({text("  Muộn   : ") | dim,
                           text(std::to_string(cfMuon)) | bold | color(Color::Yellow)}),
-                    hbox({text("  Chua DD: ") | dim,
+                    hbox({text("  Chưa ĐD: ") | dim,
                           text(std::to_string(cfChuaDD)) | bold}),
                     separator(),
                     cfAtRisk > 0
                         ? (hbox({text("  [!] ") | color(Color::Red),
                                   text(std::to_string(cfAtRisk) +
-                                       " SV sap vuot nguong cam thi") | dim}))
+                                       " SV sắp vượt ngưỡng cấm thi") | dim}))
                         : text(""),
-                    text("  Se tu vang: " + std::to_string(cfChuaDD) +
-                         " SV chua diem danh") | dim,
+                    text("  Sẽ tự vắng: " + std::to_string(cfChuaDD) +
+                         " SV chưa điểm danh") | dim,
                     separator(),
-                    text(" [Y] Xac nhan    [N/Esc] Huy ") | center | bold,
+                    text(" [Y] Xác nhận    [N/Esc] Hủy ") | center | bold,
                 }) | border | size(WIDTH, EQUAL, 46) | center;
                 return dbox({mainContent | dim,
                              vbox({filler(), dialog, filler()})});
@@ -421,12 +395,11 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
               return mainContent;
             }) |
         CatchEvent([&](Event e) {
-          // Feature 5: chặn tất cả sự kiện khi đang hiển thị confirm
           if (showConfirmKhoa) {
             if (e == Event::Character('y') || e == Event::Character('Y')) {
               try {
                 app.getDDManager().khoaBuoiVaAutoVang(maLHP, buoiIndex, dsMaSV);
-                thongBao = "[OK] Da khoa buoi diem danh";
+                thongBao = "[OK] Đã khóa buổi điểm danh";
                 showConfirmKhoa = false;
                 luaChon = 0;
                 screen.Exit();
@@ -437,10 +410,9 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
             } else {
               showConfirmKhoa = false; // N, Esc, hoặc bất kỳ phím nào khác
             }
-            return true; // chặn tất cả
+            return true;
           }
 
-          // Feature 4: quick mark khi có nội dung trong input
           if (e == Event::Return && !quickInput.empty() && !isAdmin && !khoa) {
             auto it = std::find(dsMaSV.begin(), dsMaSV.end(), quickInput);
             if (it != dsMaSV.end()) {
@@ -456,13 +428,13 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                 coPhepMap[maSV] = false;
                 refreshEntry(maSV, idx);
                 recalcStats();
-                thongBao = "[OK] Co mat: " + maSV;
+                thongBao = "[OK] Có mặt: " + maSV;
               } catch (const std::exception &ex) {
                 thongBao = "[ERR] " + std::string(ex.what());
               }
               quickInput.clear();
             } else {
-              thongBao = "[!] Khong tim thay ma: " + quickInput;
+              thongBao = "[!] Không tìm thấy mã: " + quickInput;
               quickInput.clear();
             }
             return true;
@@ -488,7 +460,6 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
             if (e == Event::Character('k') || e == Event::Character('K')) {
               btnKhoa->OnEvent(Event::Return); return true;
             }
-            // Feature 1: toggle có phép cho SV đang vắng
             if (e == Event::Character('p') || e == Event::Character('P')) {
               if (!dsMaSV.empty() && selected < static_cast<int>(dsMaSV.size())) {
                 const auto &maSV = dsMaSV[selected];
@@ -499,18 +470,17 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                     app.getDDManager().capNhatCoPhep(maLHP, buoiIndex, maSV, newCP);
                     coPhepMap[maSV] = newCP;
                     entries[selected] = buildEntry(selected);
-                    thongBao = newCP ? "[OK] Vang co phep: " + maSV
-                                     : "[OK] Vang khong phep: " + maSV;
+                    thongBao = newCP ? "[OK] Vắng có phép: " + maSV
+                                     : "[OK] Vắng không phép: " + maSV;
                   } catch (const std::exception &ex) {
                     thongBao = "[ERR] " + std::string(ex.what());
                   }
                 } else {
-                  thongBao = "[!] Chi toggle phep cho SV dang vang";
+                  thongBao = "[!] Chỉ toggle phép cho SV đang vắng";
                 }
               }
               return true;
             }
-            // Feature 6: xem lich su
             if (e == Event::Character('h') || e == Event::Character('H')) {
               if (!dsMaSV.empty() && selected < static_cast<int>(dsMaSV.size())) {
                 luaChon = 10;
@@ -518,16 +488,14 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
               }
               return true;
             }
-            // Ghi chu: [G] mo form nhap ghi chu cho SV dang chon
             if (e == Event::Character('g') || e == Event::Character('G')) {
               if (!dsMaSV.empty() && selected < static_cast<int>(dsMaSV.size())) {
                 const auto &maSV = dsMaSV[selected];
-                // Chi cho phep ghi chu khi SV da duoc diem danh
                 if (trangThaiMap.count(maSV)) {
-                  luaChon = 12;
+                  luaChon = 20;
                   screen.Exit();
                 } else {
-                  thongBao = "[!] Can diem danh SV truoc khi ghi chu";
+                  thongBao = "[!] Hãy điểm danh SV trước khi thêm ghi chú";
                 }
               }
               return true;
@@ -546,14 +514,27 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
     else if (luaChon == 10 && !dsMaSV.empty() &&
              selected < static_cast<int>(dsMaSV.size())) {
       screenSinhVienHistory(app, maLHP, dsMaSV[selected]);
-    } else if (luaChon == 12 && !dsMaSV.empty() &&
+    } else if (luaChon == 20 && !dsMaSV.empty() &&
                selected < static_cast<int>(dsMaSV.size())) {
       const auto &maSV = dsMaSV[selected];
-      std::string tenSV;
-      auto it = svMap.find(maSV);
-      if (it != svMap.end()) tenSV = it->second.ten;
-      formGhiChu(app, maLHP, buoiIndex, maSV, tenSV);
-      // loop tiep tuc (khong set thoat)
+      auto itSV = svMap.find(maSV);
+      std::string tenSV = (itSV != svMap.end()) ? itSV->second.ten : "";
+      std::string curGhiChu;
+      {
+        const auto &lhpRef = app.getLHPManager().getLopRef(maLHP);
+        const auto &buoiRef = lhpRef.getDsBuoiDiemDanh()[buoiIndex];
+        if (const auto *ct = buoiRef.findChiTiet(maSV))
+          curGhiChu = ct->getGhiChu();
+      }
+      std::string newGhiChu = screenNhapGhiChu(maSV, tenSV, curGhiChu);
+      if (newGhiChu != curGhiChu) {
+        try {
+          app.getDDManager().capNhatGhiChu(maLHP, buoiIndex, maSV, newGhiChu);
+          thongBao = "[OK] Đã lưu ghi chú: " + maSV;
+        } catch (const std::exception &ex) {
+          thongBao = "[ERR] " + std::string(ex.what());
+        }
+      }
     }
   }
 }
@@ -585,7 +566,6 @@ void screenDiemDanh(AppManager &app, const std::string &maGV) {
 
     auto menuLop = Menu(&lopEntries, &selLop);
 
-    // buoiEntries được cập nhật động trong renderer khi selLop thay đổi
     std::vector<std::string> buoiEntries;
     auto menuBuoi = Menu(&buoiEntries, &selBuoi);
 
@@ -604,7 +584,6 @@ void screenDiemDanh(AppManager &app, const std::string &maGV) {
           luaChon = 1;
           screen.Exit();
         } else {
-          // Chưa có buổi → hỏi tạo mới
           luaChon = 2;
           screen.Exit();
         }
@@ -632,7 +611,7 @@ void screenDiemDanh(AppManager &app, const std::string &maGV) {
               if (selLop != cachedSelLop) {
                 cachedSelLop = selLop;
                 buoiEntries.clear();
-                selBuoi = 0; // reset về buổi đầu khi đổi lớp
+                selBuoi = 0;
                 if (!dsLHP.empty() && selLop < static_cast<int>(dsLHP.size())) {
                   const auto &lhp = dsLHP[selLop];
                   cachedSoSV =
