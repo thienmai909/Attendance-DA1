@@ -188,17 +188,48 @@ void screenBaoCao(AppManager& app, const std::string& maGV) {
                     auto tkLop = app.getTKManager().thongKeLop(maLHP);
                     auto top5  = app.getTKManager().topSVVangNhieu(maLHP, 5);
                     auto byCa  = app.getTKManager().tyLeVangTheoCa(maLHP);
+                    const auto& lhp = app.getTKManager().getLHPRef(maLHP);
+
+                    // Lay ten GV
+                    std::string tenGVLop = "-";
+                    if (!lhp.getMaGV().empty()) {
+                        auto gvL = app.getGVManager().timTheoMa(lhp.getMaGV());
+                        if (gvL.has_value()) tenGVLop = gvL->getHoTenGV();
+                    }
+                    std::string tenPhong = lhp.getTenPhongHoc();
+                    if (tenPhong.empty()) tenPhong = "(Chưa có)";
+
+                    int pctTienDo = lhp.getTongSoTiet() > 0
+                        ? (int)(100.0 * lhp.getSoTietDaHoc() / lhp.getTongSoTiet()) : 0;
+                    int maxVang = (int)(lhp.getTongSoTiet() * lhp.getNguongCamThi());
+                    int nguongPct = (int)(lhp.getNguongCamThi() * 100);
+
+                    // Dem cac nhom
+                    int svNguy = 0, svChuY = 0;
+                    auto dsSVAll = app.getTKManager().thongKeToanLop(maLHP);
+                    for (const auto& sv : dsSVAll) {
+                        if (sv.biCamThi)        ; // da co soSVBiCamThi
+                        else if (sv.tyLeVang > 0.8) ++svNguy;
+                        else if (sv.tyLeVang > 0.5) ++svChuY;
+                    }
 
                     Elements topRows;
                     for (int i = 0; i < (int)top5.size(); ++i) {
                         const auto& sv = top5[i];
+                        int con = maxVang - sv.soTietVang;
+                        std::string conStr = con > 0
+                            ? "(còn " + std::to_string(con) + "t)"
+                            : "(ĐÃ VƯỢT)";
                         topRows.push_back(hbox({
                             text("  " + std::to_string(i+1) + ". ") | dim,
-                            text(sv.maSV + " - " + sv.tenSV) | size(WIDTH, EQUAL, 30),
-                            text("  (" + std::to_string(sv.soTietVang) + "t - " +
-                                 std::to_string((int)(sv.tyLeVang*100)) + "%)") | bold
+                            text(sv.maSV + " - " + sv.tenSV) | size(WIDTH, EQUAL, 28),
+                            text("  " + std::to_string(sv.soTietVang) + "t / " +
+                                 std::to_string((int)(sv.tyLeVang*100)) + "%  ") | bold,
+                            text(conStr) | dim
                         }));
                     }
+                    if (top5.empty())
+                        topRows.push_back(text("  (Chưa có dữ liệu điểm danh)") | dim);
 
                     Elements caRows;
                     for (const auto& [ca, ty] : byCa)
@@ -208,18 +239,35 @@ void screenBaoCao(AppManager& app, const std::string& maGV) {
                         }));
 
                     content = vbox({
-                        hbox({ text(" Số SV    : ") | dim, text(std::to_string(tkLop.soSinhVien)) | bold }),
-                        hbox({ text(" Số buổi  : ") | dim, text(std::to_string(tkLop.soBuoiDaHoc)) | bold }),
-                        hbox({ text(" Tiết học : ") | dim, text(std::to_string(tkLop.soTietDaHoc)) | bold }),
-                        hbox({ text(" % Vắng TB: ") | dim,
-                               text(std::to_string((int)(tkLop.tyLeVangTrungBinh*100)) + "%") | bold }),
-                        hbox({ text(" SV cấm thi: ") | dim,
-                               text(std::to_string(tkLop.soSVBiCamThi)) | bold | color(Color::Red) }),
+                        // Thong tin lop
+                        text(" THÔNG TIN LỚP HỌC PHẦN ") | bold | inverted | center,
+                        hbox({ text(" Giảng viên : ") | dim, text(tenGVLop) | bold }),
+                        hbox({ text(" Phòng học  : ") | dim, text(tenPhong) | bold }),
+                        hbox({ text(" Học kỳ     : ") | dim, text(lhp.getHocKiStr()) }),
+                        hbox({ text(" Ngưỡng CT  : ") | dim,
+                               text(std::to_string(nguongPct) + "% (tối đa " +
+                                    std::to_string(maxVang) + " tiết)") | bold }),
+                        hbox({ text(" Tiến độ    : ") | dim,
+                               text(std::to_string(lhp.getSoTietDaHoc()) + "/" +
+                                    std::to_string(lhp.getTongSoTiet()) + " tiết (" +
+                                    std::to_string(pctTienDo) + "%)") | bold }),
                         separator(),
-                        text(" Top 5 vắng nhiều:") | bold,
+                        // Thong ke tong
+                        text(" THỐNG KÊ ") | bold | inverted | center,
+                        hbox({ text(" Số SV      : ") | dim, text(std::to_string(tkLop.soSinhVien)) | bold }),
+                        hbox({ text(" % Vắng TB  : ") | dim,
+                               text(std::to_string((int)(tkLop.tyLeVangTrungBinh*100)) + "%") | bold }),
+                        hbox({ text(" SV cấm thi : ") | dim,
+                               text(std::to_string(tkLop.soSVBiCamThi)) | bold | color(Color::Red) }),
+                        hbox({ text(" SV nguy    : ") | dim,
+                               text(std::to_string(svNguy)) | bold | color(Color::RedLight) }),
+                        hbox({ text(" SV cần chú : ") | dim,
+                               text(std::to_string(svChuY)) | bold | color(Color::Yellow) }),
+                        separator(),
+                        text(" TOP 5 VẮNG NHIỀU (tiết vắng / % / còn được vắng): ") | bold,
                         vbox(std::move(topRows)),
                         separator(),
-                        text(" Vắng theo ca:") | bold,
+                        text(" VẮNG THEO CA: ") | bold,
                         vbox(std::move(caRows)),
                         filler()
                     });
@@ -231,8 +279,30 @@ void screenBaoCao(AppManager& app, const std::string& maGV) {
                 if (!dsLop.empty() && selLop < (int)dsLop.size()) {
                     const std::string& maLHP = dsLop[selLop].getMaLHP();
                     auto dsSV = app.getTKManager().thongKeToanLop(maLHP);
+                    const auto& lhp2 = app.getTKManager().getLHPRef(maLHP);
+                    int maxVang2 = (int)(lhp2.getTongSoTiet() * lhp2.getNguongCamThi());
+
+                    int nCT = 0, nNguy = 0, nChuY = 0;
+                    for (const auto& sv : dsSV) {
+                        if (sv.biCamThi) ++nCT;
+                        else if (sv.tyLeVang > 0.8) ++nNguy;
+                        else if (sv.tyLeVang > 0.5) ++nChuY;
+                    }
 
                     Elements svRows;
+                    // Dong tom tat
+                    int nOk = (int)dsSV.size() - nCT - nNguy - nChuY;
+                    svRows.push_back(
+                        hbox({
+                            text(" Tổng: " + std::to_string(dsSV.size()) + " SV  ") | dim,
+                            text("[CT] " + std::to_string(nCT) + "  ") | color(Color::Red),
+                            text("[!!] " + std::to_string(nNguy) + "  ") | color(Color::RedLight),
+                            text("[!] " + std::to_string(nChuY) + "  ") | color(Color::Yellow),
+                            text("[OK] " + std::to_string(nOk)) | color(Color::Green),
+                            text("  | Tối đa vắng: " + std::to_string(maxVang2) + " tiết") | dim,
+                        })
+                    );
+                    svRows.push_back(separator());
                     svRows.push_back(
                         hbox({
                             text(" # ") | size(WIDTH, EQUAL, 4),
@@ -241,13 +311,16 @@ void screenBaoCao(AppManager& app, const std::string& maGV) {
                             text(" Vắng") | bold | size(WIDTH, EQUAL, 6),
                             text(" Muộn") | bold | size(WIDTH, EQUAL, 6),
                             text(" % Vắng") | bold | size(WIDTH, EQUAL, 8),
-                            text(" Trạng Thái    ") | bold,
+                            text(" Còn vắng") | bold | size(WIDTH, EQUAL, 10),
+                            text(" Trạng thái") | bold,
                         }) | inverted
                     );
                     svRows.push_back(separator());
                     for (int i = 0; i < (int)dsSV.size(); ++i) {
                         const auto& sv = dsSV[i];
                         int pct = (int)(sv.tyLeVang * 100);
+                        int con = maxVang2 - sv.soTietVang;
+                        std::string conStr = con > 0 ? std::to_string(con) + "t" : "VƯỢT";
                         std::string tt = trangThaiSV(sv.tyLeVang, sv.biCamThi);
                         Color col = sv.biCamThi       ? Color::Red
                                   : sv.tyLeVang > 0.8 ? Color::RedLight
@@ -260,6 +333,7 @@ void screenBaoCao(AppManager& app, const std::string& maGV) {
                             text(" " + std::to_string(sv.soTietVang) + "t ") | size(WIDTH, EQUAL, 6),
                             text(" " + std::to_string(sv.soTietMuon) + "t ") | size(WIDTH, EQUAL, 6),
                             text(" " + std::to_string(pct) + "% ") | size(WIDTH, EQUAL, 8),
+                            text(" " + conStr + "      ") | size(WIDTH, EQUAL, 10) | (con <= 0 ? color(Color::Red) : color(Color::Green)),
                             text(" " + tt) | size(WIDTH, EQUAL, 16),
                         }) | color(col);
                         svRows.push_back(row);

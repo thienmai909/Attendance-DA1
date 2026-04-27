@@ -366,7 +366,7 @@ void BaoCaoManager::xuatTongQuanJSON(
 // XLSX WRITERS
 // ============================================================
 
-// Macro tien ich: viet header row
+// Viet header row
 static void writeHeaderRow(lxw_worksheet* ws, lxw_format* fmt,
                            const std::vector<std::string>& headers,
                            double colWidth = 20.0) {
@@ -377,76 +377,185 @@ static void writeHeaderRow(lxw_worksheet* ws, lxw_format* fmt,
     }
 }
 
-void BaoCaoManager::xuatSinhVienXLSX(
-    const std::string &maLHP,
-    const std::filesystem::path &filePath
-) {
-    auto dsSV = _tkManager.thongKeToanLop(maLHP);
-    lxw_workbook  *wb = workbook_new(filePath.string().c_str());
-    lxw_worksheet *ws = workbook_add_worksheet(wb, "Danh Sách SV");
+// Viet block thong tin lop (dung cho sheet standalone)
+static lxw_row_t writeInfoBlock(lxw_worksheet* ws, lxw_workbook* wb,
+                                const LopHocPhan& lhp,
+                                const std::string& tenGV,
+                                const std::string& timestamp,
+                                int nCT, int soSV) {
+    lxw_format *fTitle = workbook_add_format(wb);
+    format_set_bold(fTitle); format_set_font_size(fTitle, 13);
+    format_set_bg_color(fTitle, 0x1F4E79);
+    format_set_font_color(fTitle, LXW_COLOR_WHITE);
+    format_set_align(fTitle, LXW_ALIGN_CENTER);
+    format_set_align(fTitle, LXW_ALIGN_VERTICAL_CENTER);
 
-    // Formats
-    lxw_format *fHeader = workbook_add_format(wb);
-    format_set_bold(fHeader);
-    format_set_bg_color(fHeader, 0x2E75B6); // xanh duong
-    format_set_font_color(fHeader, LXW_COLOR_WHITE);
-    format_set_border(fHeader, LXW_BORDER_THIN);
-    format_set_align(fHeader, LXW_ALIGN_CENTER);
+    lxw_format *fLabel = workbook_add_format(wb);
+    format_set_bold(fLabel); format_set_bg_color(fLabel, 0xD6E4F0);
+    format_set_border(fLabel, LXW_BORDER_THIN);
 
-    lxw_format *fOk   = workbook_add_format(wb);
-    format_set_border(fOk, LXW_BORDER_THIN);
-
-    lxw_format *fWarn = workbook_add_format(wb); // > 50% nguong
-    format_set_bg_color(fWarn, 0xFFFF99); // vang
-    format_set_border(fWarn, LXW_BORDER_THIN);
-
-    lxw_format *fDanger = workbook_add_format(wb); // > 80%
-    format_set_bg_color(fDanger, 0xFFCC99); // cam
-    format_set_border(fDanger, LXW_BORDER_THIN);
-
-    lxw_format *fCamThi = workbook_add_format(wb);
-    format_set_bg_color(fCamThi, 0xFF0000); // do
-    format_set_font_color(fCamThi, LXW_COLOR_WHITE);
-    format_set_bold(fCamThi);
-    format_set_border(fCamThi, LXW_BORDER_THIN);
+    lxw_format *fVal = workbook_add_format(wb);
+    format_set_border(fVal, LXW_BORDER_THIN);
 
     lxw_format *fPct = workbook_add_format(wb);
     format_set_border(fPct, LXW_BORDER_THIN);
     format_set_num_format(fPct, "0.0%");
 
-    writeHeaderRow(ws, fHeader, {
-        "STT", "Mã SV", "Họ Tên",
-        "Tiết Vắng", "Tiết Muộn", "Tiết Có Mặt",
-        "% Vắng", "Trạng Thái"
-    });
-    worksheet_set_column(ws, 0, 0, 6,  nullptr); // STT
-    worksheet_set_column(ws, 1, 1, 12, nullptr); // Ma SV
-    worksheet_set_column(ws, 2, 2, 30, nullptr); // Ho Ten
-    worksheet_set_column(ws, 6, 6, 10, nullptr); // % Vang
+    lxw_format *fWarn = workbook_add_format(wb);
+    format_set_border(fWarn, LXW_BORDER_THIN);
+    format_set_font_color(fWarn, 0xC00000);
+    format_set_bold(fWarn);
 
+    int nguongPct = (int)(lhp.getNguongCamThi() * 100);
+    int maxVang   = (int)(lhp.getTongSoTiet() * lhp.getNguongCamThi());
+    int pctTienDo = lhp.getTongSoTiet() > 0
+        ? (int)(100.0 * lhp.getSoTietDaHoc() / lhp.getTongSoTiet()) : 0;
+    std::string tenPhong = lhp.getTenPhongHoc().empty() ? "(Chưa có)" : lhp.getTenPhongHoc();
+
+    // Row 0: Title merged
+    int cols = 6;
+    worksheet_merge_range(ws, 0, 0, 0, cols - 1,
+        ("BÁO CÁO ĐIỂM DANH - " + lhp.getMaLHP() + " - " + lhp.getTenLHP()).c_str(),
+        fTitle);
+    worksheet_set_row(ws, 0, 28, nullptr);
+    worksheet_set_column(ws, 0, 0, 22, nullptr);
+    worksheet_set_column(ws, 1, 1, 30, nullptr);
+    worksheet_set_column(ws, 2, 2, 18, nullptr);
+    worksheet_set_column(ws, 3, 3, 18, nullptr);
+
+    // Rows 2-3: 2 cot thong tin
+    struct KV { const char* k; std::string v; bool isWarn; };
+    std::vector<KV> left = {
+        {"Mã lớp học phần:",  lhp.getMaLHP(),           false},
+        {"Tên lớp học phần:", lhp.getTenLHP(),           false},
+        {"Giảng viên:",       tenGV,                     false},
+        {"Phòng học:",        tenPhong,                  false},
+        {"Học kỳ:",           lhp.getHocKiStr(),         false},
+    };
+    std::vector<KV> right = {
+        {"Ngưỡng cấm thi:",   std::to_string(nguongPct) + "% (max " + std::to_string(maxVang) + " tiết)", false},
+        {"Tổng số tiết:",     std::to_string(lhp.getTongSoTiet()) + " tiết",                              false},
+        {"Tiến độ học tập:",  std::to_string(lhp.getSoTietDaHoc()) + "/" + std::to_string(lhp.getTongSoTiet())
+                              + " tiết (" + std::to_string(pctTienDo) + "%)",                              false},
+        {"Số sinh viên:",     std::to_string(soSV) + " SV",                                               false},
+        {"SV bị cấm thi:",   std::to_string(nCT) + " SV",                                                 nCT > 0},
+    };
+    int maxR = (int)std::max(left.size(), right.size());
+    for (int r = 0; r < maxR; ++r) {
+        lxw_row_t row = (lxw_row_t)(r + 2);
+        if (r < (int)left.size()) {
+            worksheet_write_string(ws, row, 0, left[r].k,        fLabel);
+            worksheet_write_string(ws, row, 1, left[r].v.c_str(), left[r].isWarn ? fWarn : fVal);
+        }
+        if (r < (int)right.size()) {
+            worksheet_write_string(ws, row, 2, right[r].k,         fLabel);
+            worksheet_write_string(ws, row, 3, right[r].v.c_str(), right[r].isWarn ? fWarn : fVal);
+        }
+    }
+
+    // Ngay xuat
+    lxw_row_t rowNgay = (lxw_row_t)(maxR + 3);
+    lxw_format *fDim = workbook_add_format(wb);
+    format_set_italic(fDim); format_set_font_color(fDim, 0x808080);
+    worksheet_write_string(ws, rowNgay, 0, "Ngày xuất báo cáo:", fLabel);
+    worksheet_write_string(ws, rowNgay, 1, timestamp.c_str(), fDim);
+
+    return rowNgay + 2; // row bat dau du lieu
+}
+
+void BaoCaoManager::xuatSinhVienXLSX(
+    const std::string &maLHP,
+    const std::filesystem::path &filePath
+) {
+    auto dsSV     = _tkManager.thongKeToanLop(maLHP);
+    const auto& lhp = _tkManager.getLHPRef(maLHP);
+    int maxVang   = (int)(lhp.getTongSoTiet() * lhp.getNguongCamThi());
+    int nCT       = 0;
+    for (const auto& sv : dsSV) if (sv.biCamThi) ++nCT;
+
+    lxw_workbook  *wb = workbook_new(filePath.string().c_str());
+    lxw_worksheet *ws = workbook_add_worksheet(wb, "Danh Sách SV");
+
+    lxw_row_t startRow = writeInfoBlock(ws, wb, lhp, "", taoTimestamp(), nCT, (int)dsSV.size());
+
+    lxw_format *fHeader = workbook_add_format(wb);
+    format_set_bold(fHeader); format_set_bg_color(fHeader, 0x2E75B6);
+    format_set_font_color(fHeader, LXW_COLOR_WHITE);
+    format_set_border(fHeader, LXW_BORDER_THIN); format_set_align(fHeader, LXW_ALIGN_CENTER);
+
+    auto mkFmt = [&](uint32_t bg = 0xFFFFFF) {
+        lxw_format *f = workbook_add_format(wb);
+        if (bg != 0xFFFFFF) format_set_bg_color(f, bg);
+        format_set_border(f, LXW_BORDER_THIN); return f;
+    };
+    auto mkPct = [&](uint32_t bg = 0xFFFFFF) {
+        lxw_format *f = workbook_add_format(wb);
+        if (bg != 0xFFFFFF) format_set_bg_color(f, bg);
+        format_set_border(f, LXW_BORDER_THIN);
+        format_set_num_format(f, "0.0%"); return f;
+    };
+    lxw_format *fOk     = mkFmt();
+    lxw_format *fWarn   = mkFmt(0xFFFF99);
+    lxw_format *fDanger = mkFmt(0xFFCC99);
+    lxw_format *fCT     = workbook_add_format(wb);
+    format_set_bg_color(fCT, 0xFF0000); format_set_font_color(fCT, LXW_COLOR_WHITE);
+    format_set_bold(fCT); format_set_border(fCT, LXW_BORDER_THIN);
+    lxw_format *fCon    = workbook_add_format(wb);
+    format_set_bg_color(fCon, 0xE2EFDA); format_set_border(fCon, LXW_BORDER_THIN); // xanh la nhat
+    lxw_format *fConBad = workbook_add_format(wb);
+    format_set_bg_color(fConBad, 0xFFCCCC); format_set_border(fConBad, LXW_BORDER_THIN); // do nhat
+
+    // Header
+    const std::vector<std::string> hdrs = {
+        "STT", "Mã SV", "Họ Tên", "Tiết Vắng", "Tiết Muộn",
+        "Tiết Có Mặt", "% Vắng", "Còn được vắng", "Trạng Thái"
+    };
+    for (int c = 0; c < (int)hdrs.size(); ++c)
+        worksheet_write_string(ws, startRow, (lxw_col_t)c, hdrs[c].c_str(), fHeader);
+    worksheet_set_column(ws, 0, 0, 6,  nullptr);
+    worksheet_set_column(ws, 1, 1, 12, nullptr);
+    worksheet_set_column(ws, 2, 2, 30, nullptr);
+    worksheet_set_column(ws, 6, 6, 10, nullptr);
+    worksheet_set_column(ws, 7, 7, 16, nullptr);
+    worksheet_set_column(ws, 8, 8, 14, nullptr);
+    lxw_format *fPct = mkPct();
+
+    int tongVang = 0;
     for (int i = 0; i < (int)dsSV.size(); ++i) {
-        const auto &sv = dsSV[i];
-        lxw_row_t row = (lxw_row_t)(i + 1);
-
-        lxw_format *fRow = sv.biCamThi   ? fCamThi
-                         : sv.tyLeVang > 0.8 ? fDanger
-                         : sv.tyLeVang > 0.5 ? fWarn
-                         :                      fOk;
-
-        worksheet_write_number(ws, row, 0, i + 1, fRow);
-        worksheet_write_string(ws, row, 1, sv.maSV.c_str(),   fRow);
-        worksheet_write_string(ws, row, 2, sv.tenSV.c_str(),  fRow);
-        worksheet_write_number(ws, row, 3, sv.soTietVang,     fRow);
-        worksheet_write_number(ws, row, 4, sv.soTietMuon,     fRow);
-        worksheet_write_number(ws, row, 5, sv.soTietCoMat,    fRow);
-        worksheet_write_number(ws, row, 6, sv.tyLeVang,       fPct);
-
+        const auto& sv = dsSV[i];
+        lxw_row_t row  = startRow + 1 + (lxw_row_t)i;
+        int con        = maxVang - sv.soTietVang;
+        tongVang      += sv.soTietVang;
+        lxw_format *fR = sv.biCamThi       ? fCT
+                       : sv.tyLeVang > 0.8 ? fDanger
+                       : sv.tyLeVang > 0.5 ? fWarn : fOk;
         std::string tt = sv.biCamThi       ? "CẤM THI"
                        : sv.tyLeVang > 0.8 ? "Nguy hiểm"
-                       : sv.tyLeVang > 0.5 ? "Cần chú ý"
-                       :                      "Bình thường";
-        worksheet_write_string(ws, row, 7, tt.c_str(), fRow);
+                       : sv.tyLeVang > 0.5 ? "Cần chú ý" : "Bình thường";
+        std::string conStr = con > 0
+            ? "+" + std::to_string(con) + " tiết"
+            : "Vượt " + std::to_string(-con) + " tiết";
+
+        worksheet_write_number(ws, row, 0, i + 1,              fR);
+        worksheet_write_string(ws, row, 1, sv.maSV.c_str(),    fR);
+        worksheet_write_string(ws, row, 2, sv.tenSV.c_str(),   fR);
+        worksheet_write_number(ws, row, 3, sv.soTietVang,      fR);
+        worksheet_write_number(ws, row, 4, sv.soTietMuon,      fR);
+        worksheet_write_number(ws, row, 5, sv.soTietCoMat,     fR);
+        worksheet_write_number(ws, row, 6, sv.tyLeVang,        fPct);
+        worksheet_write_string(ws, row, 7, conStr.c_str(),     con > 0 ? fCon : fConBad);
+        worksheet_write_string(ws, row, 8, tt.c_str(),         fR);
     }
+
+    // Dong tong ket
+    lxw_row_t rowSum = startRow + 1 + (lxw_row_t)dsSV.size();
+    lxw_format *fSum = workbook_add_format(wb);
+    format_set_bold(fSum); format_set_bg_color(fSum, 0xD6E4F0); format_set_border(fSum, LXW_BORDER_THIN);
+    worksheet_write_string(ws, rowSum, 0, "TỔNG KẾT", fSum);
+    worksheet_write_string(ws, rowSum, 1, (std::to_string(dsSV.size()) + " SV").c_str(), fSum);
+    worksheet_write_string(ws, rowSum, 3, (std::to_string(tongVang) + " tiết").c_str(), fSum);
+    worksheet_write_string(ws, rowSum, 8, ("Cấm thi: " + std::to_string(nCT) + " SV").c_str(), fSum);
+
     workbook_close(wb);
 }
 
@@ -618,6 +727,7 @@ void BaoCaoManager::xuatToanDienXLSX(
     auto dsBuoi = _tkManager.thongKeTatCaBuoi(maLHP);
     auto dsCT   = _tkManager.dsSVBiCamThi(maLHP);
     auto tkLop  = _tkManager.thongKeLop(maLHP);
+    const auto& lhp = _tkManager.getLHPRef(maLHP);
     auto buoiMax = _tkManager.buoiVangCaoNhat(maLHP);
     std::size_t maxIdx = buoiMax.has_value() ? buoiMax->buoiIndex : SIZE_MAX;
 
@@ -659,35 +769,120 @@ void BaoCaoManager::xuatToanDienXLSX(
     // ---- SHEET 1: Tong Quan LHP ----
     {
         lxw_worksheet *ws = workbook_add_worksheet(wb, "Tổng Quan LHP");
+
+        // Lay ten GV
+        std::string tenGVStr = "(Chưa phân công)";
+        // Note: BaoCaoManager khong co reference GVManager - dung maGV
+        if (!lhp.getMaGV().empty()) tenGVStr = lhp.getMaGV();
+
+        // Dung writeInfoBlock cho nhat quan
+        int nCTSheet1 = (int)dsCT.size();
+        int soSVSheet1 = (int)dsSV.size();
+        // Viet thu cong vi co them du lieu tong quan
+        int nguongPct = (int)(lhp.getNguongCamThi() * 100);
+        int maxVangLop = (int)(lhp.getTongSoTiet() * lhp.getNguongCamThi());
+        int pctTienDo  = lhp.getTongSoTiet() > 0
+            ? (int)(100.0 * lhp.getSoTietDaHoc() / lhp.getTongSoTiet()) : 0;
+        std::string tenPhong = lhp.getTenPhongHoc().empty() ? "(Chưa có)" : lhp.getTenPhongHoc();
+
+        // Dem nhom SV
+        int svNguy = 0, svChuY = 0, svOk = 0;
+        for (const auto& sv : dsSV) {
+            if (sv.biCamThi) ; // da co nCTSheet1
+            else if (sv.tyLeVang > 0.8) ++svNguy;
+            else if (sv.tyLeVang > 0.5) ++svChuY;
+            else ++svOk;
+        }
+
+        worksheet_set_column(ws, 0, 0, 26, nullptr);
+        worksheet_set_column(ws, 1, 1, 32, nullptr);
+        worksheet_set_column(ws, 2, 2, 24, nullptr);
+        worksheet_set_column(ws, 3, 3, 24, nullptr);
+
+        // Title row
         worksheet_merge_range(ws, 0, 0, 0, 3,
             ("BÁO CÁO ĐIỂM DANH - " + maLHP + " - " + tkLop.tenLHP).c_str(), fTitle);
         worksheet_set_row(ws, 0, 30, nullptr);
-        worksheet_set_column(ws, 0, 0, 22, nullptr);
-        worksheet_set_column(ws, 1, 3, 25, nullptr);
 
-        lxw_format *fNorm = mkCell();
-        struct Row { const char* label; std::string val; };
-        std::vector<Row> rows = {
-            {"Mã lớp học phần",  maLHP},
-            {"Tên lớp học phần", tkLop.tenLHP},
-            {"Số sinh viên",     std::to_string(tkLop.soSinhVien)},
-            {"Số buổi đã học",   std::to_string(tkLop.soBuoiDaHoc)},
-            {"Số tiết đã học",   std::to_string(tkLop.soTietDaHoc)},
-            {"SV bị cấm thi",    std::to_string(tkLop.soSVBiCamThi)},
+        // Block thong tin (2 cot x 5 hang, bat dau tu row 2)
+        struct KV2 { const char* k; std::string v; bool warn; };
+        lxw_format *fWarnCell = workbook_add_format(wb);
+        format_set_border(fWarnCell, LXW_BORDER_THIN);
+        format_set_font_color(fWarnCell, 0xC00000); format_set_bold(fWarnCell);
+
+        std::vector<KV2> left2 = {
+            {"Mã lớp học phần:",  maLHP,               false},
+            {"Tên lớp học phần:", tkLop.tenLHP,         false},
+            {"Giảng viên (Mã):",  tenGVStr,             false},
+            {"Phòng học:",        tenPhong,             false},
+            {"Học kỳ:",           lhp.getHocKiStr(),   false},
         };
-        for (int r = 0; r < (int)rows.size(); ++r) {
-            worksheet_write_string(ws, (lxw_row_t)(r+2), 0, rows[r].label, fLabel);
-            worksheet_write_string(ws, (lxw_row_t)(r+2), 1, rows[r].val.c_str(), fNorm);
+        std::vector<KV2> right2 = {
+            {"Ngưỡng cấm thi:",   std::to_string(nguongPct) + "% (tối đa " + std::to_string(maxVangLop) + " tiết)", false},
+            {"Tổng số tiết:",     std::to_string(lhp.getTongSoTiet()) + " tiết", false},
+            {"Tiến độ học tập:",  std::to_string(lhp.getSoTietDaHoc()) + "/" + std::to_string(lhp.getTongSoTiet())
+                                  + " tiết (" + std::to_string(pctTienDo) + "%)", false},
+            {"Số SV ghi danh:",   std::to_string(soSVSheet1) + " SV", false},
+            {"Số buổi đã học:",   std::to_string(tkLop.soBuoiDaHoc) + " buổi / " + std::to_string(tkLop.soTietDaHoc) + " tiết", false},
+        };
+        int maxR2 = (int)std::max(left2.size(), right2.size());
+        for (int r = 0; r < maxR2; ++r) {
+            lxw_row_t row = (lxw_row_t)(r + 2);
+            if (r < (int)left2.size()) {
+                worksheet_write_string(ws, row, 0, left2[r].k,         fLabel);
+                worksheet_write_string(ws, row, 1, left2[r].v.c_str(), mkCell());
+            }
+            if (r < (int)right2.size()) {
+                worksheet_write_string(ws, row, 2, right2[r].k,         fLabel);
+                worksheet_write_string(ws, row, 3, right2[r].v.c_str(), right2[r].warn ? fWarnCell : mkCell());
+            }
         }
+
+        // Hang phan cach
+        lxw_row_t rowSep = (lxw_row_t)(maxR2 + 3);
+        lxw_format *fSub = workbook_add_format(wb);
+        format_set_bold(fSub); format_set_bg_color(fSub, 0x2E75B6);
+        format_set_font_color(fSub, LXW_COLOR_WHITE); format_set_border(fSub, LXW_BORDER_THIN);
+        worksheet_merge_range(ws, rowSep, 0, rowSep, 3, "THỐNG KÊ TÌNH TRẠNG SINH VIÊN", fSub);
+        worksheet_set_row(ws, rowSep, 20, nullptr);
+
+        // Phan nhom SV
+        struct NhomInfo { std::string ten; int so; uint32_t bg; uint32_t fg; };
+        std::vector<NhomInfo> nhoms = {
+            {"Bình thường (vắng < 50% ngưỡng)",  svOk,        0xE2EFDA, 0x375623},
+            {"Cần chú ý (50%-80% ngưỡng)",       svChuY,      0xFFFF99, 0x7D6608},
+            {"Nguy hiểm (>80% ngưỡng)",          svNguy,      0xFFCC99, 0x843C0C},
+            {"Bị cấm thi (≥ ngưỡng)",           nCTSheet1,   0xFF0000, 0xFFFFFF},
+        };
+        lxw_format *fTenNhom = workbook_add_format(wb);
+        format_set_border(fTenNhom, LXW_BORDER_THIN);
+        for (int n = 0; n < (int)nhoms.size(); ++n) {
+            lxw_row_t row = (lxw_row_t)(rowSep + 1 + n);
+            lxw_format *fNhom = workbook_add_format(wb);
+            format_set_border(fNhom, LXW_BORDER_THIN);
+            format_set_bg_color(fNhom, nhoms[n].bg);
+            format_set_font_color(fNhom, nhoms[n].fg);
+            format_set_bold(fNhom);
+            worksheet_write_string(ws, row, 0, nhoms[n].ten.c_str(), fNhom);
+            worksheet_write_number(ws, row, 1, nhoms[n].so, fNhom);
+            std::string pctStr = soSVSheet1 > 0
+                ? std::to_string((int)(100.0 * nhoms[n].so / soSVSheet1)) + "% số SV"
+                : "-";
+            worksheet_write_string(ws, row, 2, pctStr.c_str(), fNhom);
+        }
+
         // % vang TB
-        lxw_format *fPLabel = workbook_add_format(wb);
-        format_set_bold(fPLabel); format_set_bg_color(fPLabel, 0xD6E4F0);
-        format_set_border(fPLabel, LXW_BORDER_THIN);
-        lxw_format *fP = mkPct();
-        worksheet_write_string(ws, (lxw_row_t)(rows.size()+2), 0,
-                               "% vắng trung bình", fLabel);
-        worksheet_write_number(ws, (lxw_row_t)(rows.size()+2), 1,
-                               tkLop.tyLeVangTrungBinh, fP);
+        lxw_row_t rowPct = (lxw_row_t)(rowSep + 1 + nhoms.size() + 1);
+        worksheet_write_string(ws, rowPct, 0, "% Vắng trung bình toàn lớp:", fLabel);
+        lxw_format *fPctVal = mkPct();
+        worksheet_write_number(ws, rowPct, 1, tkLop.tyLeVangTrungBinh, fPctVal);
+
+        // Ngay xuat
+        lxw_row_t rowNgay2 = (lxw_row_t)(rowPct + 2);
+        lxw_format *fDim2 = workbook_add_format(wb);
+        format_set_italic(fDim2); format_set_font_color(fDim2, 0x808080);
+        worksheet_write_string(ws, rowNgay2, 0, "Ngày xuất báo cáo:", fLabel);
+        worksheet_write_string(ws, rowNgay2, 1, taoTimestamp().c_str(), fDim2);
     }
 
     // ---- SHEET 2: Diem Danh Buoi ----
@@ -700,6 +895,7 @@ void BaoCaoManager::xuatToanDienXLSX(
         lxw_format *fPHL= mkPct(0xFF9999);
         writeHeaderRow(ws, fH, {"Buổi","Ngày","Ca","Số Tiết","Có Mặt","Vắng","Muộn","% Có Mặt"});
         worksheet_set_column(ws, 1, 1, 14, nullptr);
+        int tongTiet=0, tongVang=0, tongMuon=0, tongCoMat=0;
         for (int i = 0; i < (int)dsBuoi.size(); ++i) {
             const auto &b = dsBuoi[i];
             lxw_row_t row = (lxw_row_t)(i+1);
@@ -714,7 +910,26 @@ void BaoCaoManager::xuatToanDienXLSX(
             worksheet_write_number(ws, row, 5, b.soVang,  fR);
             worksheet_write_number(ws, row, 6, b.soMuon,  fR);
             worksheet_write_number(ws, row, 7, b.tyLeCoMat, fPR);
+            tongTiet  += b.soTiet;
+            tongVang  += b.soVang;
+            tongMuon  += b.soMuon;
+            tongCoMat += b.soCoMat;
         }
+        // Dong tong ket
+        lxw_row_t rowSum = (lxw_row_t)(dsBuoi.size() + 1);
+        lxw_format *fSum2 = workbook_add_format(wb);
+        format_set_bold(fSum2); format_set_bg_color(fSum2, 0xD6E4F0);
+        format_set_border(fSum2, LXW_BORDER_THIN);
+        lxw_format *fPctSum = mkPct(0xD6E4F0);
+        worksheet_write_string(ws, rowSum, 0, "TỔNG / TB", fSum2);
+        worksheet_write_string(ws, rowSum, 1, (std::to_string(dsBuoi.size()) + " buổi").c_str(), fSum2);
+        worksheet_write_string(ws, rowSum, 2, "", fSum2);
+        worksheet_write_number(ws, rowSum, 3, tongTiet,  fSum2);
+        worksheet_write_number(ws, rowSum, 4, tongCoMat, fSum2);
+        worksheet_write_number(ws, rowSum, 5, tongVang,  fSum2);
+        worksheet_write_number(ws, rowSum, 6, tongMuon,  fSum2);
+        double tbCoMat = tongTiet > 0 ? (double)tongCoMat / tongTiet : 0.0;
+        worksheet_write_number(ws, rowSum, 7, tbCoMat,   fPctSum);
     }
 
     // ---- SHEET 3: Danh Sach SV ----

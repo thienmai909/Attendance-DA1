@@ -219,6 +219,11 @@ const LopHocPhan &ThongKeManager::timLop(const std::string &maLHP) const
     return _lhpManager.getLopRef(maLHP);
 }
 
+const LopHocPhan &ThongKeManager::getLHPRef(const std::string &maLHP) const
+{
+    return timLop(maLHP);
+}
+
 void ThongKeManager::tinhChiTietSV(
     const LopHocPhan &lhp,
     const std::string &maSV,
