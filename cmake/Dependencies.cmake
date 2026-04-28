@@ -50,21 +50,30 @@ target_link_libraries(deps::ftxui INTERFACE
     ftxui::component
 )
 
+if(WIN32)
+    set(VCPKG_TARGET_TRIPLET_DIR "x64-windows")
+elseif(UNIX)
+    set(VCPKG_TARGET_TRIPLET_DIR "x64-linux")
+endif()
+
+set(VCPKG_INSTALLED "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET_DIR}")
+
 find_package(unofficial-minizip CONFIG REQUIRED)
 # Find libxlsxwriter (no CMake config — locate manually)
+
 find_path(XLSXWRITER_INCLUDE_DIR
     NAMES xlsxwriter.h
-    PATHS "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/include"
+    PATHS "${VCPKG_INSTALLED}/include"
     NO_DEFAULT_PATH
 )
 find_library(XLSXWRITER_LIB_RELEASE
     NAMES xlsxwriter
-    PATHS "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/lib"
+    PATHS "${VCPKG_INSTALLED}/lib"
     NO_DEFAULT_PATH
 )
 find_library(XLSXWRITER_LIB_DEBUG
     NAMES xlsxwriter
-    PATHS "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/debug/lib"
+    PATHS "${VCPKG_INSTALLED}/debug/lib"
     NO_DEFAULT_PATH
 )
 
