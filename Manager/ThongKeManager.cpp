@@ -31,7 +31,8 @@ ThongKeSinhVien ThongKeManager::thongKeSV(
 }
 
 std::vector<ThongKeSinhVien> ThongKeManager::thongKeToanLop(
-    const std::string &maLHP
+    const std::string &maLHP,
+    SortSV sort
 ) const {
     auto dsMaSV = _dkManager.getDsMaSVTheoLop(maLHP);
 
@@ -39,10 +40,15 @@ std::vector<ThongKeSinhVien> ThongKeManager::thongKeToanLop(
     result.reserve(dsMaSV.size());
     for (const auto& maSV : dsMaSV)
         result.push_back(thongKeSV(maLHP, maSV));
-    
+
     std::sort(result.begin(), result.end(),
-        [](const ThongKeSinhVien& a, const ThongKeSinhVien& b) {
-            return a.tyLeVang > b.tyLeVang;
+        [sort](const ThongKeSinhVien& a, const ThongKeSinhVien& b) {
+            switch (sort) {
+                case SortSV::VANG_ASC: return a.tyLeVang < b.tyLeVang;
+                case SortSV::TEN_AZ:   return a.tenSV   < b.tenSV;
+                case SortSV::MSSV:     return a.maSV    < b.maSV;
+                default:               return a.tyLeVang > b.tyLeVang; // VANG_DESC
+            }
         }
     );
 
@@ -99,7 +105,8 @@ ThongKeBuoi ThongKeManager::thongKeBuoi(
 }
 
 std::vector<ThongKeBuoi> ThongKeManager::thongKeTatCaBuoi(
-    const std::string &maLHP
+    const std::string &maLHP,
+    SortBuoi sort
 ) const {
     const auto& lopHocPhan = timLop(maLHP);
     std::vector<ThongKeBuoi> result;
@@ -107,8 +114,26 @@ std::vector<ThongKeBuoi> ThongKeManager::thongKeTatCaBuoi(
         std::size_t i = 0;
         i < lopHocPhan.getDsBuoiDiemDanh().size();
         ++i
-    ) 
+    )
         result.push_back(thongKeBuoi(maLHP, i));
+
+    // Ap dung sort (NGAY_ASC = thu tu tu dong, khong can sort)
+    switch (sort) {
+        case SortBuoi::COMAT_ASC:
+            std::sort(result.begin(), result.end(),
+                [](const ThongKeBuoi& a, const ThongKeBuoi& b){
+                    return a.tyLeCoMat < b.tyLeCoMat;
+                });
+            break;
+        case SortBuoi::VANG_DESC:
+            std::sort(result.begin(), result.end(),
+                [](const ThongKeBuoi& a, const ThongKeBuoi& b){
+                    return a.soVang > b.soVang;
+                });
+            break;
+        default: break; // NGAY_ASC: giu thu tu vector
+    }
+
     return result;
 }
 
@@ -148,15 +173,19 @@ ThongKeLop ThongKeManager::thongKeLop(const std::string &maLHP) const
     return tkL;
 }
 
-std::vector<ThongKeLop> ThongKeManager::thongKeTatCaLop() const
+std::vector<ThongKeLop> ThongKeManager::thongKeTatCaLop(SortLop sort) const
 {
     std::vector<ThongKeLop> result;
     for (const auto& lopHocPhan : _lhpManager.getAll())
         result.push_back(thongKeLop(lopHocPhan.getMaLHP()));
-    
+
     std::sort(result.begin(), result.end(),
-        [](const ThongKeLop& a, const ThongKeLop& b) {
-            return a.tyLeVangTrungBinh > b.tyLeVangTrungBinh;
+        [sort](const ThongKeLop& a, const ThongKeLop& b) {
+            switch (sort) {
+                case SortLop::SO_CT_DESC: return a.soSVBiCamThi       > b.soSVBiCamThi;
+                case SortLop::MA_LHP_AZ:  return a.maLHP              < b.maLHP;
+                default:                  return a.tyLeVangTrungBinh  > b.tyLeVangTrungBinh;
+            }
         }
     );
 

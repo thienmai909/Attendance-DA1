@@ -80,6 +80,11 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
     int luaChon = -1;
     std::string thongBao;
 
+    // Sort state (giu nguyen khi doi lop)
+    SortSV sortSV = SortSV::VANG_DESC;
+    SortLop sortLop = SortLop::VANG_DESC;
+    SortBuoi sortBuoi = SortBuoi::NGAY_ASC;
+
     auto dsLop = getLopList();
 
     // ----------------------------------------------------------
@@ -162,21 +167,37 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
 
               // --- Tab 0: Tong quan (admin) ---
               if (activeTab == 0 && isAdmin) {
-                auto dsLopTK = app.getTKManager().thongKeTatCaLop();
+                // Sort label
+                std::string sortLopLabel = (sortLop == SortLop::VANG_DESC)
+                                               ? "[V] \u25bc %V\u1eafng"
+                                           : (sortLop == SortLop::SO_CT_DESC)
+                                               ? "[C] \u25bc SV CT"
+                                               : "[L] \u25b2 M\u00e3 LHP";
+
+                auto dsLopTK = app.getTKManager().thongKeTatCaLop(sortLop);
                 auto lopMax = app.getTKManager().lopVangCaoNhat();
 
                 Elements rows;
                 rows.push_back(
                     hbox({
-                        text(" Mã LHP   ") | bold | size(WIDTH, EQUAL, 12),
-                        text(" Tên LHP                     ") | bold |
+                        text(" M\u00e3 LHP   ") | bold | size(WIDTH, EQUAL, 12),
+                        text(" T\u00ean LHP                     ") | bold |
                             size(WIDTH, EQUAL, 30),
                         text(" SV  ") | bold | size(WIDTH, EQUAL, 6),
-                        text(" Buổi") | bold | size(WIDTH, EQUAL, 6),
-                        text(" % Vắng  ") | bold | size(WIDTH, EQUAL, 9),
-                        text(" SV CT") | bold | size(WIDTH, EQUAL, 7),
+                        text(" Bu\u1ed5i") | bold | size(WIDTH, EQUAL, 6),
+                        text(sortLop == SortLop::VANG_DESC
+                                 ? " %V\u1eafng \u25bc"
+                                 : " %V\u1eafng  ") |
+                            bold | size(WIDTH, EQUAL, 9) |
+                            (sortLop == SortLop::VANG_DESC ? inverted
+                                                           : nothing),
+                        text(sortLop == SortLop::SO_CT_DESC ? " SV CT\u25bc"
+                                                            : " SV CT") |
+                            bold | size(WIDTH, EQUAL, 7) |
+                            (sortLop == SortLop::SO_CT_DESC ? inverted
+                                                            : nothing),
                     }) |
-                    inverted);
+                    color(Color::White));
                 rows.push_back(separator());
                 for (const auto &lk : dsLopTK) {
                   int pct = (int)(lk.tyLeVangTrungBinh * 100);
@@ -206,12 +227,14 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                               std::to_string(
                                   (int)(lopMax->tyLeVangTrungBinh * 100)) +
                               "%)"
-                        : "(Chưa có dữ liệu)";
+                        : "(Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u)";
 
-                content =
-                    vbox({hbox({text(" Lớp vắng cao nhất: ") | dim,
-                                text(maxInfo) | bold | color(Color::Red)}),
-                          separator(), vbox(std::move(rows)) | frame | flex});
+                content = vbox(
+                    {hbox({text(" L\u1edbp v\u1eafng cao nh\u1ea5t: ") | dim,
+                           text(maxInfo) | bold | color(Color::Red), filler(),
+                           text(" [S] S\u1eafp x\u1ebfp: ") | dim,
+                           text(sortLopLabel) | bold | color(Color::Cyan)}),
+                     separator(), vbox(std::move(rows)) | frame | flex});
               }
 
               else if (activeTab == 1) {
@@ -338,10 +361,18 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
               else if (activeTab == 2) {
                 if (!dsLop.empty() && selLop < (int)dsLop.size()) {
                   const std::string &maLHP = dsLop[selLop].getMaLHP();
-                  auto dsSV = app.getTKManager().thongKeToanLop(maLHP);
+                  // Truyen sort vao ham
+                  auto dsSV = app.getTKManager().thongKeToanLop(maLHP, sortSV);
                   const auto &lhp2 = app.getTKManager().getLHPRef(maLHP);
                   int maxVang2 =
                       (int)(lhp2.getTongSoTiet() * lhp2.getNguongCamThi());
+
+                  // Sort label cho indicator
+                  std::string sortSVLabel =
+                      (sortSV == SortSV::VANG_DESC)  ? "\u25bc V\u1eafng%"
+                      : (sortSV == SortSV::VANG_ASC) ? "\u25b2 V\u1eafng%"
+                      : (sortSV == SortSV::TEN_AZ)   ? "\u25b2 T\u00ean"
+                                                     : "\u25b2 M\u00e3 SV";
 
                   int nCT = 0, nNguy = 0, nChuY = 0;
                   for (const auto &sv : dsSV) {
@@ -354,10 +385,11 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                   }
 
                   Elements svRows;
-                  // Dong tom tat
+                  // Dong tom tat + sort indicator
                   int nOk = (int)dsSV.size() - nCT - nNguy - nChuY;
                   svRows.push_back(hbox({
-                      text(" Tổng: " + std::to_string(dsSV.size()) + " SV  ") |
+                      text(" T\u1ed5ng: " + std::to_string(dsSV.size()) +
+                           " SV  ") |
                           dim,
                       text("[CT] " + std::to_string(nCT) + "  ") |
                           color(Color::Red),
@@ -366,24 +398,39 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                       text("[!] " + std::to_string(nChuY) + "  ") |
                           color(Color::Yellow),
                       text("[OK] " + std::to_string(nOk)) | color(Color::Green),
-                      text("  | Tối đa vắng: " + std::to_string(maxVang2) +
-                           " tiết") |
+                      text("  | T\u1ed1i \u0111a v\u1eafng: " +
+                           std::to_string(maxVang2) + " ti\u1ebft") |
                           dim,
+                      filler(),
+                      text(" [S] S\u1eafp: ") | dim,
+                      text(sortSVLabel) | bold | color(Color::Cyan),
                   }));
                   svRows.push_back(separator());
                   svRows.push_back(
                       hbox({
                           text(" # ") | size(WIDTH, EQUAL, 4),
-                          text(" Mã SV    ") | bold | size(WIDTH, EQUAL, 11),
-                          text(" Họ Tên                    ") | bold |
-                              size(WIDTH, EQUAL, 28),
-                          text(" Vắng") | bold | size(WIDTH, EQUAL, 6),
-                          text(" Muộn") | bold | size(WIDTH, EQUAL, 6),
-                          text(" % Vắng") | bold | size(WIDTH, EQUAL, 8),
-                          text(" Còn vắng") | bold | size(WIDTH, EQUAL, 10),
-                          text(" Trạng thái") | bold,
+                          text(" M\u00e3 SV    ") | bold |
+                              size(WIDTH, EQUAL, 11) |
+                              (sortSV == SortSV::MSSV ? inverted : nothing),
+                          text(" H\u1ecd T\u00ean                    ") | bold |
+                              size(WIDTH, EQUAL, 28) |
+                              (sortSV == SortSV::TEN_AZ ? inverted : nothing),
+                          text(" V\u1eafng") | bold | size(WIDTH, EQUAL, 6) |
+                              (sortSV == SortSV::VANG_DESC ||
+                                       sortSV == SortSV::VANG_ASC
+                                   ? inverted
+                                   : nothing),
+                          text(" Mu\u1ed9n") | bold | size(WIDTH, EQUAL, 6),
+                          text(" % V\u1eafng") | bold | size(WIDTH, EQUAL, 8) |
+                              (sortSV == SortSV::VANG_DESC ||
+                                       sortSV == SortSV::VANG_ASC
+                                   ? inverted
+                                   : nothing),
+                          text(" C\u00f2n v\u1eafng") | bold |
+                              size(WIDTH, EQUAL, 10),
+                          text(" Tr\u1ea1ng th\u00e1i") | bold,
                       }) |
-                      inverted);
+                      color(Color::White));
                   svRows.push_back(separator());
                   for (int i = 0; i < (int)dsSV.size(); ++i) {
                     const auto &sv = dsSV[i];
@@ -429,25 +476,44 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
               else if (activeTab == 3) {
                 if (!dsLop.empty() && selLop < (int)dsLop.size()) {
                   const std::string &maLHP = dsLop[selLop].getMaLHP();
-                  auto dsBuoi = app.getTKManager().thongKeTatCaBuoi(maLHP);
+                  auto dsBuoi =
+                      app.getTKManager().thongKeTatCaBuoi(maLHP, sortBuoi);
                   auto maxB = app.getTKManager().buoiVangCaoNhat(maLHP);
                   std::size_t maxIdx =
                       maxB.has_value() ? maxB->buoiIndex : SIZE_MAX;
 
+                  // Sort label
+                  std::string sortBuoiLabel =
+                      (sortBuoi == SortBuoi::NGAY_ASC)    ? "\u25b2 Ng\u00e0y"
+                      : (sortBuoi == SortBuoi::COMAT_ASC) ? "\u25b2 %CM"
+                                                          : "\u25bc V\u1eafng";
+
                   Elements bRows;
+                  // Sort indicator row
+                  bRows.push_back(hbox({
+                      filler(),
+                      text(" [S] S\u1eafp x\u1ebfp: ") | dim,
+                      text(sortBuoiLabel) | bold | color(Color::Cyan),
+                  }));
                   bRows.push_back(
                       hbox({
-                          text(" Buổi") | bold | size(WIDTH, EQUAL, 6),
-                          text(" Ngày          ") | bold |
+                          text(" Bu\u1ed5i") | bold | size(WIDTH, EQUAL, 6) |
+                              (sortBuoi == SortBuoi::NGAY_ASC ? inverted
+                                                              : nothing),
+                          text(" Ng\u00e0y          ") | bold |
                               size(WIDTH, EQUAL, 15),
                           text(" Ca  ") | bold | size(WIDTH, EQUAL, 6),
-                          text(" Tiết") | bold | size(WIDTH, EQUAL, 6),
+                          text(" Ti\u1ebft") | bold | size(WIDTH, EQUAL, 6),
                           text("  CM ") | bold | size(WIDTH, EQUAL, 6),
-                          text(" Vắng") | bold | size(WIDTH, EQUAL, 6),
-                          text(" Muộn") | bold | size(WIDTH, EQUAL, 6),
-                          text(" %CM    ") | bold | size(WIDTH, EQUAL, 9),
+                          text(" V\u1eafng") | bold | size(WIDTH, EQUAL, 6) |
+                              (sortBuoi == SortBuoi::VANG_DESC ? inverted
+                                                               : nothing),
+                          text(" Mu\u1ed9n") | bold | size(WIDTH, EQUAL, 6),
+                          text(" %CM    ") | bold | size(WIDTH, EQUAL, 9) |
+                              (sortBuoi == SortBuoi::COMAT_ASC ? inverted
+                                                               : nothing),
                       }) |
-                      inverted);
+                      color(Color::White));
                   bRows.push_back(separator());
                   for (const auto &b : dsBuoi) {
                     bool isMax = (b.buoiIndex == maxIdx);
@@ -554,6 +620,23 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
             luaChon = 99;
             screen.Exit();
             return true;
+          }
+          // [S] Sort cycle theo tab hien tai
+          if (e == Event::Character('s') || e == Event::Character('S')) {
+            if (activeTab == 0 && isAdmin) {
+              sortLop =
+                  static_cast<SortLop>((static_cast<int>(sortLop) + 1) % 3);
+              return true;
+            }
+            if (activeTab == 2) {
+              sortSV = static_cast<SortSV>((static_cast<int>(sortSV) + 1) % 4);
+              return true;
+            }
+            if (activeTab == 3) {
+              sortBuoi =
+                  static_cast<SortBuoi>((static_cast<int>(sortBuoi) + 1) % 3);
+              return true;
+            }
           }
           return false;
         });
