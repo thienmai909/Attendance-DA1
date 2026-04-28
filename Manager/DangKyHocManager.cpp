@@ -1,4 +1,4 @@
-#include <DangKyHocManager.hpp>
+﻿#include <DangKyHocManager.hpp>
 
 DangKyHocManager::DangKyHocManager(std::filesystem::path filePath)
     : _filePath(std::move(filePath))
@@ -87,7 +87,7 @@ std::vector<std::string> DangKyHocManager::getDsMaLHPTheoSV(const std::string &m
     std::vector<std::string> result;
     for (const auto& dangKy : _dsDangKy)
         if (dangKy.getMaSV() == maSV && dangKy.isActive())
-            result.push_back(dangKy.getMaSV());
+            result.push_back(dangKy.getMaLopHocPhan()); // FIX #1: push maLHP, khong phai maSV
     return result;
 }
 

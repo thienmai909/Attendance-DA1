@@ -171,12 +171,12 @@ int LopHocPhan::soTietVangToiDaChoPhep(const std::string& maSV) const
 
 std::string LopHocPhan::tienDoHocTapStr() const
 {
-    return std::format("Đã học: {} buổi ({}/{} tiết) - {:.2f}%", 
-        this->getSoBuoiDaHoc(),
-        this->getSoTietDaHoc(),
-        this->getTongSoTiet(),
-        static_cast<double>(this->getSoTietDaHoc()) / this->getTongSoTiet() * 100.0
-    );
+    int tong = getTongSoTiet();
+    double pct = (tong > 0)
+        ? static_cast<double>(getSoTietDaHoc()) / tong * 100.0
+        : 0.0;
+    return std::format("Đã học: {} buổi ({}/{} tiết) - {:.2f}%",
+        getSoBuoiDaHoc(), getSoTietDaHoc(), tong, pct);
 }
 
 void LopHocPhan::themBuoiDiemDanh(const DateTime &ngayDiemDanh, CaHoc caDiemDanh, int soTiet)

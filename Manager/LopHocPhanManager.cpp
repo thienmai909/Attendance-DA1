@@ -92,13 +92,9 @@ void LopHocPhanManager::themBuoi(
     CaHoc ca,
     int soTiet)
 {
-    try {
-        auto& lopHocPhan = getLopRef(maLHP);
-        lopHocPhan.themBuoiDiemDanh(ngay, ca, soTiet);
-        _isDirty = true;
-    } catch (const std::runtime_error& e) {
-        std::cout << e.what() << std::endl;
-    }
+    auto& lopHocPhan = getLopRef(maLHP); // throws invalid_argument nếu không tìm thấy
+    lopHocPhan.themBuoiDiemDanh(ngay, ca, soTiet); // throws runtime_error nếu trùng ngày/ca
+    _isDirty = true;
 }
 
 LopHocPhan &LopHocPhanManager::getLopRef(const std::string &maLHP)
@@ -134,8 +130,15 @@ void LopHocPhanManager::ganGiangVien(const std::string &maLHP, const std::string
 
 void LopHocPhanManager::xoaGiangVien(const std::string &maGV)
 {
-    auto& lopHocPhan = getLopRef(maGV);
-    lopHocPhan.xoaGiangVien();
+    bool found = false;
+    for (auto& lhp : _dsLHP) {
+        if (lhp.getMaGV() == maGV) {
+            lhp.xoaGiangVien();
+            found = true;
+        }
+    }
+    if (!found)
+        throw std::invalid_argument("Không tìm thấy lớp nào của GV: " + maGV);
     _isDirty = true;
 }
 

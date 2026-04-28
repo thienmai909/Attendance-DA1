@@ -90,7 +90,7 @@ int DiemDanhManager::soTietVang(const std::string &maLHP,
 double DiemDanhManager::tiLeVang(const std::string &maLHP,
                                  const std::string &maSV) const {
   const auto &lopHocPhan = timLopConst(maLHP);
-  int tongTiet = lopHocPhan.getSoBuoiDaHoc();
+  int tongTiet = lopHocPhan.getSoTietDaHoc();
   if (tongTiet == 0)
     return 0.0;
   return static_cast<double>(soTietVang(maLHP, maSV)) / tongTiet;
@@ -167,19 +167,19 @@ DiemDanhManager::kiemTraNguong(const std::string &maLHP,
                                const std::string &maSV) const {
   const auto &lhp = timLopConst(maLHP);
   TrangThaiNguong t;
-  t.tyLeVang = lhp.tyLeVang(maSV);            // đã có
+  t.tyLeVang = lhp.tyLeVang(maSV); // đã có
   double nguong = lhp.getNguongCamThi();
   t.phanTramNguong = (nguong > 0.0) ? (t.tyLeVang / nguong) : 0.0;
-  t.soTietConLai   = lhp.soTietVangToiDaChoPhep(maSV); // đã có
-  t.biCamThi       = lhp.biCamThi(maSV);      // đã có
-  t.daVuotNguong   = !t.biCamThi && (t.phanTramNguong > 0.8);
-  t.sapVuotNguong  = !t.biCamThi && !t.daVuotNguong && (t.phanTramNguong > 0.5);
+  t.soTietConLai = lhp.soTietVangToiDaChoPhep(maSV); // đã có
+  t.biCamThi = lhp.biCamThi(maSV);                   // đã có
+  t.daVuotNguong = !t.biCamThi && (t.phanTramNguong > 0.8);
+  t.sapVuotNguong = !t.biCamThi && !t.daVuotNguong && (t.phanTramNguong > 0.5);
   return t;
 }
 
 std::vector<DiemDanhManager::LichSuBuoi>
 DiemDanhManager::lichSuDiemDanhSV(const std::string &maLHP,
-                                   const std::string &maSV) const {
+                                  const std::string &maSV) const {
   const auto &lhp = timLopConst(maLHP);
   std::vector<LichSuBuoi> result;
   const auto &dsBuoi = lhp.getDsBuoiDiemDanh();
@@ -188,17 +188,17 @@ DiemDanhManager::lichSuDiemDanhSV(const std::string &maLHP,
     const auto &buoi = dsBuoi[i];
     LichSuBuoi ls;
     ls.buoiIndex = i;
-    ls.ngay      = buoi.getNgayDiemDanhStr();
-    ls.ca        = buoi.getCaDiemDanhStr();
-    ls.soTiet    = buoi.getSoTiet();
+    ls.ngay = buoi.getNgayDiemDanhStr();
+    ls.ca = buoi.getCaDiemDanhStr();
+    ls.soTiet = buoi.getSoTiet();
     if (const auto *ct = buoi.findChiTiet(maSV)) {
       ls.trangThai = ct->getTrangThai();
-      ls.coPhep    = ct->isCoPhep();
-      ls.ghiChu    = ct->getGhiChu();
+      ls.coPhep = ct->isCoPhep();
+      ls.ghiChu = ct->getGhiChu();
     } else {
       ls.trangThai = Status::DEFAULT;
-      ls.coPhep    = false;
-      ls.ghiChu    = "";
+      ls.coPhep = false;
+      ls.ghiChu = "";
     }
     result.push_back(std::move(ls));
   }
