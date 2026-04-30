@@ -169,11 +169,12 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
               // --- Tab 0: Tong quan (admin) ---
               if (activeTab == 0 && isAdmin) {
                 // Sort label
-                std::string sortLopLabel = (sortLop == SortLop::VANG_DESC)
-                                               ? "[V] \u25bc %V\u1eafng"
-                                           : (sortLop == SortLop::SO_CT_DESC)
-                                               ? "[C] \u25bc SV CT"
-                                               : "[L] \u25b2 M\u00e3 LHP";
+                std::string sortLopLabel =
+                    (sortLop == SortLop::VANG_DESC)  ? "[V] \u25bc %V\u1eafng"
+                    : (sortLop == SortLop::SO_CT_DESC) ? "[C] \u25bc SV CT"
+                    : (sortLop == SortLop::MA_LHP_AZ)  ? "[L] \u25b2 M\u00e3 LHP"
+                    : (sortLop == SortLop::TEN_AZ)     ? "[A] \u25b2 T\u00ean A\u2192Z"
+                                                       : "[Z] \u25bc T\u00ean Z\u2192A";
 
                 auto dsLopTK = app.getTKManager().thongKeTatCaLop(sortLop);
                 auto lopMax = app.getTKManager().lopVangCaoNhat();
@@ -190,13 +191,14 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                                  ? " %V\u1eafng \u25bc"
                                  : " %V\u1eafng  ") |
                             bold | size(WIDTH, EQUAL, 9) |
-                            (sortLop == SortLop::VANG_DESC ? inverted
-                                                           : nothing),
-                        text(sortLop == SortLop::SO_CT_DESC ? " SV CT\u25bc"
-                                                            : " SV CT") |
+                            (sortLop == SortLop::VANG_DESC ? inverted : nothing),
+                        text(sortLop == SortLop::SO_CT_DESC ? " SV CT\u25bc" : " SV CT") |
                             bold | size(WIDTH, EQUAL, 7) |
-                            (sortLop == SortLop::SO_CT_DESC ? inverted
-                                                            : nothing),
+                            (sortLop == SortLop::SO_CT_DESC ? inverted : nothing),
+                        text(sortLop == SortLop::TEN_AZ ? " T\u00ean\u25b2"
+                             : sortLop == SortLop::TEN_ZA  ? " T\u00ean\u25bc" : " T\u00ean  ") |
+                            bold | size(WIDTH, EQUAL, 8) |
+                            ((sortLop == SortLop::TEN_AZ || sortLop == SortLop::TEN_ZA) ? inverted : nothing),
                     }) |
                     color(Color::Default));
                 rows.push_back(separator());
@@ -361,7 +363,8 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                   std::string sortSVLabel =
                       (sortSV == SortSV::VANG_DESC)  ? "\u25bc V\u1eafng%"
                       : (sortSV == SortSV::VANG_ASC) ? "\u25b2 V\u1eafng%"
-                      : (sortSV == SortSV::TEN_AZ)   ? "\u25b2 T\u00ean"
+                      : (sortSV == SortSV::TEN_AZ)   ? "\u25b2 T\u00ean A\u2192Z"
+                      : (sortSV == SortSV::TEN_ZA)   ? "\u25bc T\u00ean Z\u2192A"
                                                      : "\u25b2 M\u00e3 SV";
 
                   int nCT = 0, nNguy = 0, nChuY = 0;
@@ -404,7 +407,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                               (sortSV == SortSV::MSSV ? inverted : nothing),
                           text(" H\u1ecd T\u00ean                    ") | bold |
                               size(WIDTH, EQUAL, 28) |
-                              (sortSV == SortSV::TEN_AZ ? inverted : nothing),
+                              ((sortSV == SortSV::TEN_AZ || sortSV == SortSV::TEN_ZA) ? inverted : nothing),
                           text(" V\u1eafng") | bold | size(WIDTH, EQUAL, 6) |
                               (sortSV == SortSV::VANG_DESC ||
                                        sortSV == SortSV::VANG_ASC
@@ -625,11 +628,11 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
           if (e == Event::Character('s') || e == Event::Character('S')) {
             if (activeTab == 0 && isAdmin) {
               sortLop =
-                  static_cast<SortLop>((static_cast<int>(sortLop) + 1) % 3);
+                  static_cast<SortLop>((static_cast<int>(sortLop) + 1) % 5);
               return true;
             }
             if (activeTab == 2) {
-              sortSV = static_cast<SortSV>((static_cast<int>(sortSV) + 1) % 4);
+              sortSV = static_cast<SortSV>((static_cast<int>(sortSV) + 1) % 5);
               return true;
             }
             if (activeTab == 3) {

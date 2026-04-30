@@ -16,13 +16,16 @@ enum class SortSV {
     VANG_DESC,  // Vang nhieu nhat len dau (mac dinh)
     VANG_ASC,   // Vang it nhat len dau
     TEN_AZ,     // Ho ten A->Z
+    TEN_ZA,     // Ho ten Z->A
     MSSV        // Ma SV A->Z
 };
 
 enum class SortLop {
     VANG_DESC,    // % vang TB cao nhat len dau (mac dinh)
     SO_CT_DESC,   // So SV cam thi nhieu nhat len dau
-    MA_LHP_AZ     // Ma LHP A->Z
+    MA_LHP_AZ,    // Ma LHP A->Z
+    TEN_AZ,       // Ten LHP A->Z
+    TEN_ZA        // Ten LHP Z->A
 };
 
 enum class SortBuoi {

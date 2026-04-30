@@ -46,6 +46,7 @@ std::vector<ThongKeSinhVien> ThongKeManager::thongKeToanLop(
             switch (sort) {
                 case SortSV::VANG_ASC: return a.tyLeVang < b.tyLeVang;
                 case SortSV::TEN_AZ:   return a.tenSV   < b.tenSV;
+                case SortSV::TEN_ZA:   return a.tenSV   > b.tenSV;
                 case SortSV::MSSV:     return a.maSV    < b.maSV;
                 default:               return a.tyLeVang > b.tyLeVang; // VANG_DESC
             }
@@ -182,9 +183,11 @@ std::vector<ThongKeLop> ThongKeManager::thongKeTatCaLop(SortLop sort) const
     std::sort(result.begin(), result.end(),
         [sort](const ThongKeLop& a, const ThongKeLop& b) {
             switch (sort) {
-                case SortLop::SO_CT_DESC: return a.soSVBiCamThi       > b.soSVBiCamThi;
-                case SortLop::MA_LHP_AZ:  return a.maLHP              < b.maLHP;
-                default:                  return a.tyLeVangTrungBinh  > b.tyLeVangTrungBinh;
+                case SortLop::SO_CT_DESC: return a.soSVBiCamThi      > b.soSVBiCamThi;
+                case SortLop::MA_LHP_AZ:  return a.maLHP             < b.maLHP;
+                case SortLop::TEN_AZ:     return a.tenLHP            < b.tenLHP;
+                case SortLop::TEN_ZA:     return a.tenLHP            > b.tenLHP;
+                default:                  return a.tyLeVangTrungBinh > b.tyLeVangTrungBinh;
             }
         }
     );
