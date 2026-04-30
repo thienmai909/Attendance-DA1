@@ -52,6 +52,7 @@ void screenSinhVien(AppManager &app) {
                 if (!danhSach.empty() &&
                     selected < static_cast<int>(danhSach.size())) {
                   const auto &sv = danhSach[selected];
+                  auto lhSV = sv.getLienHe();
                   cachedChiTiet =
                       vbox({text(" CHI TIẾT ") | bold | center, separator(),
                             hbox({text(" Mã SV     : ") | dim,
@@ -62,8 +63,11 @@ void screenSinhVien(AppManager &app) {
                                   text(sv.getLopSHStr())}),
                             hbox({text(" Ngày sinh : ") | dim,
                                   text(sv.getNgaySinhStr())}),
-                            hbox({text(" Liên hệ   : ") | dim,
-                                  text(sv.getLienHeStr())}),
+                            separator(),
+                            hbox({text(" Email     : ") | dim,
+                                  text(lhSV.has_value() ? lhSV->getEmail() : "(none)") | color(Color::Cyan)}),
+                            hbox({text(" SĐT       : ") | dim,
+                                  text(lhSV.has_value() ? lhSV->getPhoneNumber() : "(none)")}),
                             filler()});
                 }
               }
@@ -81,7 +85,7 @@ void screenSinhVien(AppManager &app) {
                                separator(), menuSinhVien->Render() | flex}) |
                              border | flex,
 
-                         cachedChiTiet | border | size(WIDTH, EQUAL, 80)}) |
+                         cachedChiTiet | border | size(WIDTH, EQUAL, 42)}) |
                        flex,
                    separator(),
                    UiHelper::makeFooter(

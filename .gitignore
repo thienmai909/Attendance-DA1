@@ -3,4 +3,5 @@ build-unix/
 .vscode/
 data/
 logs/
+output/
 git clone --recurse-submodules https://github.com/thienmai909/Attendance-DA1.git
