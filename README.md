@@ -211,7 +211,7 @@ Dự án đi kèm công cụ **Seed** để tạo bộ dữ liệu mẫu hoàn c
 | Lớp học phần | 4 (IT2090, IT3210, IT4050, IT5030) |
 | Sinh viên | 45 SV (phân bổ vào các LHP) |
 | Giảng viên | 3 GV + 1 Admin |
-| Phòng học | 7 phòng (các loại: Thường, Máy tính, Thí nghiệm) |
+| Phòng học | 7 phòng (các loại: Thường, Máy tính) |
 | Buổi điểm danh | ~28 buổi (2–3 tiết/buổi, đã khóa) |
 
 ### Chạy Seed
