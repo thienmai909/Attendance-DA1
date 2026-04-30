@@ -17,6 +17,7 @@ static std::string screenNhapGhiChu(const std::string &maSV,
 
   InputOption opt;
   opt.multiline = false;
+  opt.transform = [](InputState state) -> Element { return state.element | color(Color::Black); };
   auto input = Input(&ghiChu, "Nhập ghi chú...", opt);
   auto btnLuu = Button("Lưu", [&] { confirmed = true; screen.Exit(); });
   auto btnHuy = Button("Hủy [Esc]", [&] { screen.Exit(); });
@@ -156,7 +157,7 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
     recalcStats();
 
     std::string quickInput;
-    auto inputMaSV = Input(&quickInput, "Mã SV...", InputOption::Default());
+    auto inputMaSV = Input(&quickInput, "Mã SV...", makeInputOpt());
 
     auto menuSV = Menu(&entries, &selected);
 
@@ -320,7 +321,7 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                       text("  Vắng: ") | dim,
                       text(std::to_string(soVang)) | color(Color::Red) | bold,
                       text("  Muộn: ") | dim,
-                      text(std::to_string(soMuon)) | color(Color::Yellow) | bold,
+                      text(std::to_string(soMuon)) | color(Color::Magenta) | bold,
                       text("  Chưa ĐD: ") | dim,
                       text(std::to_string(soChuaDD)) | color(Color::GrayDark) | bold,
                       text("  /" + std::to_string(total)) | dim,
@@ -336,7 +337,7 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                        : [&]() -> Element {
                            if (isAdmin) {
                              return vbox({text(" CHẾ ĐỘ: XEM & QUẢN LÝ ") | bold |
-                                              color(Color::Yellow) | center,
+                                              color(Color::Magenta) | center,
                                           separator(),
                                           hbox({khoa ? btnMoKhoa->Render()
                                                      : text(" [Chưa khóa] ") | dim,
@@ -375,7 +376,7 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                     hbox({text("  Vắng   : ") | dim,
                           text(std::to_string(cfVang)) | bold | color(Color::Red)}),
                     hbox({text("  Muộn   : ") | dim,
-                          text(std::to_string(cfMuon)) | bold | color(Color::Yellow)}),
+                          text(std::to_string(cfMuon)) | bold | color(Color::Magenta)}),
                     hbox({text("  Chưa ĐD: ") | dim,
                           text(std::to_string(cfChuaDD)) | bold}),
                     separator(),

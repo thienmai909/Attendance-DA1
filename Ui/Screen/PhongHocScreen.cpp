@@ -35,6 +35,7 @@ void screenPhongHoc(AppManager& app) {
         int selectedLoai = 0;
         std::vector<std::string> loaiEntries = {"Lý thuyết", "Thực hành"};
         InputOption opt; opt.multiline = false;
+        opt.transform = [](InputState state) -> Element { return state.element | color(Color::Black); };
         auto inputMaComp  = Input(&inputMa,    "B2-01", opt);
         auto inputSCComp  = Input(&inputSCStr, "50",    opt);
         auto menuLoai     = Radiobox(&loaiEntries, &selectedLoai);

@@ -1,4 +1,4 @@
-﻿#include <GiangVienForm.hpp>
+#include <GiangVienForm.hpp>
 #include <GiangVienScreen.hpp>
 #include <UiHelper.hpp>
 #include <ftxui/component/component.hpp>
@@ -68,7 +68,7 @@ void screenGiangVien(AppManager &app) {
                            text(giangVien.getTenTaiKhoan())}),
                      separator(),
                      hbox({text(" Email      : ") | dim,
-                           text(lhGV.has_value() ? lhGV->getEmail() : "") | color(Color::Cyan)}),
+                           text(lhGV.has_value() ? lhGV->getEmail() : "") | color(Color::Blue)}),
                      hbox({text(" SDT        : ") | dim,
                            text(lhGV.has_value() ? lhGV->getPhoneNumber() : "")}),
                      separator(),
@@ -76,7 +76,7 @@ void screenGiangVien(AppManager &app) {
                            text(std::to_string(soLop)) | bold}),
                      hbox({text(" Quyền      : ") | dim,
                            giangVien.isAdmin()
-                               ? text("Admin") | color(Color::Yellow) | bold
+                               ? text("Admin") | color(Color::Magenta) | bold
                                : text("Giảng viên") | dim}),
                      filler()});
               }

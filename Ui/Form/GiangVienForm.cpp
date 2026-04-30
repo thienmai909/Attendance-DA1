@@ -42,12 +42,9 @@ bool formThemGiangVien(AppManager &app)
         "Tiến sĩ", "PGS.TS", "GS.TS"
     };
 
-    InputOption opt;
-    opt.multiline = false;
+    InputOption opt = makeInputOpt();
 
-    InputOption passOpt;
-    passOpt.multiline = false;
-    passOpt.password  = true;
+    InputOption passOpt = makeInputOpt(true);
 
     auto inputMa      = Input(&maGV,      " 00234...",         opt);
     auto inputTen     = Input(&hoTen,     " Nguyen Van A",     opt);
@@ -144,12 +141,9 @@ bool formSuaGiangVien(AppManager &app, const std::string &maGV)
         "Tiến sĩ", "PGS.TS", "GS.TS"
     };
 
-    InputOption opt;
-    opt.multiline = false;
+    InputOption opt = makeInputOpt();
 
-    InputOption passOpt;
-    passOpt.multiline = false;
-    passOpt.password  = true;
+    InputOption passOpt = makeInputOpt(true);
 
     auto inputTen   = Input(&hoTen,      "",                opt);
     auto inputTK    = Input(&taiKhoan,   "",                opt);
@@ -272,7 +266,7 @@ bool formXoaGiangVien(AppManager &app, const std::string &maGV)
                 separator(),
                 vbox(canhBao),
                 text(" Hành động này không thể hoàn tác! ")
-                    | color(Color::Yellow) | center,
+                    | color(Color::Magenta) | center,
                 separator(),
                 hbox({ btnXoa->Render(), text("  "), btnHuy->Render() }) | center
             }) | border | size(WIDTH, EQUAL, 54) | center,

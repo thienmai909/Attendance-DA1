@@ -1,9 +1,32 @@
 #pragma once
+#include <ftxui/component/component_options.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <string>
 #include <vector>
 
 using namespace ftxui;
+
+inline InputOption makeInputOpt(bool password = false) {
+    InputOption opt;
+    opt.password  = password;
+    opt.multiline = false;
+    opt.transform = [](InputState state) -> Element {
+        state.element |= color(Color::Black);
+
+        if (state.is_placeholder) {
+          state.element |= dim;
+        }
+
+        if (state.focused) {
+            state.element |= inverted;
+        } else if (state.hovered) {
+            state.element |= color(Color::GrayDark);
+        }
+
+        return state.element;
+    };
+    return opt;
+}
 
 namespace UiHelper {
     inline Element makeHeader(
@@ -41,7 +64,7 @@ namespace UiHelper {
         for (const auto& [txt, w] : cols)
             cells.push_back(text(txt) | size(WIDTH, EQUAL, w));
         auto row = hbox(cells);
-        return selected ? (row | color(Color::Cyan) | bold) : row;
+        return selected ? (row | color(Color::Blue) | bold) : row;
     }
 
     inline Element makeTableHeader(
@@ -50,7 +73,7 @@ namespace UiHelper {
         std::vector<Element> cells;
         for (const auto& [txt, w] : cols)
             cells.push_back(text(txt) | bold | size(WIDTH, EQUAL, w));
-        return hbox(cells) | color(Color::Yellow);
+        return hbox(cells) | color(Color::Magenta);
     }
 
     inline Element makeSeparatorLabel(const std::string& label) {
@@ -70,7 +93,7 @@ namespace UiHelper {
                 text("  "),
                 text(" [Q] Huy ") | color(Color::Red)
             }) | center
-        }) | border | color(Color::Yellow);
+        }) | border | color(Color::Magenta);
     }
 
 }

@@ -1,4 +1,4 @@
-﻿#include <LopHocPhanForm.hpp>
+#include <LopHocPhanForm.hpp>
 #include <LopHocPhanScreen.hpp>
 #include <UiHelper.hpp>
 #include <ftxui/component/component.hpp>
@@ -113,7 +113,7 @@ void screenLopHocPhan(AppManager &app, const std::string &maGV) {
                          return vbox({
                              hbox({text(" Phòng      : ") | dim,
                                    text(ph->getTenPhong()) | bold |
-                                       color(Color::Cyan)}),
+                                       color(Color::Blue)}),
                              hbox({text(" Loại       : ") | dim,
                                    text(ph->getLoaiPhongStr())}),
                              hbox({text(" Sức chứa   : ") | dim,
@@ -296,6 +296,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP,
     std::string inputMaSVStr;
     InputOption inputOpt;
     inputOpt.multiline = false;
+    inputOpt.transform = [](InputState state) -> Element { return state.element | color(Color::Black); };
 
     auto menuSV = Menu(&entries, &selected);
     auto inputMaSV = Input(&inputMaSVStr, "Nhập mã SV...", inputOpt);
@@ -394,7 +395,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP,
                            hbox({text(" Lớp SH  : ") | dim, text(info.lopSH)}),
                            separator(),
                            hbox({text(" Email   : ") | dim,
-                                 text(info.email) | color(Color::Cyan)}),
+                                 text(info.email) | color(Color::Blue)}),
                            hbox({text(" SĐT     : ") | dim, text(info.sdt)}),
                            filler()});
                     }
@@ -426,7 +427,7 @@ void screenQuanLySVTrongLop(AppManager &app, const std::string &maLHP,
                                          bold,
                                      text(") ") | dim}) |
                                    border,
-                               separator(), menuSV->Render() | flex}) |
+                               separator(), menuSV->Render() | vscroll_indicator | yframe | flex}) |
                              border | flex,
                          cachedChiTiet | border | size(WIDTH, EQUAL, 42)}) |
                        flex,

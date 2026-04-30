@@ -36,8 +36,7 @@ bool formThemSinhVien(AppManager &app)
         "ĐHSTIN23C"
     };
 
-    InputOption opt;
-    opt.multiline = false;
+    InputOption opt = makeInputOpt();
 
     auto inputMa = Input(&maSV, "VD: 00234xxxxx", opt);
     auto inputTen = Input(&tenSV, "VD: Nguyễn Văn A", opt);
@@ -138,8 +137,7 @@ bool formSuaSinhVien(AppManager &app, const std::string &maSV)
         "Chưa xếp lớp", "ĐHSTIN23A", "ĐHSTIN23B", "ĐHSTIN23C"
     };
 
-    InputOption inputOpt;
-    inputOpt.multiline = false;
+    InputOption inputOpt = makeInputOpt();
 
     auto inputTen = Input(&tenSV, "", inputOpt);
     auto inputNgay = Input(&ngaySinh, "DD/MM/YYYY", inputOpt);
@@ -248,7 +246,7 @@ bool formXoaSinhVien(AppManager &app, const std::string &maSV)
                 hbox({ text(" Mã SV  : ") | dim, text(maSV)                    | bold}) | center,
                 hbox({ text(" Họ tên : ") | dim, text(sinhVienOpt->getTenSV()) | bold}) | center,
                 separator(),
-                text(" Hành động này không thể hoàn tác! ") | color(Color::Yellow) | center,
+                text(" Hành động này không thể hoàn tác! ") | color(Color::Magenta) | center,
                 separator(),
                 hbox({ btnXoa->Render(), text(" "), btnHuy->Render() }) | center
             }) | border | size(WIDTH, EQUAL, 50) | center,

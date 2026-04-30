@@ -1,143 +1,138 @@
 #include <LoginScreen.hpp>
 #include <UiHelper.hpp>
-#include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 
-#include <chrono>
-#include <thread>
 #include <atomic>
+#include <chrono>
 #include <mutex>
+#include <thread>
 
-std::optional<std::string> screenLogin(AppManager &app)
-{
-    auto screen = ScreenInteractive::Fullscreen();
+std::optional<std::string> screenLogin(AppManager &app) {
+  auto screen = ScreenInteractive::Fullscreen();
 
-    std::string username, password;
-    std::string thongBao;
-    std::mutex thongBaoMutex;
-    std::optional<std::string> ketQua = std::nullopt;
-    std::atomic<bool> dangChay{true};
+  std::string username, password;
+  std::string thongBao;
+  std::mutex thongBaoMutex;
+  std::optional<std::string> ketQua = std::nullopt;
+  std::atomic<bool> dangChay{true};
 
-    InputOption usernameOpt;
-    usernameOpt.multiline = false;
+  InputOption usernameOpt = makeInputOpt();
 
-    InputOption passOpt;
-    passOpt.password = true;
-    passOpt.multiline = false;
+  InputOption passOpt = makeInputOpt(true);
 
-    auto inputUser = Input(&username, "Tên tài khoản...", usernameOpt);
-    auto inputPass = Input(&password, "Mật khẩu...", passOpt);
+  auto inputUser = Input(&username, "Tên tài khoản...", usernameOpt);
+  auto inputPass = Input(&password, "Mật khẩu...", passOpt);
 
-    std::thread timerThread([&] {
-        while(dangChay) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            bool hasMsg = false;
-            {
-                std::lock_guard<std::mutex> lk(thongBaoMutex);
-                hasMsg = !thongBao.empty();
-            }
-            if (hasMsg) {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-                {
-                    std::lock_guard<std::mutex> lk(thongBaoMutex);
-                    thongBao.clear();
-                }
-                screen.PostEvent(Event::Custom);
-            }
-        }
-    });
-
-    auto xuLiDangNhap = [&] {
-        auto giangVien = app.getGVManager().dangNhap(username, password);
-        if (giangVien.has_value()) {
-            ketQua = giangVien->getMaGV();
-            LOG_INFO("Login", "Đăng nhập thành công: " + username);
-            screen.Exit();
-        } else {
-            std::lock_guard<std::mutex> lk(thongBaoMutex);
-            thongBao = "[ERR] Sai tài khoản hoặc mật khẩu!";
-            LOG_WARNING("Login", "Đăng nhập thất bại: " + username);
-            password.clear();
-        }
-    };
-
-    ButtonOption btnDangNhapOpt;
-    btnDangNhapOpt.transform = [] (const EntryState& s) {
-        auto element = text(s.label) 
-            | center
-            | size(WIDTH, EQUAL, 15) 
-            | size(HEIGHT, EQUAL, 1)
-            | borderRounded;
-        if (s.active) element |= bold;
-        if (s.focused) element |= inverted;
-        return element;
-    };
-
-    auto btnDangNhap = Button("Đăng Nhập", xuLiDangNhap, btnDangNhapOpt);
-    auto btnThoat = Button("Thoát", [&] {
-        screen.Exit();
-    }, btnDangNhapOpt);
-
-    auto layout = Container::Vertical({
-        inputUser,
-        inputPass,
-        Container::Horizontal({btnDangNhap, btnThoat})
-    });
-
-    auto bgColorHeader = Color::HSV(
-            185 * 255 / 360,
-            15 * 255 / 100, 
-            100 * 255 / 100
-    );
-
-    auto renderer = Renderer(layout, [&] {
-        std::string msgSnap;
+  std::thread timerThread([&] {
+    while (dangChay) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      bool hasMsg = false;
+      {
+        std::lock_guard<std::mutex> lk(thongBaoMutex);
+        hasMsg = !thongBao.empty();
+      }
+      if (hasMsg) {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
         {
-            std::lock_guard<std::mutex> lk(thongBaoMutex);
-            msgSnap = thongBao;
+          std::lock_guard<std::mutex> lk(thongBaoMutex);
+          thongBao.clear();
         }
-        return vbox({
-            filler(),
-            vbox({
-                UiHelper::makeHeader("HỆ THỐNG ĐIỂM DANH", "Vui lòng đăng nhập") | bgcolor(bgColorHeader),
-                separator(),
-                hbox({ text(" Tài khoản : "), inputUser->Render() | flex }),
-                hbox({ text(" Mật khẩu  : "), inputPass->Render() | flex }),
-                separator(),
-                hbox({
-                    btnDangNhap->Render(),
-                    text(" ") | size(WIDTH, EQUAL, 15),
-                    btnThoat->Render()
-                }) | center,
-                separator(),
-                !msgSnap.empty() ? UiHelper::makeMessage(msgSnap) : filler()
-            }) | border | size(WIDTH, EQUAL, 100) | center,
-            filler(),
-            UiHelper::makeFooter("[Tab] Chuyển ô  [Enter] Xác nhận  [Q] Thoát")
-        });
-    }) | CatchEvent([&](Event e) {
-        if (e == Event::Custom) return false;
-        if (e == Event::Character('q') || e == Event::Character('Q') || e == Event::Escape) {
-            dangChay = false;
-            screen.Exit();
-            return true;
+        screen.PostEvent(Event::Custom);
+      }
+    }
+  });
+
+  auto xuLiDangNhap = [&] {
+    auto giangVien = app.getGVManager().dangNhap(username, password);
+    if (giangVien.has_value()) {
+      ketQua = giangVien->getMaGV();
+      LOG_INFO("Login", "Đăng nhập thành công: " + username);
+      screen.Exit();
+    } else {
+      std::lock_guard<std::mutex> lk(thongBaoMutex);
+      thongBao = "[ERR] Sai tài khoản hoặc mật khẩu!";
+      LOG_WARNING("Login", "Đăng nhập thất bại: " + username);
+      password.clear();
+    }
+  };
+
+  ButtonOption btnDangNhapOpt;
+  btnDangNhapOpt.transform = [](const EntryState &s) {
+    auto element = text(s.label) | center | size(WIDTH, EQUAL, 15) |
+                   size(HEIGHT, EQUAL, 1) | borderRounded;
+    if (s.active)
+      element |= bold;
+    if (s.focused)
+      element |= inverted;
+    return element;
+  };
+
+  auto btnDangNhap = Button("Đăng Nhập", xuLiDangNhap, btnDangNhapOpt);
+  auto btnThoat = Button("Thoát", [&] { screen.Exit(); }, btnDangNhapOpt);
+
+  auto layout = Container::Vertical(
+      {inputUser, inputPass, Container::Horizontal({btnDangNhap, btnThoat})});
+
+  auto bgColorHeader =
+      Color::HSV(185 * 255 / 360, 15 * 255 / 100, 100 * 255 / 100);
+
+  auto renderer =
+      Renderer(
+          layout,
+          [&] {
+            std::string msgSnap;
+            {
+              std::lock_guard<std::mutex> lk(thongBaoMutex);
+              msgSnap = thongBao;
+            }
+            return vbox(
+                {filler(),
+                 vbox(
+                     {UiHelper::makeHeader("HỆ THỐNG ĐIỂM DANH",
+                                           "Vui lòng đăng nhập") |
+                          bgcolor(bgColorHeader),
+                      separator(),
+                      hbox({text(" Tài khoản : "), inputUser->Render() | flex}),
+                      hbox({text(" Mật khẩu  : "), inputPass->Render() | flex}),
+                      separator(),
+                      hbox({btnDangNhap->Render(),
+                            text(" ") | size(WIDTH, EQUAL, 15),
+                            btnThoat->Render()}) |
+                          center,
+                      separator(),
+                      !msgSnap.empty() ? UiHelper::makeMessage(msgSnap)
+                                       : filler()}) |
+                     border | size(WIDTH, EQUAL, 100) | center,
+                 filler(),
+                 UiHelper::makeFooter(
+                     "[Tab] Chuyển ô  [Enter] Xác nhận  [Q] Thoát")});
+          }) |
+      CatchEvent([&](Event e) {
+        if (e == Event::Custom)
+          return false;
+        if (e == Event::Character('q') || e == Event::Character('Q') ||
+            e == Event::Escape) {
+          dangChay = false;
+          screen.Exit();
+          return true;
         }
         if (e == Event::Return) {
-            if (layout->ActiveChild() == inputPass || layout->ActiveChild() == inputUser) {
-                xuLiDangNhap();
-                return true;
-            }
+          if (layout->ActiveChild() == inputPass ||
+              layout->ActiveChild() == inputUser) {
+            xuLiDangNhap();
+            return true;
+          }
         }
         return false;
-    });
+      });
 
-    screen.Loop(renderer);
+  screen.Loop(renderer);
 
-    dangChay = false;
-    if (timerThread.joinable())
-        timerThread.join();
+  dangChay = false;
+  if (timerThread.joinable())
+    timerThread.join();
 
-    return ketQua;
-
+  return ketQua;
 }

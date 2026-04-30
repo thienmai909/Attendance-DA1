@@ -54,8 +54,7 @@ bool formThemLop(AppManager &app, const std::string &maGV)
         "Chưa xác định", "Học kì I", "Học kì II", "Học kì hè"
     };
 
-    InputOption opt;
-    opt.multiline = false;
+    InputOption opt = makeInputOpt();
 
     auto inputMa       = Input(&maLHP, "IN1001", opt);
     auto inputTen      = Input(&tenLHP, "Lap trinh can ban", opt);
@@ -235,8 +234,7 @@ bool formSuaLop(AppManager &app, const std::string &maLHP)
         "Chưa xác định", "Học kì I", "Học kì II", "Học kì hè"
     };
 
-    InputOption opt;
-    opt.multiline = false;
+    InputOption opt = makeInputOpt();
 
     auto inputTen      = Input(&tenLHP, "", opt);
     auto inputSoTC     = Input(&soTCStr, "", opt);
@@ -378,7 +376,7 @@ bool formXoaLop(AppManager &app, const std::string &maLHP)
                 hbox({ text(" Số SV   : ") | dim, text(std::to_string(soSV)) | bold}) | center,
                 separator(),
                 vbox(canhBao),
-                text(" Hành động này không thể hoàn tác! ") | color(Color::Yellow) | center,
+                text(" Hành động này không thể hoàn tác! ") | color(Color::Magenta) | center,
                 separator(),
                 hbox({ btnXoa->Render(), text(" "), btnHuy->Render() }) | center
             }) | border | size(WIDTH, EQUAL, 54) | center,
@@ -464,7 +462,7 @@ bool formSetPhongHoc(AppManager &app, const std::string &maLHP)
                 separator(),
                 hbox({ text(" Phòng hiện tại : ") | dim,
                        text(phHT.empty() ? "(chưa có)" : phHT) |
-                           (phHT.empty() ? dim : bold | color(Color::Cyan))
+                           (phHT.empty() ? dim : bold | color(Color::Blue))
                 }),
                 separator(),
                 text(" Chọn phòng mới: ") | dim,

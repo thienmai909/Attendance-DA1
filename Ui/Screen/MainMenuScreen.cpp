@@ -54,7 +54,7 @@ int screenMainMenu(AppManager &app, const std::string &maGV)
                     hbox({ text(" Xin chào  : ") | dim, text(tenGV) | bold }),
                     hbox({ text(" Quyền     : ") | dim,
                         isAdmin
-                            ? text("Admin") | color(Color::Yellow) | bold
+                            ? text("Admin") | color(Color::Magenta) | bold
                             : text("Giảng viên") | dim
                     }),
                     separator(),

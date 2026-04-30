@@ -65,7 +65,7 @@ void screenSinhVien(AppManager &app) {
                                   text(sv.getNgaySinhStr())}),
                             separator(),
                             hbox({text(" Email     : ") | dim,
-                                  text(lhSV.has_value() ? lhSV->getEmail() : "(none)") | color(Color::Cyan)}),
+                                  text(lhSV.has_value() ? lhSV->getEmail() : "(none)") | color(Color::Blue)}),
                             hbox({text(" SĐT       : ") | dim,
                                   text(lhSV.has_value() ? lhSV->getPhoneNumber() : "(none)")}),
                             filler()});
@@ -82,7 +82,7 @@ void screenSinhVien(AppManager &app) {
                                          bold,
                                      text(") ") | dim}) |
                                    center,
-                               separator(), menuSinhVien->Render() | flex}) |
+                               separator(), menuSinhVien->Render() | vscroll_indicator | yframe | flex}) |
                              border | flex,
 
                          cachedChiTiet | border | size(WIDTH, EQUAL, 42)}) |

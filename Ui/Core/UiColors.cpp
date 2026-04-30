@@ -2,7 +2,7 @@
 
 Element UiColors::asTitle(Element e)
 {
-    return e | bold | color(Color::Cyan);
+    return e | bold | color(Color::Blue);
 }
 
 Element UiColors::asSubtitle(Element e)
@@ -17,7 +17,7 @@ Element UiColors::asOk(Element e)
 
 Element UiColors::asWarn(Element e)
 {
-    return e | color(Color::Yellow);
+    return e | color(Color::Magenta);
 }
 
 Element UiColors::asError(Element e)
@@ -32,7 +32,7 @@ Element UiColors::asDim(Element e)
 
 Element UiColors::asSelected(Element e)
 {
-    return e | color(Color::Cyan) | bold;
+    return e | color(Color::Blue) | bold;
 }
 
 Element UiColors::asCamThi(Element e)

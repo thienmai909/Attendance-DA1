@@ -197,7 +197,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                             (sortLop == SortLop::SO_CT_DESC ? inverted
                                                             : nothing),
                     }) |
-                    color(Color::White));
+                    color(Color::Default));
                 rows.push_back(separator());
                 for (const auto &lk : dsLopTK) {
                   int pct = (int)(lk.tyLeVangTrungBinh * 100);
@@ -217,7 +217,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                   if (warn)
                     row = row | color(Color::Red);
                   else if (pct > 30)
-                    row = row | color(Color::Yellow);
+                    row = row | color(Color::Magenta);
                   rows.push_back(row);
                 }
 
@@ -233,7 +233,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                     {hbox({text(" L\u1edbp v\u1eafng cao nh\u1ea5t: ") | dim,
                            text(maxInfo) | bold | color(Color::Red), filler(),
                            text(" [S] S\u1eafp x\u1ebfp: ") | dim,
-                           text(sortLopLabel) | bold | color(Color::Cyan)}),
+                           text(sortLopLabel) | bold | color(Color::Blue)}),
                      separator(), vbox(std::move(rows)) | frame | flex});
               }
 
@@ -344,7 +344,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                                  color(Color::RedLight)}),
                        hbox({text(" SV cần chú : ") | dim,
                              text(std::to_string(svChuY)) | bold |
-                                 color(Color::Yellow)}),
+                                 color(Color::Magenta)}),
                        separator(),
                        text(" TOP 5 VẮNG NHIỀU (tiết vắng / % / còn được "
                             "vắng): ") |
@@ -396,14 +396,14 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                       text("[!!] " + std::to_string(nNguy) + "  ") |
                           color(Color::RedLight),
                       text("[!] " + std::to_string(nChuY) + "  ") |
-                          color(Color::Yellow),
+                          color(Color::Magenta),
                       text("[OK] " + std::to_string(nOk)) | color(Color::Green),
                       text("  | T\u1ed1i \u0111a v\u1eafng: " +
                            std::to_string(maxVang2) + " ti\u1ebft") |
                           dim,
                       filler(),
                       text(" [S] S\u1eafp: ") | dim,
-                      text(sortSVLabel) | bold | color(Color::Cyan),
+                      text(sortSVLabel) | bold | color(Color::Blue),
                   }));
                   svRows.push_back(separator());
                   svRows.push_back(
@@ -430,7 +430,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                               size(WIDTH, EQUAL, 10),
                           text(" Tr\u1ea1ng th\u00e1i") | bold,
                       }) |
-                      color(Color::White));
+                      color(Color::Default));
                   svRows.push_back(separator());
                   for (int i = 0; i < (int)dsSV.size(); ++i) {
                     const auto &sv = dsSV[i];
@@ -442,7 +442,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                     Color col = sv.biCamThi         ? Color::Red
                                 : sv.tyLeVang > 0.8 ? Color::RedLight
                                 : sv.tyLeVang > 0.5 ? Color::Yellow
-                                                    : Color::White;
+                                                    : Color::Black;
                     auto row =
                         hbox({
                             text(" " + std::to_string(i + 1) + " ") |
@@ -493,7 +493,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                   bRows.push_back(hbox({
                       filler(),
                       text(" [S] S\u1eafp x\u1ebfp: ") | dim,
-                      text(sortBuoiLabel) | bold | color(Color::Cyan),
+                      text(sortBuoiLabel) | bold | color(Color::Blue),
                   }));
                   bRows.push_back(
                       hbox({
@@ -513,7 +513,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                               (sortBuoi == SortBuoi::COMAT_ASC ? inverted
                                                                : nothing),
                       }) |
-                      color(Color::White));
+                      color(Color::Default));
                   bRows.push_back(separator());
                   for (const auto &b : dsBuoi) {
                     bool isMax = (b.buoiIndex == maxIdx);
