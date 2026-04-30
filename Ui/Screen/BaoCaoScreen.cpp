@@ -72,6 +72,7 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
 
   // Chon lop chung (cho tab 2,3,4,5)
   int selLop = 0;
+  int contentScroll = 0; // Y offset for tab content
 
   bool thoat = false;
 
@@ -309,51 +310,40 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                         {text("  Ca " + std::to_string((int)ca) + ": ") | dim,
                          text(std::to_string((int)(ty * 100)) + "%") | bold}));
 
-                  content = vbox(
-                      {text(" THÔNG TIN LỚP HỌC PHẦN ") | bold | inverted |
-                           center,
-                       hbox({text(" Giảng viên : ") | dim,
-                             text(tenGVLop) | bold}),
-                       hbox({text(" Phòng học  : ") | dim,
-                             text(tenPhong) | bold}),
-                       hbox({text(" Học kỳ     : ") | dim,
-                             text(lhp.getHocKiStr())}),
-                       hbox({text(" Ngưỡng CT  : ") | dim,
-                             text(std::to_string(nguongPct) + "% (tối đa " +
-                                  std::to_string(maxVang) + " tiết)") |
-                                 bold}),
-                       hbox(
-                           {text(" Tiến độ    : ") | dim,
-                            text(std::to_string(lhp.getSoTietDaHoc()) + "/" +
-                                 std::to_string(lhp.getTongSoTiet()) +
-                                 " tiết (" + std::to_string(pctTienDo) + "%)") |
-                                bold}),
-                       separator(),
-                       text(" THỐNG KÊ ") | bold | inverted | center,
-                       hbox({text(" Số SV      : ") | dim,
-                             text(std::to_string(soSVTotal)) | bold}),
-                       hbox({text(" % Vắng TB  : ") | dim,
-                             text(std::to_string((int)(tyLeVangTB * 100)) +
-                                  "%") |
-                                 bold}),
-                       hbox({text(" SV cấm thi : ") | dim,
-                             text(std::to_string(soSVBiCamThi)) | bold |
-                                 color(Color::Red)}),
-                       hbox({text(" SV nguy    : ") | dim,
-                             text(std::to_string(svNguy)) | bold |
-                                 color(Color::RedLight)}),
-                       hbox({text(" SV cần chú : ") | dim,
-                             text(std::to_string(svChuY)) | bold |
-                                 color(Color::Magenta)}),
-                       separator(),
-                       text(" TOP 5 VẮNG NHIỀU (tiết vắng / % / còn được "
-                            "vắng): ") |
-                           bold,
-                       vbox(std::move(topRows)),
-                       separator(),
-                       text(" VẮNG THEO CA: ") | bold,
-                       vbox(std::move(caRows)),
-                       filler()});
+                  // Manual scroll: build flat element list
+                  Elements allE;
+                  allE.push_back(text(" THÔNG TIN LỚP HỌC PHẦN ") | bold | inverted | center);
+                  allE.push_back(hbox({text(" Giảng viên : ") | dim, text(tenGVLop) | bold}));
+                  allE.push_back(hbox({text(" Phòng học  : ") | dim, text(tenPhong) | bold}));
+                  allE.push_back(hbox({text(" Học kỳ     : ") | dim, text(lhp.getHocKiStr())}));
+                  allE.push_back(hbox({text(" Ngưỡng CT  : ") | dim,
+                    text(std::to_string(nguongPct) + "% (tối đa " + std::to_string(maxVang) + " tiết)") | bold}));
+                  allE.push_back(hbox({text(" Tiến độ    : ") | dim,
+                    text(std::to_string(lhp.getSoTietDaHoc()) + "/" + std::to_string(lhp.getTongSoTiet()) +
+                         " tiết (" + std::to_string(pctTienDo) + "%)") | bold}));
+                  allE.push_back(separator());
+                  allE.push_back(text(" THỐNG KÊ ") | bold | inverted | center);
+                  allE.push_back(hbox({text(" Số SV      : ") | dim, text(std::to_string(soSVTotal)) | bold}));
+                  allE.push_back(hbox({text(" % Vắng TB  : ") | dim,
+                    text(std::to_string((int)(tyLeVangTB * 100)) + "%") | bold}));
+                  allE.push_back(hbox({text(" SV cấm thi : ") | dim,
+                    text(std::to_string(soSVBiCamThi)) | bold | color(Color::Red)}));
+                  allE.push_back(hbox({text(" SV nguy    : ") | dim,
+                    text(std::to_string(svNguy)) | bold | color(Color::RedLight)}));
+                  allE.push_back(hbox({text(" SV cần chú : ") | dim,
+                    text(std::to_string(svChuY)) | bold | color(Color::Magenta)}));
+                  allE.push_back(separator());
+                  allE.push_back(text(" TOP 5 VẮNG NHIỀU: ") | bold);
+                  for (auto& r : topRows) allE.push_back(r);
+                  allE.push_back(separator());
+                  allE.push_back(text(" VẮNG THEO CA: ") | bold);
+                  for (auto& r : caRows) allE.push_back(r);
+                  int cs1 = std::max(0, std::min(contentScroll, (int)allE.size()-1));
+                  content = vbox({
+                    hbox({filler(), text(" [J]▼ [K]▲  " + std::to_string(cs1+1) +
+                                        "/" + std::to_string(allE.size()) + " ") | dim}),
+                    vbox(std::vector<Element>(allE.begin()+cs1, allE.end())) | flex
+                  }) | flex;
                 }
               }
 
@@ -439,10 +429,10 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                     std::string conStr =
                         con > 0 ? std::to_string(con) + "t" : "VƯỢT";
                     std::string tt = trangThaiSV(sv.tyLeVang, sv.biCamThi);
-                    Color col = sv.biCamThi         ? Color::Red
+                    Color col = sv.biCamThi          ? Color::Red
                                 : sv.tyLeVang > 0.18 ? Color::RedLight
                                 : sv.tyLeVang > 0.10 ? Color::Yellow
-                                                    : Color::Black;
+                                                     : Color::Black;
                     auto row =
                         hbox({
                             text(" " + std::to_string(i + 1) + " ") |
@@ -468,7 +458,12 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                     svRows.push_back(text("  (Chưa có dữ liệu điểm danh)") |
                                      dim);
 
-                  content = vbox(std::move(svRows)) | frame | flex;
+                  int cs2 = std::max(0, std::min(contentScroll, (int)svRows.size()-1));
+                  content = vbox({
+                    hbox({filler(), text(" [J]▼ [K]▲  " + std::to_string(cs2+1) +
+                                        "/" + std::to_string(svRows.size()) + " ") | dim}),
+                    vbox(std::vector<Element>(svRows.begin()+cs2, svRows.end())) | flex
+                  }) | flex;
                 }
               }
 
@@ -541,7 +536,12 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                   if (dsBuoi.empty())
                     bRows.push_back(text("  (Chưa có buổi điểm danh)") | dim);
 
-                  content = vbox(std::move(bRows)) | frame | flex;
+                  int cs3 = std::max(0, std::min(contentScroll, (int)bRows.size()-1));
+                  content = vbox({
+                    hbox({filler(), text(" [J]▼ [K]▲  " + std::to_string(cs3+1) +
+                                        "/" + std::to_string(bRows.size()) + " ") | dim}),
+                    vbox(std::vector<Element>(bRows.begin()+cs3, bRows.end())) | flex
+                  }) | flex;
                 }
               }
 
@@ -586,27 +586,27 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
         CatchEvent([&](Event e) {
           // FIX #7: Chi cho admin chuyen sang tab 0
           if (e == Event::Character('1') && isAdmin) {
-            activeTab = 0;
+            activeTab = 0; contentScroll = 0;
             return true;
           }
           if (e == Event::Character('1') && !isAdmin) {
-            activeTab = 1;
+            activeTab = 1; contentScroll = 0;
             return true;
           } // GV nhan [1] -> chi tiet lop
           if (e == Event::Character('2')) {
-            activeTab = 1;
+            activeTab = 1; contentScroll = 0;
             return true;
           }
           if (e == Event::Character('3')) {
-            activeTab = 2;
+            activeTab = 2; contentScroll = 0;
             return true;
           }
           if (e == Event::Character('4')) {
-            activeTab = 3;
+            activeTab = 3; contentScroll = 0;
             return true;
           }
           if (e == Event::Character('5')) {
-            activeTab = 4;
+            activeTab = 4; contentScroll = 0;
             return true;
           }
           // Xuat nhanh
@@ -637,6 +637,17 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                   static_cast<SortBuoi>((static_cast<int>(sortBuoi) + 1) % 3);
               return true;
             }
+          }
+          // Content scroll with J/K
+          if ((e == Event::Character('j') || e == Event::Character('J')) &&
+              activeTab >= 1 && activeTab <= 3) {
+            contentScroll++;
+            return true;
+          }
+          if ((e == Event::Character('k') || e == Event::Character('K')) &&
+              activeTab >= 1 && activeTab <= 3) {
+            contentScroll = std::max(0, contentScroll - 1);
+            return true;
           }
           return false;
         });
