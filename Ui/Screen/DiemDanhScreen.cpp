@@ -331,7 +331,7 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                                    inputMaSV->Render() | size(WIDTH, EQUAL, 16),
                                    text(" [Enter]=Có mặt") | dim, filler()})
                            : text(""),
-                  vbox({menuSV->Render() | flex}) | border | flex,
+                  vbox({menuSV->Render() | flex}) | vscroll_indicator | yframe | border | flex,
                   separator(),
                   khoa ? text(" Buổi này đã bị khóa ") | color(Color::Red) | center
                        : [&]() -> Element {
@@ -361,9 +361,9 @@ static void screenDiemDanhBuoi(AppManager &app, const std::string &maLHP,
                        isAdmin ? (khoa ? "[M] Mở khóa  [X] Xóa buổi  [Q] Quay lại"
                                        : "[K] Khóa  [X] Xóa buổi  [Q] Quay lại")
                                : (khoa ? "[Q] Quay lại"
-                                       : "[1] CM  [2] Vắng  [3] Muộn  [P] T.Phép"
+                                       : "[1] C.Mặt  [2] Vắng  [3] Muộn  [P] T.Phép"
                                          "  [G] Ghi chú  [A] Tất cả"
-                                         "  [K] Khóa  [H] Lịch sư  [Q] Quay lại")),
+                                         "  [K] Khóa  [H] Lịch sử  [Q] Quay lại")),
               });
 
               if (showConfirmKhoa) {

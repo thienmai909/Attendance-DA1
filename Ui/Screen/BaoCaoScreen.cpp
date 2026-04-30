@@ -46,9 +46,9 @@ static Element renderTabBar(int activeTab, bool isAdmin) {
 static std::string trangThaiSV(double tyLeVang, bool biCamThi) {
   if (biCamThi)
     return "[CT] Cấm thi";
-  if (tyLeVang > 0.8)
+  if (tyLeVang > 0.18)
     return "[!!] Nguy";
-  if (tyLeVang > 0.5)
+  if (tyLeVang > 0.10)
     return " [!] Cần chú ý";
   return "      OK";
 }
@@ -254,9 +254,9 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                     tongTyLe += sv.tyLeVang;
                     if (sv.biCamThi)
                       ++soSVBiCamThi;
-                    else if (sv.tyLeVang > 0.8)
+                    else if (sv.tyLeVang > 0.18)
                       ++svNguy;
-                    else if (sv.tyLeVang > 0.5)
+                    else if (sv.tyLeVang > 0.10)
                       ++svChuY;
                   }
                   double tyLeVangTB =
@@ -378,9 +378,9 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                   for (const auto &sv : dsSV) {
                     if (sv.biCamThi)
                       ++nCT;
-                    else if (sv.tyLeVang > 0.8)
+                    else if (sv.tyLeVang > 0.18)
                       ++nNguy;
-                    else if (sv.tyLeVang > 0.5)
+                    else if (sv.tyLeVang > 0.10)
                       ++nChuY;
                   }
 
@@ -440,8 +440,8 @@ void screenBaoCao(AppManager &app, const std::string &maGV) {
                         con > 0 ? std::to_string(con) + "t" : "VƯỢT";
                     std::string tt = trangThaiSV(sv.tyLeVang, sv.biCamThi);
                     Color col = sv.biCamThi         ? Color::Red
-                                : sv.tyLeVang > 0.8 ? Color::RedLight
-                                : sv.tyLeVang > 0.5 ? Color::Yellow
+                                : sv.tyLeVang > 0.18 ? Color::RedLight
+                                : sv.tyLeVang > 0.10 ? Color::Yellow
                                                     : Color::Black;
                     auto row =
                         hbox({

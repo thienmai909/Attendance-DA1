@@ -1,403 +1,308 @@
 #include <LopHocPhan.hpp>
 
-void LopHocPhan::setSoTietDaHoc(int soTietDaHoc)
-{
-    _soTietDaHoc = soTietDaHoc;
+void LopHocPhan::setSoTietDaHoc(int soTietDaHoc) { _soTietDaHoc = soTietDaHoc; }
+
+void LopHocPhan::setSoBuoiDaHoc(int soBuoiDaHoc) { _soBuoiDaHoc = soBuoiDaHoc; }
+
+LopHocPhan::LopHocPhan(std::string maLHP, std::string tenLHP, int soTC,
+                       int tongSoTiet, double nguongCamThi, HocKi hocKi)
+    : _maLHP(std::move(maLHP)), _tenLHP(std::move(tenLHP)), _soTC(soTC),
+      _tongSoTiet(tongSoTiet), _nguongCamThi(nguongCamThi), _hocKi(hocKi) {}
+
+const std::string &LopHocPhan::getMaLHP() const { return _maLHP; }
+
+const std::string &LopHocPhan::getTenLHP() const { return _tenLHP; }
+
+const std::string &LopHocPhan::getMaGV() const { return _maGV; }
+
+int LopHocPhan::getSoTC() const { return _soTC; }
+
+int LopHocPhan::getTongSoTiet() const { return _tongSoTiet; }
+
+int LopHocPhan::getSoTietDaHoc() const { return _soTietDaHoc; }
+
+int LopHocPhan::getSoBuoiDaHoc() const { return _soBuoiDaHoc; }
+
+double LopHocPhan::getNguongCamThi() const { return _nguongCamThi; }
+
+HocKi LopHocPhan::getHocKi() const { return _hocKi; }
+
+std::string LopHocPhan::getHocKiStr() const {
+  switch (_hocKi) {
+  case HocKi::I:
+    return std::format("I");
+  case HocKi::II:
+    return std::format("II");
+  case HocKi::He:
+    return std::format("Hè");
+  };
+  return std::format("(none)");
 }
 
-void LopHocPhan::setSoBuoiDaHoc(int soBuoiDaHoc)
-{
-    _soBuoiDaHoc = soBuoiDaHoc;
+std::optional<ClassRoom> LopHocPhan::getPhongHoc() const { return _phongHoc; }
+
+std::string LopHocPhan::getTenPhongHoc() const {
+  if (_phongHoc.has_value()) {
+    return std::format("{}", _phongHoc->getTenPhong());
+  }
+  return "(none)";
 }
 
-LopHocPhan::LopHocPhan(
-    std::string maLHP,
-    std::string tenLHP,
-    int soTC,
-    int tongSoTiet,
-    double nguongCamThi,
-    HocKi hocKi) : _maLHP(std::move(maLHP)),
-                   _tenLHP(std::move(tenLHP)),
-                   _soTC(soTC),
-                   _tongSoTiet(tongSoTiet),
-                   _nguongCamThi(nguongCamThi),
-                   _hocKi(hocKi)
-{
+const std::vector<BuoiDiemDanh> &LopHocPhan::getDsBuoiDiemDanh() const {
+  return _dsBuoiDiemDanh;
 }
 
-const std::string &LopHocPhan::getMaLHP() const
-{
-    return _maLHP;
+void LopHocPhan::setTenLHP(const std::string &tenLHP) { _tenLHP = tenLHP; }
+
+void LopHocPhan::setMaGV(const std::string &maGV) { _maGV = maGV; }
+
+void LopHocPhan::setSoTC(int soTC) { _soTC = soTC; }
+
+void LopHocPhan::setTongSoTiet(int tongSoTiet) { _tongSoTiet = tongSoTiet; }
+
+void LopHocPhan::setNguongCamThi(double nguongCamThi) {
+  _nguongCamThi = nguongCamThi;
 }
 
-const std::string &LopHocPhan::getTenLHP() const
-{
-    return _tenLHP;
+void LopHocPhan::setPhongHoc(const ClassRoom &phongHoc) {
+  _phongHoc = phongHoc;
 }
 
-const std::string &LopHocPhan::getMaGV() const
-{
-    return _maGV;
+void LopHocPhan::setPhongHoc(const std::string &tenPhong, int sucChua,
+                             RoomType loaiPhong) {
+  _phongHoc.emplace(tenPhong, sucChua, loaiPhong);
 }
 
-int LopHocPhan::getSoTC() const
-{
-    return _soTC;
+int LopHocPhan::soTietVangToiDa() const {
+  return static_cast<int>(_tongSoTiet * _nguongCamThi);
 }
 
-int LopHocPhan::getTongSoTiet() const
-{
-    return _tongSoTiet;
+bool LopHocPhan::kiemTraViPham(int soTietVang) const {
+  return soTietVang > soTietVangToiDa();
 }
 
-int LopHocPhan::getSoTietDaHoc() const
-{
-    return _soTietDaHoc;
+void LopHocPhan::ghiNhanBuoiHoc(int soTiet) {
+  _soBuoiDaHoc += 1;
+  _soTietDaHoc += soTiet;
 }
 
-int LopHocPhan::getSoBuoiDaHoc() const
-{
-    return _soBuoiDaHoc;
+double LopHocPhan::tiLeVangHienTai(int tongSoTietVang) const {
+  if (_soTietDaHoc == 0)
+    return 0.0;
+  return static_cast<double>(tongSoTietVang) / _soTietDaHoc;
 }
 
-double LopHocPhan::getNguongCamThi() const
-{
-    return _nguongCamThi;
+int LopHocPhan::soTietVangToiDaChoPhep(const std::string &maSV) const {
+  int daVang = 0;
+  for (const auto &buoi : _dsBuoiDiemDanh)
+    if (auto *ct = buoi.findChiTiet(maSV))
+      if (ct->getTrangThai() == Status::VANG)
+        daVang += buoi.getSoTiet();
+  int conChoPhep = soTietVangToiDa() - daVang;
+  return conChoPhep > 0 ? conChoPhep : 0;
 }
 
-HocKi LopHocPhan::getHocKi() const
-{
-    return _hocKi;
+std::string LopHocPhan::tienDoHocTapStr() const {
+  int tong = getTongSoTiet();
+  double pct =
+      (tong > 0) ? static_cast<double>(getSoTietDaHoc()) / tong * 100.0 : 0.0;
+  return std::format("Đã học: {} buổi ({}/{} tiết) - {:.2f}%", getSoBuoiDaHoc(),
+                     getSoTietDaHoc(), tong, pct);
 }
 
-std::string LopHocPhan::getHocKiStr() const
-{
-    switch(_hocKi) {
-        case HocKi::I:
-            return std::format("I");
-        case HocKi::II:
-            return std::format("II");
-        case HocKi::He:
-            return std::format("Hè");
-    };
-    return std::format("(none)");
+void LopHocPhan::themBuoiDiemDanh(const DateTime &ngayDiemDanh,
+                                  CaHoc caDiemDanh, int soTiet) {
+  for (const auto &buoi : _dsBuoiDiemDanh) {
+    const auto &buoi_1 = buoi.getNgayDiemDanh();
+    CaHoc ca_buoi_1 = buoi.getCaDiemDanh();
+    if (buoi_1.has_value())
+      if (buoi_1->year() == ngayDiemDanh.year() &&
+          buoi_1->month() == ngayDiemDanh.month() &&
+          buoi_1->day() == ngayDiemDanh.day() && ca_buoi_1 == caDiemDanh)
+        throw std::runtime_error("Buổi điểm danh bị trùng");
+  }
+  _dsBuoiDiemDanh.emplace_back(ngayDiemDanh, caDiemDanh, soTiet);
 }
 
-std::optional<ClassRoom> LopHocPhan::getPhongHoc() const
-{
-    return _phongHoc;
+BuoiDiemDanh &LopHocPhan::getBuoi(std::size_t index) {
+  if (index >= _dsBuoiDiemDanh.size())
+    throw std::out_of_range("Index số buổi không hợp lệ!");
+  return _dsBuoiDiemDanh.at(index);
 }
 
-std::string LopHocPhan::getTenPhongHoc() const
-{
-    if (_phongHoc.has_value()) {
-        return std::format("{}", _phongHoc->getTenPhong());
-    }
-    return "(none)";
+std::size_t LopHocPhan::soBuoi() const { return _dsBuoiDiemDanh.size(); }
+
+int LopHocPhan::tongTietDaDiemDanh() const {
+  int tong = 0;
+  for (const auto &buoi : _dsBuoiDiemDanh)
+    if (buoi.isKhoaDiemDanh())
+      tong += buoi.getSoTiet();
+  return tong;
 }
 
-const std::vector<BuoiDiemDanh> &LopHocPhan::getDsBuoiDiemDanh() const
-{
-    return _dsBuoiDiemDanh;
+double LopHocPhan::tyLeVang(const std::string &maSV) const {
+  if (_tongSoTiet == 0)
+    return 0.0;
+  int soTietVang = 0;
+  for (const auto &buoi : _dsBuoiDiemDanh)
+    if (auto *ct = buoi.findChiTiet(maSV))
+      if (ct->getTrangThai() == Status::VANG)
+        soTietVang += buoi.getSoTiet();
+  return static_cast<double>(soTietVang) / _tongSoTiet;
 }
 
-void LopHocPhan::setTenLHP(const std::string &tenLHP)
-{
-    _tenLHP = tenLHP;
+bool LopHocPhan::coGiangVien() const { return !_maGV.empty(); }
+
+void LopHocPhan::xoaGiangVien() { _maGV.clear(); }
+
+bool LopHocPhan::biCamThi(const std::string &maSV) const {
+  return tyLeVang(maSV) > _nguongCamThi;
 }
 
-void LopHocPhan::setMaGV(const std::string &maGV)
-{
-    _maGV = maGV;
+bool LopHocPhan::matchTen(const std::string &keyword) const {
+  auto toLower = [](const std::string &s) {
+    std::string result = s;
+    std::transform(result.begin(), result.end(), result.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    return result;
+  };
+  return toLower(_tenLHP).find(toLower(keyword)) != std::string::npos;
 }
 
-void LopHocPhan::setSoTC(int soTC)
-{
-    _soTC = soTC;
+void LopHocPhan::xoaBuoiTaiIndex(std::size_t index) {
+  if (index >= _dsBuoiDiemDanh.size())
+    throw std::out_of_range("Index buổi không hợp lệ!");
+
+  if (_dsBuoiDiemDanh[index].isKhoaDiemDanh()) {
+    _soTietDaHoc =
+        std::max(0, _soTietDaHoc - _dsBuoiDiemDanh[index].getSoTiet());
+    _soBuoiDaHoc = std::max(0, _soBuoiDaHoc - 1);
+  }
+  _dsBuoiDiemDanh.erase(_dsBuoiDiemDanh.begin() + index);
 }
 
-void LopHocPhan::setTongSoTiet(int tongSoTiet)
-{
-    _tongSoTiet = tongSoTiet;
+utility_csv::Row LopHocPhan::toCSVRow() const {
+  std::string hocKi{};
+  switch (_hocKi) {
+  case HocKi::I:
+    hocKi = "I";
+    break;
+  case HocKi::II:
+    hocKi = "II";
+    break;
+  case HocKi::He:
+    hocKi = "He";
+    break;
+  default:
+    hocKi = "DEFAULT";
+  }
+
+  utility_csv::Row row;
+  row.push_back(_maLHP);
+  row.push_back(_tenLHP);
+  row.push_back(std::to_string(_soTC));
+  row.push_back(std::to_string(_tongSoTiet));
+  row.push_back(std::to_string(_soTietDaHoc));
+  row.push_back(std::to_string(_soBuoiDaHoc));
+  row.push_back(std::to_string(_nguongCamThi));
+  row.push_back(hocKi);
+  row.push_back(_phongHoc.has_value() ? _phongHoc->getLoaiPhongStr()
+                                      : "(none)");
+  row.push_back(_phongHoc.has_value() ? _phongHoc->getTenPhong() : "(none)");
+  row.push_back(_phongHoc.has_value() ? std::to_string(_phongHoc->getSucChua())
+                                      : "(none)");
+
+  return row;
 }
 
-void LopHocPhan::setNguongCamThi(double nguongCamThi)
-{
-    _nguongCamThi = nguongCamThi;
+LopHocPhan LopHocPhan::fromCSVRow(const utility_csv::Row &row) {
+  HocKi hocKi = HocKi::DEFAULT;
+  if (row[7] == "I")
+    hocKi = HocKi::I;
+  else if (row[7] == "II")
+    hocKi = HocKi::II;
+  else if (row[7] == "He")
+    hocKi = HocKi::He;
+  else
+    hocKi = HocKi::DEFAULT;
+
+  LopHocPhan lopHocPhan(row[0],            // maLHP
+                        row[1],            // tenLHP
+                        std::stoi(row[2]), // soTC
+                        std::stoi(row[3]), // tongSoTiet
+                        std::stof(row[6]), // nguongCamThi
+                        hocKi);
+
+  lopHocPhan.setSoTietDaHoc(std::stoi(row[4]));
+  lopHocPhan.setSoBuoiDaHoc(std::stoi(row[5]));
+
+  RoomType loaiPhong;
+
+  if (!row[8].empty() && row[8] != "(none)" && !row[9].empty() &&
+      row[9] != "(none)" && !row[10].empty() && row[10] != "(none)") {
+
+    if (row[8] == "Phòng lý thuyết")
+      loaiPhong = RoomType::PhongLyThuyet;
+    else if (row[8] == "Phòng thực hành")
+      loaiPhong = RoomType::PhongThucHanh;
+
+    ClassRoom phongHoc(row[9], std::stoi(row[10]), loaiPhong);
+    lopHocPhan.setPhongHoc(phongHoc);
+  }
+
+  return lopHocPhan;
 }
 
-void LopHocPhan::setPhongHoc(const ClassRoom &phongHoc)
-{
-    _phongHoc = phongHoc;
+nlohmann::json LopHocPhan::toJson() const {
+  nlohmann::json j = {
+      {"maLHP", _maLHP},
+      {"tenLHP", _tenLHP},
+      {"maGV", _maGV},
+      {"soTC", _soTC},
+      {"tongSoTiet", _tongSoTiet},
+      {"soTietDaHoc", _soTietDaHoc},
+      {"soBuoiDaHoc", _soBuoiDaHoc},
+      {"nguongCamThi", _nguongCamThi},
+      {"hocKi", static_cast<int>(_hocKi)},
+      {"buoiDiemDanh",
+       utility_json::dump_array<BuoiDiemDanh>(
+           _dsBuoiDiemDanh, [](const BuoiDiemDanh &buoiDiemDanh) {
+             return buoiDiemDanh.toJson();
+           })}};
+
+  if (_phongHoc.has_value())
+    j["phongHoc"] = {
+        {"tenPhong", _phongHoc->getTenPhong()},
+        {"sucChua", _phongHoc->getSucChua()},
+        {"loaiPhong", static_cast<int>(_phongHoc->getLoaiPhong())}};
+  else
+    j["phongHoc"] = nullptr;
+  return j;
 }
 
-void LopHocPhan::setPhongHoc(const std::string &tenPhong, int sucChua, RoomType loaiPhong)
-{
-    _phongHoc.emplace(tenPhong, sucChua, loaiPhong);
-}
+LopHocPhan LopHocPhan::fromJson(const nlohmann::json &j) {
+  using namespace utility_json;
 
-int LopHocPhan::soTietVangToiDa() const
-{
-    return static_cast<int>(_tongSoTiet * _nguongCamThi);
-}
+  LopHocPhan lopHocPhan(require<std::string>(j, "maLHP"),
+                        require<std::string>(j, "tenLHP"),
+                        require<int>(j, "soTC"), require<int>(j, "tongSoTiet"),
+                        require<double>(j, "nguongCamThi"),
+                        static_cast<HocKi>(optional<int>(j, "hocKi", 0)));
 
-bool LopHocPhan::kiemTraViPham(int soTietVang) const
-{
-    return soTietVang > soTietVangToiDa();
-}
+  lopHocPhan.setSoTietDaHoc(optional<int>(j, "soTietDaHoc", 0));
+  lopHocPhan.setSoBuoiDaHoc(optional<int>(j, "soBuoiDaHoc", 0));
+  lopHocPhan.setMaGV(optional<std::string>(j, "maGV", ""));
 
-void LopHocPhan::ghiNhanBuoiHoc(int soTiet)
-{
-    _soBuoiDaHoc += 1;
-    _soTietDaHoc += soTiet;
-}
+  if (j.contains("phongHoc") && !j["phongHoc"].is_null()) {
+    const auto &phongHoc = j["phongHoc"];
+    lopHocPhan.setPhongHoc(
+        require<std::string>(phongHoc, "tenPhong"),
+        optional<int>(phongHoc, "sucChua", 0),
+        static_cast<RoomType>(optional<int>(phongHoc, "loaiPhong", 0)));
+  }
 
-double LopHocPhan::tiLeVangHienTai(int tongSoTietVang) const
-{
-    if (_soTietDaHoc == 0) return 0.0;
-    return static_cast<double>(tongSoTietVang) / _soTietDaHoc;
-}
-
-int LopHocPhan::soTietVangToiDaChoPhep(const std::string& maSV) const
-{
-    int daVang = 0;
-    for (const auto& buoi : _dsBuoiDiemDanh)
-        if (auto* ct = buoi.findChiTiet(maSV))
-            if (ct->getTrangThai() == Status::VANG)
-                daVang += buoi.getSoTiet();
-    int conChoPhep = soTietVangToiDa() - daVang;
-    return conChoPhep > 0 ? conChoPhep : 0;
-}
-
-std::string LopHocPhan::tienDoHocTapStr() const
-{
-    int tong = getTongSoTiet();
-    double pct = (tong > 0)
-        ? static_cast<double>(getSoTietDaHoc()) / tong * 100.0
-        : 0.0;
-    return std::format("Đã học: {} buổi ({}/{} tiết) - {:.2f}%",
-        getSoBuoiDaHoc(), getSoTietDaHoc(), tong, pct);
-}
-
-void LopHocPhan::themBuoiDiemDanh(const DateTime &ngayDiemDanh, CaHoc caDiemDanh, int soTiet)
-{
-    for (const auto& buoi : _dsBuoiDiemDanh) {
-        const auto& buoi_1 = buoi.getNgayDiemDanh();
-        CaHoc ca_buoi_1 = buoi.getCaDiemDanh();
-        if (buoi_1.has_value())
-            if (
-                buoi_1->year() == ngayDiemDanh.year() &&
-                buoi_1->month() == ngayDiemDanh.month() &&
-                buoi_1->day() == ngayDiemDanh.day() &&
-                ca_buoi_1 == caDiemDanh
-            )
-                throw std::runtime_error("Buổi điểm danh bị trùng");
-        }
-    _dsBuoiDiemDanh.emplace_back(ngayDiemDanh, caDiemDanh, soTiet);
-}
-
-BuoiDiemDanh &LopHocPhan::getBuoi(std::size_t index)
-{
-    if (index >= _dsBuoiDiemDanh.size())
-        throw std::out_of_range("Index số buổi không hợp lệ!");
-    return _dsBuoiDiemDanh.at(index);
-}
-
-std::size_t LopHocPhan::soBuoi() const
-{
-    return _dsBuoiDiemDanh.size();
-}
-
-int LopHocPhan::tongTietDaDiemDanh() const
-{
-    int tong = 0;
-    for (const auto& buoi : _dsBuoiDiemDanh)
-        if (buoi.isKhoaDiemDanh())
-            tong += buoi.getSoTiet();
-    return tong;
-}
-
-double LopHocPhan::tyLeVang(const std::string &maSV) const
-{
-    if (_soTietDaHoc == 0) return 0.0;
-    int soTietVang = 0;
-    for (const auto& buoi : _dsBuoiDiemDanh)
-        if (auto* ct = buoi.findChiTiet(maSV))
-            if (ct->getTrangThai() == Status::VANG)
-                soTietVang += buoi.getSoTiet();
-    return static_cast<double>(soTietVang) / _soTietDaHoc;
-}
-
-bool LopHocPhan::coGiangVien() const
-{
-    return !_maGV.empty();
-}
-
-void LopHocPhan::xoaGiangVien()
-{
-    _maGV.clear();
-}
-
-bool LopHocPhan::biCamThi(const std::string &maSV) const
-{
-    return tyLeVang(maSV) > _nguongCamThi;
-}
-
-bool LopHocPhan::matchTen(const std::string &keyword) const
-{
-    auto toLower = [] (const std::string& s) {
-        std::string result = s;
-        std::transform(result.begin(), result.end(), result.begin(),
-            [](unsigned char c) { return std::tolower(c); }
-        );
-        return result;
-    };
-    return toLower(_tenLHP).find(toLower(keyword)) != std::string::npos;
-}
-
-void LopHocPhan::xoaBuoiTaiIndex(std::size_t index)
-{
-    if (index >= _dsBuoiDiemDanh.size())
-        throw std::out_of_range("Index buổi không hợp lệ!");
-    
-    if (_dsBuoiDiemDanh[index].isKhoaDiemDanh()) {
-        _soTietDaHoc  = std::max(0, _soTietDaHoc  - _dsBuoiDiemDanh[index].getSoTiet());
-        _soBuoiDaHoc  = std::max(0, _soBuoiDaHoc  - 1);
-    }
-    _dsBuoiDiemDanh.erase(_dsBuoiDiemDanh.begin() + index);
-}
-
-utility_csv::Row LopHocPhan::toCSVRow() const
-{
-    std::string hocKi{};
-    switch(_hocKi) {
-        case HocKi::I: 
-            hocKi = "I"; break;
-        case HocKi::II:
-            hocKi = "II"; break;
-        case HocKi::He:
-            hocKi = "He"; break;
-        default:
-            hocKi = "DEFAULT";
-    }
-
-    utility_csv::Row row;
-    row.push_back(_maLHP);
-    row.push_back(_tenLHP);
-    row.push_back(std::to_string(_soTC));
-    row.push_back(std::to_string(_tongSoTiet));
-    row.push_back(std::to_string(_soTietDaHoc));
-    row.push_back(std::to_string(_soBuoiDaHoc));
-    row.push_back(std::to_string(_nguongCamThi));
-    row.push_back(hocKi);
-    row.push_back(_phongHoc.has_value() ? _phongHoc->getLoaiPhongStr() : "(none)");
-    row.push_back(_phongHoc.has_value() ? _phongHoc->getTenPhong() : "(none)");
-    row.push_back(_phongHoc.has_value() ? std::to_string(_phongHoc->getSucChua()) : "(none)");
-    
-    return row;
-}
-
-LopHocPhan LopHocPhan::fromCSVRow(const utility_csv::Row &row)
-{   
-    HocKi hocKi = HocKi::DEFAULT;
-    if (row[7] == "I") hocKi = HocKi::I;
-    else if (row[7] == "II") hocKi = HocKi::II;
-    else if (row[7] == "He") hocKi = HocKi::He;
-    else hocKi = HocKi::DEFAULT;
-
-    LopHocPhan lopHocPhan(
-        row[0],             //maLHP
-        row[1],             //tenLHP
-        std::stoi(row[2]),  //soTC
-        std::stoi(row[3]),  //tongSoTiet
-        std::stof(row[6]),  //nguongCamThi
-        hocKi
-    );
-
-    lopHocPhan.setSoTietDaHoc(std::stoi(row[4]));
-    lopHocPhan.setSoBuoiDaHoc(std::stoi(row[5]));
-
-    RoomType loaiPhong;
-
-    if (!row[8].empty() && row[8] != "(none)" && 
-        !row[9].empty() && row[9] != "(none)" &&
-        !row[10].empty() && row[10] != "(none)"
-    ) {
-
-        if (row[8] == "Phòng lý thuyết")
-            loaiPhong = RoomType::PhongLyThuyet;
-        else if (row[8] == "Phòng thực hành")
-            loaiPhong = RoomType::PhongThucHanh;     
-        
-        ClassRoom phongHoc(row[9], std::stoi(row[10]), loaiPhong);
-        lopHocPhan.setPhongHoc(phongHoc);
-    }
-
-    return lopHocPhan;
-}
-
-nlohmann::json LopHocPhan::toJson() const
-{
-    nlohmann::json j = {
-        {"maLHP", _maLHP},
-        {"tenLHP", _tenLHP},
-        {"maGV", _maGV},
-        {"soTC", _soTC},
-        {"tongSoTiet", _tongSoTiet},
-        {"soTietDaHoc", _soTietDaHoc},
-        {"soBuoiDaHoc", _soBuoiDaHoc},
-        {"nguongCamThi", _nguongCamThi},
-        {"hocKi", static_cast<int>(_hocKi)},
-        {
-            "buoiDiemDanh", utility_json::dump_array<BuoiDiemDanh>(
-                _dsBuoiDiemDanh,
-                [](const BuoiDiemDanh& buoiDiemDanh){ return buoiDiemDanh.toJson(); }
-            )
-        }
-    };
-
-    if (_phongHoc.has_value())
-        j["phongHoc"] = {
-            {"tenPhong", _phongHoc->getTenPhong()},
-            {"sucChua", _phongHoc->getSucChua()},
-            {"loaiPhong", static_cast<int>(_phongHoc->getLoaiPhong())}
-        };
-    else
-        j["phongHoc"] = nullptr;
-    return j;
-}
-
-LopHocPhan LopHocPhan::fromJson(const nlohmann::json &j)
-{
-    using namespace utility_json;
-
-    LopHocPhan lopHocPhan(
-        require<std::string>(j, "maLHP"),
-        require<std::string>(j, "tenLHP"),
-        require<int>(j, "soTC"),
-        require<int>(j, "tongSoTiet"),
-        require<double>(j, "nguongCamThi"),
-        static_cast<HocKi>(optional<int>(j, "hocKi", 0))
-    );
-
-    lopHocPhan.setSoTietDaHoc(optional<int>(j, "soTietDaHoc", 0));
-    lopHocPhan.setSoBuoiDaHoc(optional<int>(j, "soBuoiDaHoc", 0));
-    lopHocPhan.setMaGV(optional<std::string>(j, "maGV", ""));
-
-    if (j.contains("phongHoc") && !j["phongHoc"].is_null()) {
-        const auto& phongHoc = j["phongHoc"];
-        lopHocPhan.setPhongHoc(
-            require<std::string>(phongHoc, "tenPhong"),
-            optional<int>(phongHoc, "sucChua", 0),
-            static_cast<RoomType>(optional<int>(phongHoc, "loaiPhong", 0))
-        );
-    }
-
-    lopHocPhan._dsBuoiDiemDanh = load_array<BuoiDiemDanh>(
-        j, "buoiDiemDanh",
-        [](const nlohmann::json& item) {
-            return BuoiDiemDanh::fromJson(item);
-        }
-    );
-    return lopHocPhan;
+  lopHocPhan._dsBuoiDiemDanh = load_array<BuoiDiemDanh>(
+      j, "buoiDiemDanh",
+      [](const nlohmann::json &item) { return BuoiDiemDanh::fromJson(item); });
+  return lopHocPhan;
 }

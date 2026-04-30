@@ -488,12 +488,12 @@ void BaoCaoManager::xuatSinhVienXLSX(const std::string &maLHP,
     int con = maxVang - sv.soTietVang;
     tongVang += sv.soTietVang;
     lxw_format *fR = sv.biCamThi         ? fCT
-                     : sv.tyLeVang > 0.8 ? fDanger
-                     : sv.tyLeVang > 0.5 ? fWarn
+                     : sv.tyLeVang > 0.18 ? fDanger
+                     : sv.tyLeVang > 0.10 ? fWarn
                                          : fOk;
     std::string tt = sv.biCamThi         ? "CẤM THI"
-                     : sv.tyLeVang > 0.8 ? "Nguy hiểm"
-                     : sv.tyLeVang > 0.5 ? "Cần chú ý"
+                     : sv.tyLeVang > 0.18 ? "Nguy hiểm"
+                     : sv.tyLeVang > 0.10 ? "Cần chú ý"
                                          : "Bình thường";
     std::string conStr = con > 0 ? "+" + std::to_string(con) + " tiết"
                                  : "Vượt " + std::to_string(-con) + " tiết";
@@ -764,9 +764,9 @@ void BaoCaoManager::xuatToanDienXLSX(const std::string &maLHP,
     for (const auto &sv : dsSV) {
       if (sv.biCamThi)
         ; // da co nCTSheet1
-      else if (sv.tyLeVang > 0.8)
+      else if (sv.tyLeVang > 0.18)
         ++svNguy;
-      else if (sv.tyLeVang > 0.5)
+      else if (sv.tyLeVang > 0.10)
         ++svChuY;
       else
         ++svOk;
@@ -972,12 +972,12 @@ void BaoCaoManager::xuatToanDienXLSX(const std::string &maLHP,
       const auto &sv = dsSV[i];
       lxw_row_t row = (lxw_row_t)(i + 1);
       lxw_format *fR = sv.biCamThi         ? fCT
-                       : sv.tyLeVang > 0.8 ? fDanger
-                       : sv.tyLeVang > 0.5 ? fWarn
+                       : sv.tyLeVang > 0.18 ? fDanger
+                       : sv.tyLeVang > 0.10 ? fWarn
                                            : fOk;
       std::string tt = sv.biCamThi         ? "CẤM THI"
-                       : sv.tyLeVang > 0.8 ? "Nguy hiểm"
-                       : sv.tyLeVang > 0.5 ? "Cần chú ý"
+                       : sv.tyLeVang > 0.18 ? "Nguy hiểm"
+                       : sv.tyLeVang > 0.10 ? "Cần chú ý"
                                            : "Bình thường";
       worksheet_write_number(ws, row, 0, i + 1, fR);
       worksheet_write_string(ws, row, 1, sv.maSV.c_str(), fR);
