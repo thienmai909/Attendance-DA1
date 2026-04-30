@@ -19,28 +19,6 @@
 			"cacheVariables": {
 				"CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
 			}
-		}	
-	],
-	"testPresets": [
-		{
-			"name": "test-win32",
-			"configurePreset": "attendance-win32",
-			"configuration": "Debug",
-			"execution": { 
-				"jobs": 0,
-				"noTestsAction": "error"
-			},
-			"output": { "outputOnFailure": true }
-		},
-		{
-			"name": "test-unix",
-			"configurePreset": "attendance-unix",
-			"configuration": "Debug",
-			"execution": {
-				"jobs": 0,
-				"noTestsAction": "error"
-			},
-			"output": { "outputOnFailure": true }
 		}
 	]
 }
