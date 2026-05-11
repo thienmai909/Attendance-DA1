@@ -163,7 +163,7 @@ sudo apt install -y \
     git cmake ninja-build \
     build-essential \
     curl zip unzip tar \
-    pkg-config autoconf automake libtool\
+    pkg-config autoconf automake libtool \
     libssl-dev \
     libgl1-mesa-dev \
     libx11-dev
