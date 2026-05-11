@@ -100,11 +100,11 @@ Project/
 
 ### Yêu Cầu Chung
 
-- **CMake** ≥ 3.23
+- **CMake** ≥ 4.3.2
 - **Git** (để clone submodule vcpkg)
 - **C++20** compiler:
-  - Windows: Visual Studio 2022 (MSVC) hoặc clang-cl
-  - Linux/WSL: GCC 13+ hoặc Clang 16+
+  - Windows: Visual Studio 2026 (MSVC)
+  - Linux/WSL: GCC 13+
 
 > **Lưu ý:** Ứng dụng cần terminal hỗ trợ **Unicode** và **màu 256/True Color**.  
 > Khuyến nghị dùng [Windows Terminal](https://aka.ms/terminal) với profile Ubuntu.
@@ -114,8 +114,8 @@ Project/
 ### 🪟 Cài Đặt trên Windows
 
 #### 1. Yêu cầu
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) với workload **"Desktop development with C++"**
-- [CMake](https://cmake.org/download/) ≥ 3.23 (hoặc dùng CMake tích hợp trong VS)
+- [Visual Studio 2026](https://visualstudio.microsoft.com/) với workload **"Desktop development with C++"**
+- [CMake](https://cmake.org/download/) ≥ 4.3.2
 - [Git for Windows](https://git-scm.com/download/win)
 
 #### 2. Clone project
@@ -181,8 +181,6 @@ cd Attendance-DA1
 ```bash
 cmake --preset attendance-unix
 ```
-
-> Lần đầu chạy, vcpkg sẽ build tất cả thư viện từ source (~10–20 phút).
 
 #### 4. Build
 
